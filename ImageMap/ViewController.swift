@@ -7,6 +7,7 @@
 
 import UIKit
 
+@available(iOS 13.0, *)
 class ViewController: UIViewController {
 
     @IBOutlet weak var scrollView: UIScrollView!
@@ -16,6 +17,10 @@ class ViewController: UIViewController {
     @IBOutlet weak var imageViewTrailingConstraint: NSLayoutConstraint!
     
     @IBOutlet weak var imageView: UIImageView!
+    
+    @IBAction func clearPressed(_ sender: Any) {
+        imageView.subviews.forEach({ $0.removeFromSuperview() })
+    }
     
     var longPressRecognizer: UILongPressGestureRecognizer!
     
@@ -32,20 +37,28 @@ class ViewController: UIViewController {
 
     }
 
-    @objc func longPressed(sender: UILongPressGestureRecognizer) {
+    @objc func longPressed(gesture: UILongPressGestureRecognizer) {
         let touchPoint = longPressRecognizer.location(in: imageView)
         print("Touched point (\(touchPoint.x), \(touchPoint.y)")
-        addTag(withLocation: touchPoint, toPhoto: imageView)
+         
+             if gesture.state == UIGestureRecognizer.State.began {
+                addTag(withLocation: touchPoint, toPhoto: imageView)
+             } else {
+                ///
+             }
+         
     }
      
     func addTag(withLocation location: CGPoint, toPhoto photo: UIImageView) {
-        let frame = CGRect(x: location.x - 15, y: location.y - 15, width: 30, height: 30)
+        let frame = CGRect(x: location.x - 15, y: location.y - 15, width: 50, height: 50)
         let tempImageView = UIImageView(frame: frame)
-        tempImageView.image = #imageLiteral(resourceName: "tag")
+        let tintableImage = UIImage(systemName: "pin.circle.fill")?.withRenderingMode(.alwaysTemplate)
+        tempImageView.image = tintableImage
+        tempImageView.tintColor = .red //will be options
         photo.addSubview(tempImageView)
+        
     }
-    
-    
+     
     override func viewWillLayoutSubviews() {
       super.viewWillLayoutSubviews()
       updateMinZoomScaleForSize(view.bounds.size)
@@ -76,6 +89,7 @@ class ViewController: UIViewController {
     }
 }
 
+@available(iOS 13.0, *)
 extension ViewController: UIScrollViewDelegate {
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return imageView
