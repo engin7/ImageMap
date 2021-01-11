@@ -39,8 +39,7 @@ class ViewController: UIViewController {
 
     @objc func longPressed(gesture: UILongPressGestureRecognizer) {
         let touchPoint = longPressRecognizer.location(in: imageView)
-        print("Touched point (\(touchPoint.x), \(touchPoint.y)")
-         
+      
              if gesture.state == UIGestureRecognizer.State.began {
                 addTag(withLocation: touchPoint, toPhoto: imageView)
              } else {
@@ -57,8 +56,13 @@ class ViewController: UIViewController {
         tempImageView.tintColor = .red //will be options
         photo.addSubview(tempImageView)
         
+        let label = UILabel(frame: CGRect(x: location.x + 35, y: location.y - 30, width: 250, height: 50))
+        label.textColor = UIColor.blue
+        label.text = "(\(Double(round(1000*location.x)/1000)), \(Double(round(1000*location.y)/1000)))"
+        photo.addSubview(label)
+
     }
-     
+
     override func viewWillLayoutSubviews() {
       super.viewWillLayoutSubviews()
       updateMinZoomScaleForSize(view.bounds.size)
