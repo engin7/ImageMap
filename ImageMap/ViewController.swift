@@ -26,6 +26,9 @@ class ViewController: UIViewController, UITextFieldDelegate {
     var longPressRecognizer: UILongPressGestureRecognizer!
     var singleTapRecognizer: UITapGestureRecognizer!
     
+    let notificationCenter = NotificationCenter.default
+
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -40,9 +43,27 @@ class ViewController: UIViewController, UITextFieldDelegate {
         singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(tagTapped))
         singleTapRecognizer.numberOfTouchesRequired = 1
         scrollView.addGestureRecognizer(singleTapRecognizer)
-
+        
+        notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillHideNotification, object: nil)
+        notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
     }
 
+    @objc func adjustForKeyboard(notification: Notification) {
+        guard let keyboardValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
+
+        let keyboardScreenEndFrame = keyboardValue.cgRectValue
+        let keyboardViewEndFrame = view.convert(keyboardScreenEndFrame, from: view.window)
+
+        if notification.name == UIResponder.keyboardWillHideNotification {
+            scrollView.contentInset = .zero
+        } else {
+            scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardViewEndFrame.height - view.safeAreaInsets.bottom, right: 0)
+        }
+
+        scrollView.scrollIndicatorInsets = scrollView.contentInset
+
+    }
+    
     @objc func longPressed(gesture: UILongPressGestureRecognizer) {
         let touchPoint = longPressRecognizer.location(in: imageView)
       
@@ -71,6 +92,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         tempImageView.addSubview(textField)
         textField.delegate = self
         textField.isUserInteractionEnabled = true
+        textField.textColor = .red
          
         photo.addSubview(tempImageView)
         textField.becomeFirstResponder()
