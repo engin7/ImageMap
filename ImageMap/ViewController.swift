@@ -35,9 +35,16 @@ class ViewController: UIViewController {
     @objc func longPressed(sender: UILongPressGestureRecognizer) {
         let touchPoint = longPressRecognizer.location(in: imageView)
         print("Touched point (\(touchPoint.x), \(touchPoint.y)")
-         
+        addTag(withLocation: touchPoint, toPhoto: imageView)
     }
      
+    func addTag(withLocation location: CGPoint, toPhoto photo: UIImageView) {
+        let frame = CGRect(x: location.x - 15, y: location.y - 15, width: 30, height: 30)
+        let tempImageView = UIImageView(frame: frame)
+        tempImageView.image = #imageLiteral(resourceName: "tag")
+        photo.addSubview(tempImageView)
+    }
+    
     
     override func viewWillLayoutSubviews() {
       super.viewWillLayoutSubviews()
