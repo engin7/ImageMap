@@ -7,8 +7,9 @@
 
 import UIKit
 
+// can be removed after changing system Images
 @available(iOS 13.0, *)
-class ViewController: UIViewController {
+class ViewController: UIViewController, UITextFieldDelegate {
 
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var imageViewBottomConstraint: NSLayoutConstraint!
@@ -23,6 +24,7 @@ class ViewController: UIViewController {
     }
     
     var longPressRecognizer: UILongPressGestureRecognizer!
+    var singleTapRecognizer: UITapGestureRecognizer!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,6 +36,10 @@ class ViewController: UIViewController {
         
         longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(longPressed))
         scrollView.addGestureRecognizer(longPressRecognizer)
+        
+        singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(tagTapped))
+        singleTapRecognizer.numberOfTouchesRequired = 1
+        scrollView.addGestureRecognizer(singleTapRecognizer)
 
     }
 
@@ -54,13 +60,40 @@ class ViewController: UIViewController {
         let tintableImage = UIImage(systemName: "pin.circle.fill")?.withRenderingMode(.alwaysTemplate)
         tempImageView.image = tintableImage
         tempImageView.tintColor = .red //will be options
-        photo.addSubview(tempImageView)
-        
-        let label = UILabel(frame: CGRect(x: location.x + 35, y: location.y - 30, width: 250, height: 50))
-        label.textColor = UIColor.blue
-        label.text = "(\(Double(round(1000*location.x)/1000)), \(Double(round(1000*location.y)/1000)))"
-        photo.addSubview(label)
+        tempImageView.isUserInteractionEnabled = true
 
+        let label = UILabel(frame: CGRect(x: 50, y: 0, width: 250, height: 30))
+        label.textColor = UIColor.red
+        label.text = "(\(Double(round(1000*location.x)/1000)), \(Double(round(1000*location.y)/1000)))"
+        tempImageView.addSubview(label)
+        
+        let textField = UITextField(frame: CGRect(x: 50, y: -25, width: 250, height: 150))
+        tempImageView.addSubview(textField)
+        textField.delegate = self
+        textField.isUserInteractionEnabled = true
+         
+        photo.addSubview(tempImageView)
+        textField.becomeFirstResponder()
+    }
+    
+    @objc func tagTapped(gesture: UITapGestureRecognizer) {
+        let touchPoint = singleTapRecognizer.location(in: imageView)
+        let filteredSubviews = imageView.subviews.filter { subView -> Bool in
+            return subView.frame.contains(touchPoint)
+          }
+          guard let subviewTapped = filteredSubviews.first else {
+            // No subview touched
+            return
+          }
+        subviewTapped.subviews.forEach({ $0.isHidden = !$0.isHidden })
+          // process subviewTapped however you want
+    }
+    
+   
+     
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 
     override func viewWillLayoutSubviews() {
@@ -68,7 +101,6 @@ class ViewController: UIViewController {
       updateMinZoomScaleForSize(view.bounds.size)
     }
 
-    
     func updateMinZoomScaleForSize(_ size: CGSize) {
       let widthScale = size.width / imageView.bounds.width
       let heightScale = size.height / imageView.bounds.height
@@ -122,4 +154,5 @@ extension ViewController: UIScrollViewDelegate {
  
         scrollView.zoom(to: rectToZoomTo, animated: true)
     }
+    
 }
