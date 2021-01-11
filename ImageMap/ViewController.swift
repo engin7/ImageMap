@@ -17,6 +17,8 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var imageView: UIImageView!
     
+    var longPressRecognizer: UILongPressGestureRecognizer!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -25,13 +27,15 @@ class ViewController: UIViewController {
         doubleTapRecognizer.numberOfTouchesRequired = 1
         scrollView.addGestureRecognizer(doubleTapRecognizer)
         
-        let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(longPressed))
+        longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(longPressed))
         scrollView.addGestureRecognizer(longPressRecognizer)
-        
+
     }
 
     @objc func longPressed(sender: UILongPressGestureRecognizer) {
-        print("longpressed")
+        let touchPoint = longPressRecognizer.location(in: imageView)
+        print("Touched point (\(touchPoint.x), \(touchPoint.y)")
+         
     }
      
     
