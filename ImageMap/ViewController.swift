@@ -24,8 +24,16 @@ class ViewController: UIViewController {
         doubleTapRecognizer.numberOfTapsRequired = 2
         doubleTapRecognizer.numberOfTouchesRequired = 1
         scrollView.addGestureRecognizer(doubleTapRecognizer)
+        
+        let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(longPressed))
+        scrollView.addGestureRecognizer(longPressRecognizer)
+        
     }
 
+    @objc func longPressed(sender: UILongPressGestureRecognizer) {
+        print("longpressed")
+    }
+     
     
     override func viewWillLayoutSubviews() {
       super.viewWillLayoutSubviews()
