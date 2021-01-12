@@ -29,7 +29,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
     let notificationCenter = NotificationCenter.default
  
     var startPoint: CGPoint?
-  
+    var touchedPoint: CGPoint?
+    var movingRect = false
     let rectShapeLayer: CAShapeLayer = {
           let shapeLayer = CAShapeLayer()
           shapeLayer.strokeColor = UIColor.black.cgColor
@@ -78,15 +79,38 @@ class ViewController: UIViewController, UITextFieldDelegate {
       
              if gesture.state == UIGestureRecognizer.State.began {
                 
-                //  addTag(withLocation: startPoint, toPhoto: imageView)
-                startPoint = nil
-                startPoint = longPressRecognizer.location(in: imageView)
-                rectShapeLayer.path = nil
-                imageView.layer.addSublayer(rectShapeLayer)
+               startPoint = nil
+               startPoint = longPressRecognizer.location(in: imageView)
+                
+                imageView.layer.sublayers?.forEach { layer in
+                    let layer = layer as? CAShapeLayer
+                    if let path = layer?.path, path.contains(startPoint!) {
+                        movingRect = true
+                    }
+                }
+               if !movingRect {
+                    imageView.layer.addSublayer(rectShapeLayer)
+                }
+                touchedPoint = startPoint
              } else if gesture.state == UIGestureRecognizer.State.changed {
+                
                 let currentPoint = longPressRecognizer.location(in: imageView)
-                let frame = rect(from: startPoint!, to: currentPoint)
-                rectShapeLayer.path = UIBezierPath(rect: frame).cgPath
+                
+                if movingRect {
+                imageView.layer.sublayers?.forEach { layer in
+                    let layer = layer as? CAShapeLayer
+                    if let path = layer?.path, path.contains(currentPoint) {
+                          let xOffset = currentPoint.x - touchedPoint!.x
+                          let yOffset = currentPoint.y - touchedPoint!.y
+                        layer?.frame = (layer?.frame.offsetBy(dx: xOffset, dy: yOffset))!
+                    }
+                }
+                }
+                if !movingRect {
+                    let frame = rect(from: startPoint!, to: currentPoint)
+                    rectShapeLayer.path = UIBezierPath(rect: frame).cgPath
+                 }
+                touchedPoint = currentPoint
              } else if gesture.state == UIGestureRecognizer.State.ended {
                 let currentPoint = longPressRecognizer.location(in: imageView)
                 let middlePoint = CGPoint(x: (currentPoint.x + startPoint!.x)/2, y: (currentPoint.y + startPoint!.y)/2)
@@ -95,8 +119,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 rectLayer.fillColor = UIColor.clear.cgColor
                 rectLayer.lineWidth = 5
                 rectLayer.path = rectShapeLayer.path
-                imageView.layer.addSublayer(rectLayer)
-                addTag(withLocation: middlePoint, toPhoto: imageView)
+                if !movingRect {
+                    imageView.layer.addSublayer(rectLayer)
+                    rectShapeLayer.path = nil
+                    addTag(withLocation: middlePoint, toPhoto: imageView)
+                 }
+                movingRect = false
              }
     }
      
@@ -107,7 +135,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         tempImageView.image = tintableImage
         tempImageView.tintColor = .cyan //will be options
         tempImageView.isUserInteractionEnabled = true
-
+        
         let label = UILabel(frame: CGRect(x: 50, y: 0, width: 250, height: 30))
         label.textColor = UIColor.cyan
         label.text = "(\(Double(round(1000*location.x)/1000)), \(Double(round(1000*location.y)/1000)))"
@@ -125,18 +153,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     @objc func tagTapped(gesture: UITapGestureRecognizer) {
         let touchPoint = singleTapRecognizer.location(in: imageView)
-        
-        // Detect Layer
-        
-        imageView.layer.sublayers?.forEach { layer in
-            let layer = layer as? CAShapeLayer
-            if let path = layer?.path, path.contains(touchPoint) {
-                print(layer)
-            }
-        }
-          
-        
-        
+         
         let filteredSubviews = imageView.subviews.filter { subView -> Bool in
             return subView.frame.contains(touchPoint)
           }
@@ -152,9 +169,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         } else {
             subviewTapped.tintColor = .cyan
         }
-     
-         
-        
+          
     }
     
    
