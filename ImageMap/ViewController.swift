@@ -21,17 +21,27 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     @IBAction func clearPressed(_ sender: Any) {
         imageView.subviews.forEach({ $0.removeFromSuperview() })
+        imageView.layer.sublayers?.removeAll()
     }
     
     var longPressRecognizer: UILongPressGestureRecognizer!
     var singleTapRecognizer: UITapGestureRecognizer!
-    
     let notificationCenter = NotificationCenter.default
-
+ 
+    var startPoint: CGPoint?
+  
+    let rectShapeLayer: CAShapeLayer = {
+          let shapeLayer = CAShapeLayer()
+          shapeLayer.strokeColor = UIColor.black.cgColor
+          shapeLayer.fillColor = UIColor.clear.cgColor
+          shapeLayer.lineWidth = 5
+          return shapeLayer
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        
         let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(scrollViewDoubleTapped))
         doubleTapRecognizer.numberOfTapsRequired = 2
         doubleTapRecognizer.numberOfTouchesRequired = 1
@@ -65,14 +75,23 @@ class ViewController: UIViewController, UITextFieldDelegate {
     }
     
     @objc func longPressed(gesture: UILongPressGestureRecognizer) {
-        let touchPoint = longPressRecognizer.location(in: imageView)
       
              if gesture.state == UIGestureRecognizer.State.began {
-                addTag(withLocation: touchPoint, toPhoto: imageView)
-             } else {
-                ///
+                
+//                 addTag(withLocation: startPoint, toPhoto: imageView)
+                startPoint = nil
+                startPoint = longPressRecognizer.location(in: imageView)
+                rectShapeLayer.path = nil
+                imageView.layer.addSublayer(rectShapeLayer)
+             } else if gesture.state == UIGestureRecognizer.State.changed {
+                let currentPoint = longPressRecognizer.location(in: imageView)
+                let frame = rect(from: startPoint!, to: currentPoint)
+                rectShapeLayer.path = UIBezierPath(rect: frame).cgPath
+             } else if gesture.state == UIGestureRecognizer.State.ended {
+                let currentPoint = longPressRecognizer.location(in: imageView)
+                let middlePoint = CGPoint(x: (currentPoint.x + startPoint!.x)/2, y: (currentPoint.y + startPoint!.y)/2)
+                addTag(withLocation: middlePoint, toPhoto: imageView)
              }
-         
     }
      
     func addTag(withLocation location: CGPoint, toPhoto photo: UIImageView) {
@@ -144,6 +163,13 @@ class ViewController: UIViewController, UITextFieldDelegate {
         imageViewTrailingConstraint.constant = xOffset
         
         view.layoutIfNeeded()
+    }
+   
+    private func rect(from: CGPoint, to: CGPoint) -> CGRect {
+        return CGRect(x: min(from.x, to.x),
+               y: min(from.y, to.y),
+               width: abs(to.x - from.x),
+               height: abs(to.y - from.y))
     }
 }
 
