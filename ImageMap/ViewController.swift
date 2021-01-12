@@ -105,11 +105,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
         let tempImageView = UIImageView(frame: frame)
         let tintableImage = UIImage(systemName: "pin.circle.fill")?.withRenderingMode(.alwaysTemplate)
         tempImageView.image = tintableImage
-        tempImageView.tintColor = .red //will be options
+        tempImageView.tintColor = .cyan //will be options
         tempImageView.isUserInteractionEnabled = true
 
         let label = UILabel(frame: CGRect(x: 50, y: 0, width: 250, height: 30))
-        label.textColor = UIColor.red
+        label.textColor = UIColor.cyan
         label.text = "(\(Double(round(1000*location.x)/1000)), \(Double(round(1000*location.y)/1000)))"
         tempImageView.addSubview(label)
         
@@ -117,7 +117,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         tempImageView.addSubview(textField)
         textField.delegate = self
         textField.isUserInteractionEnabled = true
-        textField.textColor = .red
+        textField.textColor = .cyan
          
         photo.addSubview(tempImageView)
         textField.becomeFirstResponder()
@@ -125,6 +125,18 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     @objc func tagTapped(gesture: UITapGestureRecognizer) {
         let touchPoint = singleTapRecognizer.location(in: imageView)
+        
+        // Detect Layer
+        
+        imageView.layer.sublayers?.forEach { layer in
+            let layer = layer as? CAShapeLayer
+            if let path = layer?.path, path.contains(touchPoint) {
+                print(layer)
+            }
+        }
+          
+        
+        
         let filteredSubviews = imageView.subviews.filter { subView -> Bool in
             return subView.frame.contains(touchPoint)
           }
@@ -132,8 +144,17 @@ class ViewController: UIViewController, UITextFieldDelegate {
             // No subview touched
             return
           }
+         
         subviewTapped.subviews.forEach({ $0.isHidden = !$0.isHidden })
           // process subviewTapped however you want
+        if subviewTapped.tintColor == .cyan {
+            subviewTapped.tintColor = .red
+        } else {
+            subviewTapped.tintColor = .cyan
+        }
+     
+         
+        
     }
     
    
