@@ -30,6 +30,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
  
     var startPoint: CGPoint?
     var touchedPoint: CGPoint?
+    var selectedLayer: CAShapeLayer?
     var movingRect = false
      
     let rectShapeLayer: CAShapeLayer = {
@@ -103,12 +104,17 @@ class ViewController: UIViewController, UITextFieldDelegate {
                    
                     let xOffset = currentPoint.x - touchedPoint!.x
                     let yOffset = currentPoint.y - touchedPoint!.y
+                    
                 imageView.layer.sublayers?.forEach { layer in
                     let layer = layer as? CAShapeLayer
-                  
-                    layer?.frame = (layer?.frame.offsetBy(dx: xOffset, dy: yOffset))!
+                        if let path = layer?.path, path.contains(currentPoint) {
+                            if (selectedLayer == nil) {
+                                selectedLayer = layer!
+                            }
+                          // FIXME: FIX POSITION BUGS
+                        }
                    }
-
+                    selectedLayer?.frame = (selectedLayer?.frame.offsetBy(dx: xOffset, dy: yOffset))!
                 }
                 if !movingRect {
                     let frame = rect(from: startPoint!, to: currentPoint)
@@ -129,6 +135,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     addTag(withLocation: middlePoint, toPhoto: imageView)
                  }
                 movingRect = false
+                selectedLayer = nil
              }
     }
      
