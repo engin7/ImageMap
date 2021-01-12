@@ -78,7 +78,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
       
              if gesture.state == UIGestureRecognizer.State.began {
                 
-//                 addTag(withLocation: startPoint, toPhoto: imageView)
+                //  addTag(withLocation: startPoint, toPhoto: imageView)
                 startPoint = nil
                 startPoint = longPressRecognizer.location(in: imageView)
                 rectShapeLayer.path = nil
@@ -90,6 +90,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
              } else if gesture.state == UIGestureRecognizer.State.ended {
                 let currentPoint = longPressRecognizer.location(in: imageView)
                 let middlePoint = CGPoint(x: (currentPoint.x + startPoint!.x)/2, y: (currentPoint.y + startPoint!.y)/2)
+                let rectLayer = CAShapeLayer()
+                rectLayer.strokeColor = UIColor.black.cgColor
+                rectLayer.fillColor = UIColor.clear.cgColor
+                rectLayer.lineWidth = 5
+                rectLayer.path = rectShapeLayer.path
+                imageView.layer.addSublayer(rectLayer)
                 addTag(withLocation: middlePoint, toPhoto: imageView)
              }
     }
