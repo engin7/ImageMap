@@ -113,10 +113,9 @@ class ViewController: UIViewController, UITextFieldDelegate {
                           // FIXME: FIX POSITION BUGS
                         }
                    }
-                    selectedLayer?.frame = (selectedLayer?.frame.offsetBy(dx: xOffset, dy: yOffset))!
-                    print(selectedLayer?.frame)
-                    print(selectedLayer?.path?.boundingBox)
-                     
+                    var translation = CGAffineTransform(translationX: xOffset,y: yOffset)
+                    let path = selectedLayer?.path?.copy(using: &translation)
+                    selectedLayer?.path = path
                   }
                 if !movingRect {
                     let frame = rect(from: startPoint!, to: currentPoint)
