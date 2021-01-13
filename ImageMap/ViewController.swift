@@ -37,8 +37,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
           let shapeLayer = CAShapeLayer()
           shapeLayer.strokeColor = UIColor.black.cgColor
           shapeLayer.fillColor = UIColor.clear.cgColor
-          shapeLayer.lineWidth = 5
-          shapeLayer.lineDashPattern = [47.12]
+          shapeLayer.lineWidth = 3
+          shapeLayer.lineDashPattern = [10,5,5,5]
           return shapeLayer
     }()
     
@@ -117,7 +117,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     let path = selectedLayer?.path?.copy(using: &translation)
                     selectedLayer?.path = path
                     // highlight moving rect
-                    let color = UIColor(red: 0, green: 0, blue: 1, alpha: 0.2).cgColor
+                    let color = UIColor(red: 0, green: 0, blue: 1, alpha: 0.3).cgColor
                     selectedLayer?.fillColor? = color
                    }
                 if !movingRect {
@@ -132,12 +132,13 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     let rectLayer = CAShapeLayer()
                     rectLayer.strokeColor = UIColor.black.cgColor
                     rectLayer.fillColor = UIColor.clear.cgColor
-                    rectLayer.lineWidth = 5
+                    rectLayer.lineWidth = 3
                     rectLayer.path = rectShapeLayer.path
                     imageView.layer.addSublayer(rectLayer)
                     rectShapeLayer.path = nil
                     addTag(withLocation: middlePoint, toPhoto: imageView)
                  }
+                selectedLayer?.fillColor = UIColor.clear.cgColor
                 movingRect = false
                 selectedLayer = nil // ot chose new layers
              }
