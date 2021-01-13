@@ -39,7 +39,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
           let shapeLayer = CAShapeLayer()
           shapeLayer.strokeColor = UIColor.black.cgColor
           shapeLayer.fillColor = UIColor.clear.cgColor
-          shapeLayer.lineWidth = 5
+          shapeLayer.lineWidth = 4
           shapeLayer.lineDashPattern = [10,5,5,5]
           return shapeLayer
     }()
@@ -123,7 +123,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     let path = selectedLayer?.path?.copy(using: &translation)
                     selectedLayer?.path = path
                     // highlight moving rect
-                    let color = UIColor(red: 0, green: 0, blue: 1, alpha: 0.3).cgColor
+                    let color = UIColor(red: 0, green: 0, blue: 1, alpha: 0.2).cgColor
                     selectedLayer?.fillColor? = color
                     // update tag
                     let midX = selectedLayer?.path?.boundingBox.midX
@@ -144,7 +144,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     let rectLayer = CAShapeLayer()
                     rectLayer.strokeColor = UIColor.black.cgColor
                     rectLayer.fillColor = UIColor.clear.cgColor
-                    rectLayer.lineWidth = 5
+                    rectLayer.lineWidth = 4
                     rectLayer.path = rectShapeLayer.path
                     imageView.layer.addSublayer(rectLayer)
                     rectShapeLayer.path = nil
@@ -191,7 +191,19 @@ class ViewController: UIViewController, UITextFieldDelegate {
         } else {
             subviewTapped.tintColor = .cyan
         }
-          
+        
+        // Highlighting rect
+        imageView.layer.sublayers?.forEach { layer in
+            let layer = layer as? CAShapeLayer
+            if let path = layer?.path, path.contains(touchPoint) {
+                let color = UIColor(red: 0, green: 1, blue: 0, alpha: 0.2).cgColor
+                layer?.fillColor? = color
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    layer?.fillColor? = UIColor.clear.cgColor
+                }
+            }
+        }
+        
     }
     
  
