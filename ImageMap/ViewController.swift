@@ -38,6 +38,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
           shapeLayer.strokeColor = UIColor.black.cgColor
           shapeLayer.fillColor = UIColor.clear.cgColor
           shapeLayer.lineWidth = 5
+          shapeLayer.lineDashPattern = [47.12]
           return shapeLayer
     }()
     
@@ -113,12 +114,14 @@ class ViewController: UIViewController, UITextFieldDelegate {
                         }
                    }
                     selectedLayer?.frame = (selectedLayer?.frame.offsetBy(dx: xOffset, dy: yOffset))!
-
-                }
+                    print(selectedLayer?.frame)
+                    print(selectedLayer?.path?.boundingBox)
+                     
+                  }
                 if !movingRect {
                     let frame = rect(from: startPoint!, to: currentPoint)
                     rectShapeLayer.path = UIBezierPath(rect: frame).cgPath
-                 }
+                  }
                 touchedPoint = currentPoint
              } else if gesture.state == UIGestureRecognizer.State.ended {
                 let currentPoint = longPressRecognizer.location(in: imageView)
