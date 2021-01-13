@@ -98,8 +98,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
              } else if gesture.state == UIGestureRecognizer.State.changed {
                 
                 let currentPoint = longPressRecognizer.location(in: imageView)
-                
-                
                 if movingRect {
                    
                     let xOffset = currentPoint.x - touchedPoint!.x
@@ -115,6 +113,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                         }
                    }
                     selectedLayer?.frame = (selectedLayer?.frame.offsetBy(dx: xOffset, dy: yOffset))!
+
                 }
                 if !movingRect {
                     let frame = rect(from: startPoint!, to: currentPoint)
@@ -124,18 +123,18 @@ class ViewController: UIViewController, UITextFieldDelegate {
              } else if gesture.state == UIGestureRecognizer.State.ended {
                 let currentPoint = longPressRecognizer.location(in: imageView)
                 let middlePoint = CGPoint(x: (currentPoint.x + startPoint!.x)/2, y: (currentPoint.y + startPoint!.y)/2)
-                let rectLayer = CAShapeLayer()
-                rectLayer.strokeColor = UIColor.black.cgColor
-                rectLayer.fillColor = UIColor.clear.cgColor
-                rectLayer.lineWidth = 5
-                rectLayer.path = rectShapeLayer.path
                 if !movingRect {
+                    let rectLayer = CAShapeLayer()
+                    rectLayer.strokeColor = UIColor.black.cgColor
+                    rectLayer.fillColor = UIColor.clear.cgColor
+                    rectLayer.lineWidth = 5
+                    rectLayer.path = rectShapeLayer.path
                     imageView.layer.addSublayer(rectLayer)
                     rectShapeLayer.path = nil
                     addTag(withLocation: middlePoint, toPhoto: imageView)
                  }
                 movingRect = false
-                selectedLayer = nil
+                selectedLayer = nil // ot chose new layers
              }
     }
      
