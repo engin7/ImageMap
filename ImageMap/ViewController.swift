@@ -32,12 +32,14 @@ class ViewController: UIViewController, UITextFieldDelegate {
     var touchedPoint: CGPoint?
     var selectedLayer: CAShapeLayer?
     var movingRect = false
-     
+    var subviewTapped: UIView?
+    var subLabel: UILabel?
+    
     let rectShapeLayer: CAShapeLayer = {
           let shapeLayer = CAShapeLayer()
           shapeLayer.strokeColor = UIColor.black.cgColor
           shapeLayer.fillColor = UIColor.clear.cgColor
-          shapeLayer.lineWidth = 3
+          shapeLayer.lineWidth = 5
           shapeLayer.lineDashPattern = [10,5,5,5]
           return shapeLayer
     }()
@@ -85,9 +87,13 @@ class ViewController: UIViewController, UITextFieldDelegate {
                startPoint = nil
                startPoint = longPressRecognizer.location(in: imageView)
                 
+                
                 imageView.layer.sublayers?.forEach { layer in
                     let layer = layer as? CAShapeLayer
                     if let path = layer?.path, path.contains(startPoint!) {
+                        subviewTapped = getSubViewSelected(bounds: (layer?.path!.boundingBox)!)
+                        let labels = subviewTapped?.subviews.compactMap { $0 as? UILabel }
+                        subLabel = labels?.first
                         movingRect = true
                     }
                 }
@@ -119,6 +125,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     // highlight moving rect
                     let color = UIColor(red: 0, green: 0, blue: 1, alpha: 0.3).cgColor
                     selectedLayer?.fillColor? = color
+                    // update tag
+                    let midX = selectedLayer?.path?.boundingBox.midX
+                    let midY = selectedLayer?.path?.boundingBox.midY
+                    let midPoint = CGPoint(x: midX!, y: midY!)
+                    subviewTapped?.center = midPoint
+                    subLabel?.text = "(\(Double(round(1000*midX!)/1000)), \(Double(round(1000*midY!)/1000)))"
                    }
                 if !movingRect {
                     let frame = rect(from: startPoint!, to: currentPoint)
@@ -132,7 +144,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     let rectLayer = CAShapeLayer()
                     rectLayer.strokeColor = UIColor.black.cgColor
                     rectLayer.fillColor = UIColor.clear.cgColor
-                    rectLayer.lineWidth = 3
+                    rectLayer.lineWidth = 5
                     rectLayer.path = rectShapeLayer.path
                     imageView.layer.addSublayer(rectLayer)
                     rectShapeLayer.path = nil
@@ -141,6 +153,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 selectedLayer?.fillColor = UIColor.clear.cgColor
                 movingRect = false
                 selectedLayer = nil // ot chose new layers
+                subLabel = nil
              }
     }
      
@@ -180,6 +193,20 @@ class ViewController: UIViewController, UITextFieldDelegate {
         }
           
     }
+    
+ 
+    func getSubViewSelected(bounds: CGRect) -> UIView {
+        
+        let filteredSubviews = imageView.subviews.filter { subView -> Bool in
+            return bounds.contains(subView.frame)
+          }
+        guard let subviewTapped = filteredSubviews.first else {
+            return UIView()
+        }
+        return subviewTapped
+    }
+    
+    
     
     func getSubViewTouched(touchPoint: CGPoint) -> UIView {
         
