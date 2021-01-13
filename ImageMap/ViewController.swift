@@ -110,13 +110,16 @@ class ViewController: UIViewController, UITextFieldDelegate {
                             if (selectedLayer == nil) {
                                 selectedLayer = layer!
                             }
-                          // FIXME: FIX POSITION BUGS
                         }
                    }
+                    // apply offset to out drawn path
                     var translation = CGAffineTransform(translationX: xOffset,y: yOffset)
                     let path = selectedLayer?.path?.copy(using: &translation)
                     selectedLayer?.path = path
-                  }
+                    // highlight moving rect
+                    let color = UIColor(red: 0, green: 0, blue: 1, alpha: 0.2).cgColor
+                    selectedLayer?.fillColor? = color
+                   }
                 if !movingRect {
                     let frame = rect(from: startPoint!, to: currentPoint)
                     rectShapeLayer.path = UIBezierPath(rect: frame).cgPath
