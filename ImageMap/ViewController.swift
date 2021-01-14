@@ -393,7 +393,7 @@ extension CAShapeLayer {
                 dragP = dragPoint.isResizingLeftCorner
             } else if ((layer.path?.boundingBox.maxX)! - touch.x < Self.kResizeThumbSize) && (touch.y - (layer.path?.boundingBox.minY)! < Self.kResizeThumbSize) {
                dragP = dragPoint.isResizingRightCorner
-           } else if (touch.x - (layer.path?.boundingBox.minX)! < Self.kResizeThumbSize) && (touch.x - (layer.path?.boundingBox.minX)! < Self.kResizeThumbSize) {
+           } else if (touch.x - (layer.path?.boundingBox.minX)! < Self.kResizeThumbSize) && ((layer.path?.boundingBox.maxY)! - touch.y < Self.kResizeThumbSize) {
                dragP = dragPoint.isResizingBottomLeftCorner
            } else if (touch.x - (layer.path?.boundingBox.minX)! < Self.kResizeThumbSize) {
                 dragP = dragPoint.isResizingLeftEdge
