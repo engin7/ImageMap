@@ -125,22 +125,53 @@ class ViewController: UIViewController, UITextFieldDelegate {
                         if let path = layer?.path, path.contains(currentPoint) {
                             if (selectedLayer == nil) {
                                 selectedLayer = layer!
+                                  
                             }
                         }
                    }
+                    var translation = CGAffineTransform()
+                    guard let pathBox = selectedLayer?.path?.boundingBox else {return}
+                    let center = CGPoint(x: pathBox.midX, y: pathBox.midY)
                     // apply offset to out drawn path
-                    var translation = CGAffineTransform(translationX: xOffset,y: yOffset)
+                    // FIXME: - TRANSLATEDBY AFTER SCALE IS WRONG NOW
+                    switch dragPoint {
+                    case .noResizing:
+                        translation = CGAffineTransform(translationX: xOffset,y: yOffset)
+                    case .isResizingLeftEdge:
+                        // xoffset negative
+                         translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1).translatedBy(x: xOffset/2, y: 0)
+                    case .isResizingRightEdge:
+                        translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1).translatedBy(x: xOffset/2, y: 0)
+                    case .isResizingBottomEdge:
+                        translation = CGAffineTransform(scaleX: 1, y: 1 + yOffset/pathBox.size.width).translatedBy(x: 0, y:  yOffset/2)
+                    case .isResizingTopEdge:
+                        translation = CGAffineTransform(scaleX: 1, y: 1 - yOffset/pathBox.size.width).translatedBy(x: 0, y: yOffset/2)
+                    // corner cases
+                    case .isResizingLeftCorner:
+                        break
+                    case .isResizingRightCorner:
+                        break
+                    case .isResizingBottomLeftCorner:
+                        break
+                    case .isResizingBottomRightCorner:
+                        break
+                    
+                    case .none:
+                        break
+                    }
+                     
                     let path = selectedLayer?.path?.copy(using: &translation)
                     selectedLayer?.path = path
-                    // highlight moving rect
+                     
+                    // highlight moving/resizing rect
                     let color = UIColor(red: 0, green: 0, blue: 1, alpha: 0.2).cgColor
                     selectedLayer?.fillColor? = color
                     // update tag
-                    let midX = selectedLayer?.path?.boundingBox.midX
-                    let midY = selectedLayer?.path?.boundingBox.midY
-                    let midPoint = CGPoint(x: midX!, y: midY!)
+                    guard let midX = selectedLayer?.path?.boundingBox.midX else { return }  // TODO: - reset values
+                    guard let midY = selectedLayer?.path?.boundingBox.midY else { return }
+                    let midPoint = CGPoint(x: midX, y: midY)
                     subviewTapped?.center = midPoint
-                    subLabel?.text = "(\(Double(round(1000*midX!)/1000)), \(Double(round(1000*midY!)/1000)))"
+                    subLabel?.text = "(\(Double(round(1000*midX)/1000)), \(Double(round(1000*midY)/1000)))"
                    }
                 if !movingRect {
                     let frame = rect(from: startPoint!, to: currentPoint)
@@ -149,6 +180,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     handImageView?.frame = (handImageView?.frame.offsetBy(dx: xOffset, dy: yOffset))!
                     touchedPoint = currentPoint
              } else if gesture.state == UIGestureRecognizer.State.ended {
+            
                 let currentPoint = longPressRecognizer.location(in: imageView)
                 let middlePoint = CGPoint(x: (currentPoint.x + startPoint!.x)/2, y: (currentPoint.y + startPoint!.y)/2)
                 if !movingRect {
@@ -166,7 +198,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 selectedLayer = nil // ot chose new layers
                 subLabel = nil
                 handImageView!.removeFromSuperview()
-                dragPoint = CAShapeLayer.dragPoint.none
+                dragPoint = CAShapeLayer.dragPoint.noResizing
              }
     }
     
@@ -342,10 +374,10 @@ extension CAShapeLayer {
     case isResizingRightCorner
     case isResizingBottomLeftCorner
      
-    case none
+    case noResizing
         
     init() {
-        self = .none
+        self = .noResizing
         }
     }
  
@@ -355,65 +387,26 @@ extension CAShapeLayer {
 
         if let touch = touch {
             
-//            if (layer.bounds.size.width - touch.x < Self.kResizeThumbSize && layer.bounds.size.height - touch.y < Self.kResizeThumbSize) {
-//                dragP = dragPoint.isResizingBottomRightCorner
-//            }
-//             if (touch.x < Self.kResizeThumbSize && touch.y < Self.kResizeThumbSize) {
-//                dragP = dragPoint.isResizingLeftCorner
-//            }
-//            if (layer.bounds.size.width-touch.x < Self.kResizeThumbSize && touch.y < Self.kResizeThumbSize) {
-//               dragP = dragPoint.isResizingRightCorner
-//           }
-//            if (touch.x < Self.kResizeThumbSize && layer.bounds.size.height - touch.y < Self.kResizeThumbSize) {
-//               dragP = dragPoint.isResizingBottomLeftCorner
-//           }
-            
-            if (touch.x - (layer.path?.boundingBox.minX)! < Self.kResizeThumbSize) {
+            if ((layer.path?.boundingBox.maxY)! - touch.y < Self.kResizeThumbSize) && ((layer.path?.boundingBox.maxX)! - touch.x < Self.kResizeThumbSize) {
+                dragP = dragPoint.isResizingBottomRightCorner
+            } else if (touch.x - (layer.path?.boundingBox.minX)! < Self.kResizeThumbSize) && (touch.y - (layer.path?.boundingBox.minY)! < Self.kResizeThumbSize) {
+                dragP = dragPoint.isResizingLeftCorner
+            } else if ((layer.path?.boundingBox.maxX)! - touch.x < Self.kResizeThumbSize) && (touch.y - (layer.path?.boundingBox.minY)! < Self.kResizeThumbSize) {
+               dragP = dragPoint.isResizingRightCorner
+           } else if (touch.x - (layer.path?.boundingBox.minX)! < Self.kResizeThumbSize) && (touch.x - (layer.path?.boundingBox.minX)! < Self.kResizeThumbSize) {
+               dragP = dragPoint.isResizingBottomLeftCorner
+           } else if (touch.x - (layer.path?.boundingBox.minX)! < Self.kResizeThumbSize) {
                 dragP = dragPoint.isResizingLeftEdge
-            }
-             if (touch.y - (layer.path?.boundingBox.minY)! < Self.kResizeThumbSize) {
+            } else if (touch.y - (layer.path?.boundingBox.minY)! < Self.kResizeThumbSize) {
                 dragP = dragPoint.isResizingTopEdge
-            }
-            if ((layer.path?.boundingBox.maxX)! - touch.x < Self.kResizeThumbSize) {
+            } else if ((layer.path?.boundingBox.maxX)! - touch.x < Self.kResizeThumbSize) {
                dragP = dragPoint.isResizingRightEdge
-           }
-            if ((layer.path?.boundingBox.maxY)! - touch.y < Self.kResizeThumbSize) {
+           } else if ((layer.path?.boundingBox.maxY)! - touch.y < Self.kResizeThumbSize) {
                dragP = dragPoint.isResizingBottomEdge
            }
             
         }
         return dragP
     }
-    
-    func resizing(_ touch: CGPoint?,in imageView: UIImageView)  {
-        
-        // make transforms for the path
-        
-        
-    }
-    
-    func resizingEnded(_ touch: CGPoint?,in imageView: UIImageView) -> dragPoint {
-        
-        
-        return dragPoint() // default value none
-    }
-     
-    
-//
-//    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-//        if let touch = touches.first {
-//            let currentPoint = touch.location(in: self)
-//            // do something with your currentPoint
-//        }
-//    }
-//        // finished
-//    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-//        if let touch = touches.first {
-//            let currentPoint = touch.location(in: self)
-//            // do something with your currentPoint
-//
-//
-//
-//        }
-//    }
+   
 }
