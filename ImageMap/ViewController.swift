@@ -133,7 +133,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     guard let pathBox = selectedLayer?.path?.boundingBox else {return}
                     let center = CGPoint(x: pathBox.midX, y: pathBox.midY)
                     // apply offset to out drawn path
-                    // FIXME: - TRANSLATEDBY AFTER SCALE IS WRONG NOW
+                    // FIXME: - TRANSLATEDBY AFTER SCALE IS WRONG NOW!!!!
                     switch dragPoint {
                     case .noResizing:
                         translation = CGAffineTransform(translationX: xOffset,y: yOffset)
@@ -148,13 +148,13 @@ class ViewController: UIViewController, UITextFieldDelegate {
                         translation = CGAffineTransform(scaleX: 1, y: 1 - yOffset/pathBox.size.width).translatedBy(x: 0, y: yOffset/2)
                     // corner cases
                     case .isResizingLeftCorner:
-                        break
+                        translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1 - yOffset/pathBox.size.width)
                     case .isResizingRightCorner:
-                        break
+                        translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1 - yOffset/pathBox.size.width)
                     case .isResizingBottomLeftCorner:
-                        break
+                        translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1 + yOffset/pathBox.size.width)
                     case .isResizingBottomRightCorner:
-                        break
+                        translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1 + yOffset/pathBox.size.width)
                     
                     case .none:
                         break
