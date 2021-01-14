@@ -130,6 +130,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
                         }
                    }
                     var translation = CGAffineTransform()
+                    var translateBack = CGAffineTransform()
+
                     guard let pathBox = selectedLayer?.path?.boundingBox else {return}
                     let center = CGPoint(x: pathBox.midX, y: pathBox.midY)
                     // apply offset to out drawn path
@@ -139,7 +141,10 @@ class ViewController: UIViewController, UITextFieldDelegate {
                         translation = CGAffineTransform(translationX: xOffset,y: yOffset)
                     case .isResizingLeftEdge:
                         // xoffset negative
-                         translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1).translatedBy(x: xOffset/2, y: 0)
+                        translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1).translatedBy(x: -center.x, y: -center.y)
+                        translateBack = CGAffineTransform(translationX: center.x, y: center.y)
+                        // https://stackoverflow.com/a/20322817/8707120
+                        // THIS SHOULD FIX, ADJUST OTHERS AND POSITIONING
                     case .isResizingRightEdge:
                         translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1).translatedBy(x: xOffset/2, y: 0)
                     case .isResizingBottomEdge:
@@ -163,6 +168,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     let path = selectedLayer?.path?.copy(using: &translation)
                     selectedLayer?.path = path
                      
+                    let pathBack = selectedLayer?.path?.copy(using: &translateBack)
+                    selectedLayer?.path = pathBack
+                    
+                    
+                    
                     // highlight moving/resizing rect
                     let color = UIColor(red: 0, green: 0, blue: 1, alpha: 0.2).cgColor
                     selectedLayer?.fillColor? = color
