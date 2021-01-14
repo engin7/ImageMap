@@ -30,6 +30,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
  
     var startPoint: CGPoint?
     var touchedPoint: CGPoint?
+    var dragPoint: CAShapeLayer.dragPoint?
     var selectedLayer: CAShapeLayer?
     var movingRect = false
     var subviewTapped: UIView?
@@ -101,6 +102,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
                         subviewTapped = getSubViewSelected(bounds: (layer?.path!.boundingBox)!)
                         let labels = subviewTapped?.subviews.compactMap { $0 as? UILabel }
                         subLabel = labels?.first
+                        dragPoint = layer?.resizingStartPoint(startPoint, in: layer!)
+                        print(dragPoint)
                         movingRect = true
                     }
                 }
@@ -163,6 +166,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 selectedLayer = nil // ot chose new layers
                 subLabel = nil
                 handImageView!.removeFromSuperview()
+                dragPoint = CAShapeLayer.dragPoint.none
              }
     }
     
@@ -321,53 +325,80 @@ extension ViewController: UIScrollViewDelegate {
 // TODO: - Resizing
 
 // touch on edges,corners
-class Overlayer: CAShapeLayer {
-
-    /*
-    // Only override draw() if you perform custom drawing.
-    // An empty implementation adversely affects performance during animation.
-    override func draw(_ rect: CGRect) {
-        // Drawing code
-    }
-    */
-
-
+extension CAShapeLayer {
+ 
     static var kResizeThumbSize:CGFloat = 44.0
-    private typealias `Self` = Overlayer
-
-    var imageView = UIImageView()
-
-    var isResizingLeftEdge:Bool = false
-    var isResizingRightEdge:Bool = false
-    var isResizingTopEdge:Bool = false
-    var isResizingBottomEdge:Bool = false
-
-    var isResizingBottomRightCorner:Bool = false
-    var isResizingLeftCorner:Bool = false
-    var isResizingRightCorner:Bool = false
-    var isResizingBottomLeftCorner:Bool = false
-
-
-        //Define your initialisers here
-
-    func resizing(_ touch: CGPoint?,in imageView: UIImageView) {
-        if let touch = touch {
-            
-            isResizingBottomRightCorner = (imageView.bounds.size.width - touch.x < Self.kResizeThumbSize && imageView.bounds.size.height - touch.y < Self.kResizeThumbSize);
-            isResizingLeftCorner = (touch.x < Self.kResizeThumbSize && touch.y < Self.kResizeThumbSize);
-            isResizingRightCorner = (imageView.bounds.size.width-touch.x < Self.kResizeThumbSize && touch.y < Self.kResizeThumbSize);
-            isResizingBottomLeftCorner = (touch.x < Self.kResizeThumbSize && imageView.bounds.size.height - touch.y < Self.kResizeThumbSize);
-
-            isResizingLeftEdge = (touch.x < Self.kResizeThumbSize)
-            isResizingTopEdge = (touch.y < Self.kResizeThumbSize)
-            isResizingRightEdge = (imageView.bounds.size.width - touch.x < Self.kResizeThumbSize)
-
-            isResizingBottomEdge = (self.bounds.size.height - touch.y < Self.kResizeThumbSize)
-
-            // do something with your currentPoint
-
+    private typealias `Self` = CAShapeLayer
+ 
+    enum dragPoint {
+    // edges
+    case isResizingLeftEdge
+    case isResizingRightEdge
+    case isResizingTopEdge
+    case isResizingBottomEdge
+    // corners
+    case isResizingBottomRightCorner
+    case isResizingLeftCorner
+    case isResizingRightCorner
+    case isResizingBottomLeftCorner
+     
+    case none
+        
+    init() {
+        self = .none
         }
     }
+ 
+    func resizingStartPoint(_ touch: CGPoint?,in layer: CAShapeLayer) -> dragPoint {
+        
+        var dragP = dragPoint()
+
+        if let touch = touch {
+            
+//            if (layer.bounds.size.width - touch.x < Self.kResizeThumbSize && layer.bounds.size.height - touch.y < Self.kResizeThumbSize) {
+//                dragP = dragPoint.isResizingBottomRightCorner
+//            }
+//             if (touch.x < Self.kResizeThumbSize && touch.y < Self.kResizeThumbSize) {
+//                dragP = dragPoint.isResizingLeftCorner
+//            }
+//            if (layer.bounds.size.width-touch.x < Self.kResizeThumbSize && touch.y < Self.kResizeThumbSize) {
+//               dragP = dragPoint.isResizingRightCorner
+//           }
+//            if (touch.x < Self.kResizeThumbSize && layer.bounds.size.height - touch.y < Self.kResizeThumbSize) {
+//               dragP = dragPoint.isResizingBottomLeftCorner
+//           }
+            
+            if (touch.x - (layer.path?.boundingBox.minX)! < Self.kResizeThumbSize) {
+                dragP = dragPoint.isResizingLeftEdge
+            }
+             if (touch.y - (layer.path?.boundingBox.minY)! < Self.kResizeThumbSize) {
+                dragP = dragPoint.isResizingTopEdge
+            }
+            if ((layer.path?.boundingBox.maxX)! - touch.x < Self.kResizeThumbSize) {
+               dragP = dragPoint.isResizingRightEdge
+           }
+            if ((layer.path?.boundingBox.maxY)! - touch.y < Self.kResizeThumbSize) {
+               dragP = dragPoint.isResizingBottomEdge
+           }
+            
+        }
+        return dragP
+    }
+    
+    func resizing(_ touch: CGPoint?,in imageView: UIImageView)  {
+        
+        // make transforms for the path
+        
+        
+    }
+    
+    func resizingEnded(_ touch: CGPoint?,in imageView: UIImageView) -> dragPoint {
+        
+        
+        return dragPoint() // default value none
+    }
+     
+    
 //
 //    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
 //        if let touch = touches.first {
@@ -382,15 +413,6 @@ class Overlayer: CAShapeLayer {
 //            // do something with your currentPoint
 //
 //
-//            isResizingLeftEdge = false
-//             isResizingRightEdge = false
-//             isResizingTopEdge = false
-//             isResizingBottomEdge = false
-//
-//             isResizingBottomRightCorner = false
-//             isResizingLeftCorner = false
-//             isResizingRightCorner = false
-//             isResizingBottomLeftCorner = false
 //
 //        }
 //    }
