@@ -7,7 +7,7 @@
 
 import UIKit
 
-// can be removed after changing system Images
+// TODO:  remove @available(iOS 13.0, *) after changing system Images (also in extension)
 @available(iOS 13.0, *)
 class ViewController: UIViewController, UITextFieldDelegate {
 
@@ -34,6 +34,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     var movingRect = false
     var subviewTapped: UIView?
     var subLabel: UILabel?
+    var handImageView: UIImageView?
     
     let rectShapeLayer: CAShapeLayer = {
           let shapeLayer = CAShapeLayer()
@@ -62,6 +63,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
         notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillHideNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
+        
     }
 
     @objc func adjustForKeyboard(notification: Notification) {
@@ -75,18 +77,23 @@ class ViewController: UIViewController, UITextFieldDelegate {
         } else {
             scrollView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: keyboardViewEndFrame.height - view.safeAreaInsets.bottom, right: 0)
         }
-
         scrollView.scrollIndicatorInsets = scrollView.contentInset
-
+        
     }
-    
+   
+    // MARK: - Long Press Gesture Logic
     @objc func longPressed(gesture: UILongPressGestureRecognizer) {
              
              if gesture.state == UIGestureRecognizer.State.began {
                 
                startPoint = nil
                startPoint = longPressRecognizer.location(in: imageView)
-                
+                let handImg = UIImage(systemName: "hand.tap.fill")
+                handImageView = UIImageView(image: handImg)
+                let handPoint = CGPoint(x: startPoint!.x-20, y: startPoint!.y-20)
+                handImageView?.frame.origin = handPoint
+                handImageView?.frame.size = CGSize(width: 40, height: 40)
+                self.imageView.addSubview(handImageView!)
                 
                 imageView.layer.sublayers?.forEach { layer in
                     let layer = layer as? CAShapeLayer
@@ -105,11 +112,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
              } else if gesture.state == UIGestureRecognizer.State.changed {
                 
                 let currentPoint = longPressRecognizer.location(in: imageView)
+                let xOffset = currentPoint.x - touchedPoint!.x
+                let yOffset = currentPoint.y - touchedPoint!.y
+                
                 if movingRect {
-                   
-                    let xOffset = currentPoint.x - touchedPoint!.x
-                    let yOffset = currentPoint.y - touchedPoint!.y
-                    
+                 
                 imageView.layer.sublayers?.forEach { layer in
                     let layer = layer as? CAShapeLayer
                         if let path = layer?.path, path.contains(currentPoint) {
@@ -136,7 +143,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     let frame = rect(from: startPoint!, to: currentPoint)
                     rectShapeLayer.path = UIBezierPath(rect: frame).cgPath
                   }
-                touchedPoint = currentPoint
+                    handImageView?.frame = (handImageView?.frame.offsetBy(dx: xOffset, dy: yOffset))!
+                    touchedPoint = currentPoint
              } else if gesture.state == UIGestureRecognizer.State.ended {
                 let currentPoint = longPressRecognizer.location(in: imageView)
                 let middlePoint = CGPoint(x: (currentPoint.x + startPoint!.x)/2, y: (currentPoint.y + startPoint!.y)/2)
@@ -154,11 +162,23 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 movingRect = false
                 selectedLayer = nil // ot chose new layers
                 subLabel = nil
+                handImageView!.removeFromSuperview()
              }
     }
-     
+    
+    // MARK: Helper method for drawing
+    
+     private func rect(from: CGPoint, to: CGPoint) -> CGRect {
+         return CGRect(x: min(from.x, to.x),
+                y: min(from.y, to.y),
+                width: abs(to.x - from.x),
+                height: abs(to.y - from.y))
+     }
+    
+    // MARK: - Adding Tag
+
     func addTag(withLocation location: CGPoint, toPhoto photo: UIImageView) {
-        let frame = CGRect(x: location.x - 15, y: location.y - 15, width: 50, height: 50)
+        let frame = CGRect(x: location.x, y: location.y, width: 40, height: 40)
         let tempImageView = UIImageView(frame: frame)
         let tintableImage = UIImage(systemName: "pin.circle.fill")?.withRenderingMode(.alwaysTemplate)
         tempImageView.image = tintableImage
@@ -180,12 +200,15 @@ class ViewController: UIViewController, UITextFieldDelegate {
         textField.becomeFirstResponder()
     }
     
+    // MARK: - Tapping Tag
+
     @objc func tagTapped(gesture: UITapGestureRecognizer) {
         let touchPoint = singleTapRecognizer.location(in: imageView)
        
         let subviewTapped = getSubViewTouched(touchPoint: touchPoint)
         subviewTapped.subviews.forEach({ $0.isHidden = !$0.isHidden })
-          // process subviewTapped however you want
+          
+        // TODO - add tint color selection
         if subviewTapped.tintColor == .cyan {
             subviewTapped.tintColor = .red
         } else {
@@ -205,8 +228,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
         }
         
     }
-    
- 
+    // MARK: - Get Subviews from clicked area
+
     func getSubViewSelected(bounds: CGRect) -> UIView {
         
         let filteredSubviews = imageView.subviews.filter { subView -> Bool in
@@ -217,8 +240,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
         }
         return subviewTapped
     }
-    
-    
     
     func getSubViewTouched(touchPoint: CGPoint) -> UIView {
         
@@ -231,11 +252,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
         return subviewTapped
     }
    
-     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
     }
+    // MARK: - ScrollView zoom, drag etc
 
     override func viewWillLayoutSubviews() {
       super.viewWillLayoutSubviews()
@@ -264,13 +285,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
         view.layoutIfNeeded()
     }
-   
-    private func rect(from: CGPoint, to: CGPoint) -> CGRect {
-        return CGRect(x: min(from.x, to.x),
-               y: min(from.y, to.y),
-               width: abs(to.x - from.x),
-               height: abs(to.y - from.y))
-    }
+  
 }
 
 @available(iOS 13.0, *)
@@ -284,14 +299,12 @@ extension ViewController: UIScrollViewDelegate {
     }
   
     @objc func scrollViewDoubleTapped(recognizer: UITapGestureRecognizer) {
-      // 1
+      
         let pointInView = recognizer.location(in: imageView)
-
-      // 2
+ 
       var newZoomScale = scrollView.zoomScale * 1.5
       newZoomScale = min(newZoomScale, scrollView.maximumZoomScale)
-
-      // 3
+ 
       let scrollViewSize = scrollView.bounds.size
       let w = scrollViewSize.width / newZoomScale
       let h = scrollViewSize.height / newZoomScale
@@ -303,4 +316,82 @@ extension ViewController: UIScrollViewDelegate {
         scrollView.zoom(to: rectToZoomTo, animated: true)
     }
     
+}
+
+// TODO: - Resizing
+
+// touch on edges,corners
+class Overlayer: CAShapeLayer {
+
+    /*
+    // Only override draw() if you perform custom drawing.
+    // An empty implementation adversely affects performance during animation.
+    override func draw(_ rect: CGRect) {
+        // Drawing code
+    }
+    */
+
+
+    static var kResizeThumbSize:CGFloat = 44.0
+    private typealias `Self` = Overlayer
+
+    var imageView = UIImageView()
+
+    var isResizingLeftEdge:Bool = false
+    var isResizingRightEdge:Bool = false
+    var isResizingTopEdge:Bool = false
+    var isResizingBottomEdge:Bool = false
+
+    var isResizingBottomRightCorner:Bool = false
+    var isResizingLeftCorner:Bool = false
+    var isResizingRightCorner:Bool = false
+    var isResizingBottomLeftCorner:Bool = false
+
+
+        //Define your initialisers here
+
+    func resizing(_ touch: CGPoint?,in imageView: UIImageView) {
+        if let touch = touch {
+            
+            isResizingBottomRightCorner = (imageView.bounds.size.width - touch.x < Self.kResizeThumbSize && imageView.bounds.size.height - touch.y < Self.kResizeThumbSize);
+            isResizingLeftCorner = (touch.x < Self.kResizeThumbSize && touch.y < Self.kResizeThumbSize);
+            isResizingRightCorner = (imageView.bounds.size.width-touch.x < Self.kResizeThumbSize && touch.y < Self.kResizeThumbSize);
+            isResizingBottomLeftCorner = (touch.x < Self.kResizeThumbSize && imageView.bounds.size.height - touch.y < Self.kResizeThumbSize);
+
+            isResizingLeftEdge = (touch.x < Self.kResizeThumbSize)
+            isResizingTopEdge = (touch.y < Self.kResizeThumbSize)
+            isResizingRightEdge = (imageView.bounds.size.width - touch.x < Self.kResizeThumbSize)
+
+            isResizingBottomEdge = (self.bounds.size.height - touch.y < Self.kResizeThumbSize)
+
+            // do something with your currentPoint
+
+        }
+    }
+//
+//    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+//        if let touch = touches.first {
+//            let currentPoint = touch.location(in: self)
+//            // do something with your currentPoint
+//        }
+//    }
+//        // finished
+//    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+//        if let touch = touches.first {
+//            let currentPoint = touch.location(in: self)
+//            // do something with your currentPoint
+//
+//
+//            isResizingLeftEdge = false
+//             isResizingRightEdge = false
+//             isResizingTopEdge = false
+//             isResizingBottomEdge = false
+//
+//             isResizingBottomRightCorner = false
+//             isResizingLeftCorner = false
+//             isResizingRightCorner = false
+//             isResizingBottomLeftCorner = false
+//
+//        }
+//    }
 }
