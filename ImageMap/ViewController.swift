@@ -32,7 +32,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     var touchedPoint: CGPoint?
     var dragPoint: CAShapeLayer.dragPoint?
     var selectedLayer: CAShapeLayer?
-    var movingRect = false
+    var insideExistingRect = false
     var subviewTapped: UIView?
     var subLabel: UILabel?
     var handImageView: UIImageView?
@@ -91,9 +91,9 @@ class ViewController: UIViewController, UITextFieldDelegate {
                startPoint = longPressRecognizer.location(in: imageView)
                 let handImg = UIImage(systemName: "hand.tap.fill")
                 handImageView = UIImageView(image: handImg)
-                let handPoint = CGPoint(x: startPoint!.x-40, y: startPoint!.y-40)
+                let handPoint = CGPoint(x: startPoint!.x, y: startPoint!.y-50)
                 handImageView?.frame.origin = handPoint
-                handImageView?.frame.size = CGSize(width: 40, height: 40)
+                handImageView?.frame.size = CGSize(width: 50, height: 50)
                 self.imageView.addSubview(handImageView!)
                 
                 imageView.layer.sublayers?.forEach { layer in
@@ -103,13 +103,49 @@ class ViewController: UIViewController, UITextFieldDelegate {
                         let labels = subviewTapped?.subviews.compactMap { $0 as? UILabel }
                         subLabel = labels?.first
                         dragPoint = layer?.resizingStartPoint(startPoint, in: layer!)
-                        print(dragPoint)
-                        movingRect = true
+                        print(dragPoint) // detect edge/corners
+                        insideExistingRect = true
                     }
                 }
-               if !movingRect {
+               if !insideExistingRect {
                     imageView.layer.addSublayer(rectShapeLayer)
+               } else {
+                
+                    switch dragPoint {
+                case .noResizing: //moving
+                    handImageView!.image = UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right")
+                 case .isResizingLeftEdge:
+                     handImageView!.image = UIImage(systemName: "arrow.left.and.right")
+                    let handPoint = CGPoint(x: startPoint!.x-70, y: startPoint!.y-50)
+                    handImageView?.frame.origin = handPoint
+                 case .isResizingRightEdge:
+                    handImageView!.image = UIImage(systemName: "arrow.left.and.right")
+                    let handPoint = CGPoint(x: startPoint!.x+10, y: startPoint!.y-50)
+                    handImageView?.frame.origin = handPoint
+                case .isResizingBottomEdge:
+                    handImageView!.image = UIImage(systemName: "arrow.up.and.down")
+                    let handPoint = CGPoint(x: startPoint!.x, y: startPoint!.y-50)
+                    handImageView?.frame.origin = handPoint
+                case .isResizingTopEdge:
+                    handImageView!.image = UIImage(systemName: "arrow.up.and.down")
+                    let handPoint = CGPoint(x: startPoint!.x, y: startPoint!.y-50)
+                    handImageView?.frame.origin = handPoint
+                // corner cases
+                case .isResizingLeftCorner:
+                    handImageView!.image = UIImage(systemName: "arrow.up.left.and.arrow.down.right")
+                case .isResizingRightCorner:
+                    let image = UIImage(systemName: "arrow.up.left.and.arrow.down.right")!.rotate(radians: .pi/2)
+                    handImageView!.image = image
+                case .isResizingBottomLeftCorner:
+                    let image = UIImage(systemName: "arrow.up.left.and.arrow.down.right")!.rotate(radians: .pi/2)
+                    handImageView!.image = image
+                case .isResizingBottomRightCorner:
+                    handImageView!.image = UIImage(systemName: "arrow.up.left.and.arrow.down.right")
+                case .none:
+                    break
                 }
+            
+               }
                 touchedPoint = startPoint
                
              } else if gesture.state == UIGestureRecognizer.State.changed {
@@ -118,7 +154,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 let xOffset = currentPoint.x - touchedPoint!.x
                 let yOffset = currentPoint.y - touchedPoint!.y
                 
-                if movingRect {
+                if insideExistingRect {
                  
                 imageView.layer.sublayers?.forEach { layer in
                     let layer = layer as? CAShapeLayer
@@ -142,41 +178,30 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     case .noResizing:
                         translation = CGAffineTransform(translationX: xOffset,y: yOffset)
                         translateBack = CGAffineTransform(translationX: 0, y: 0)
-                        handImageView!.image = UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right")
                      case .isResizingLeftEdge:
                         // xoffset negative
-                        handImageView!.image = UIImage(systemName: "arrow.left.and.right")
                         translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1).translatedBy(x: -center.x, y: -center.y)
                         translateBack = CGAffineTransform(translationX: xOffset/2 + center.x, y: center.y)
                     case .isResizingRightEdge:
-                        handImageView!.image = UIImage(systemName: "arrow.left.and.right")
                         translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1).translatedBy(x: -center.x, y: -center.y)
                         translateBack = CGAffineTransform(translationX: xOffset/2 + center.x, y: center.y)
                     case .isResizingBottomEdge:
-                        handImageView!.image = UIImage(systemName: "arrow.up.and.down")
                         translation = CGAffineTransform(scaleX: 1, y: 1 + yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
                         translateBack = CGAffineTransform(translationX: center.x, y: center.y + yOffset/2)
                     case .isResizingTopEdge:
-                        handImageView!.image = UIImage(systemName: "arrow.up.and.down")
                         translation = CGAffineTransform(scaleX: 1, y: 1 - yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
                         translateBack = CGAffineTransform(translationX: center.x, y: center.y + yOffset/2)
                     // corner cases
                     case .isResizingLeftCorner:
-                        handImageView!.image = UIImage(systemName: "arrow.up.left.and.arrow.down.right")
                         translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1 - yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
                         translateBack = CGAffineTransform(translationX: center.x + xOffset/2, y: center.y + yOffset/2)
                     case .isResizingRightCorner:
-                        let image = UIImage(systemName: "arrow.up.left.and.arrow.down.right")!.rotate(radians: .pi/2)
-                        handImageView!.image = image
                         translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1 - yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
                         translateBack = CGAffineTransform(translationX: center.x + xOffset/2, y: center.y + yOffset/2)
                     case .isResizingBottomLeftCorner:
-                        let image = UIImage(systemName: "arrow.up.left.and.arrow.down.right")!.rotate(radians: .pi/2)
-                        handImageView!.image = image
                         translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1 + yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
                         translateBack = CGAffineTransform(translationX: center.x + xOffset/2, y: center.y + yOffset/2)
                     case .isResizingBottomRightCorner:
-                        handImageView!.image = UIImage(systemName: "arrow.up.left.and.arrow.down.right")
                         translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1 + yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
                         translateBack = CGAffineTransform(translationX: center.x + xOffset/2, y: center.y + yOffset/2)
                     
@@ -206,7 +231,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     subviewTapped?.center = midPoint
                     subLabel?.text = "(\(Double(round(1000*midX)/1000)), \(Double(round(1000*midY)/1000)))"
                    }
-                if !movingRect {
+                if !insideExistingRect {
                     let frame = rect(from: startPoint!, to: currentPoint)
                     rectShapeLayer.path = UIBezierPath(rect: frame).cgPath
                   }
@@ -216,7 +241,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
             
                 let currentPoint = longPressRecognizer.location(in: imageView)
                 let middlePoint = CGPoint(x: (currentPoint.x + startPoint!.x)/2, y: (currentPoint.y + startPoint!.y)/2)
-                if !movingRect {
+                if !insideExistingRect {
                     let rectLayer = CAShapeLayer()
                     rectLayer.strokeColor = UIColor.black.cgColor
                     rectLayer.fillColor = UIColor.clear.cgColor
@@ -227,7 +252,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     addTag(withLocation: middlePoint, toPhoto: imageView)
                  }
                 selectedLayer?.fillColor = UIColor.clear.cgColor
-                movingRect = false
+                insideExistingRect = false
                 selectedLayer = nil // ot chose new layers
                 subLabel = nil
                 handImageView!.removeFromSuperview()
