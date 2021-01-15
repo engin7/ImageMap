@@ -92,7 +92,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                startPoint = longPressRecognizer.location(in: imageView)
                 let handImg = UIImage(systemName: "hand.tap.fill")
                 handImageView = UIImageView(image: handImg)
-                let handPoint = CGPoint(x: startPoint!.x, y: startPoint!.y-50)
+                let handPoint = CGPoint(x: startPoint!.x-50, y: startPoint!.y-50)
                 handImageView?.frame.origin = handPoint
                 handImageView?.frame.size = CGSize(width: 50, height: 50)
                 self.imageView.addSubview(handImageView!)
@@ -117,7 +117,9 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     subLabel = labels?.first
                     print("INSIDE A PIN *****")
                     insideExistingPin = true
+                    handImageView!.image = UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right")
                 } else {
+                    //
                     imageView.layer.addSublayer(rectShapeLayer)
                 }
                } else {
@@ -246,18 +248,29 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     handImageView?.frame = (handImageView?.frame.offsetBy(dx: xOffset, dy: yOffset))!
                     touchedPoint = currentPoint
              } else if gesture.state == UIGestureRecognizer.State.ended {
-            
+                 
                 let currentPoint = longPressRecognizer.location(in: imageView)
                 let middlePoint = CGPoint(x: (currentPoint.x + startPoint!.x)/2, y: (currentPoint.y + startPoint!.y)/2)
                 if !insideExistingRect && !insideExistingPin {
-                    let rectLayer = CAShapeLayer()
-                    rectLayer.strokeColor = UIColor.black.cgColor
-                    rectLayer.fillColor = UIColor.clear.cgColor
-                    rectLayer.lineWidth = 4
-                    rectLayer.path = rectShapeLayer.path
-                    imageView.layer.addSublayer(rectLayer)
-                    rectShapeLayer.path = nil
-                    addTag(withLocation: middlePoint, toPhoto: imageView)
+                    if let width = rectShapeLayer.path?.boundingBox.size.width  {
+                        // just pin if size too small
+                        if width < 5 {
+                            addTag(withLocation: middlePoint, toPhoto: imageView)
+                        } else {
+                            let rectLayer = CAShapeLayer()
+                            rectLayer.strokeColor = UIColor.black.cgColor
+                            rectLayer.fillColor = UIColor.clear.cgColor
+                            rectLayer.lineWidth = 4
+                            rectLayer.path = rectShapeLayer.path
+                            imageView.layer.addSublayer(rectLayer)
+                            addTag(withLocation: middlePoint, toPhoto: imageView)
+                        }
+                    } else {
+                        // no rect drawn. Just add pin
+                        addTag(withLocation: middlePoint, toPhoto: imageView)
+                    }
+                      rectShapeLayer.path = nil
+                    
                  }
                 selectedLayer?.fillColor = UIColor.clear.cgColor
                 insideExistingRect = false
@@ -281,7 +294,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     // MARK: - Adding Tag
 
     func addTag(withLocation location: CGPoint, toPhoto photo: UIImageView) {
-        let frame = CGRect(x: location.x, y: location.y, width: 40, height: 40)
+        let frame = CGRect(x: location.x, y: location.y, width: 50, height: 50)
         let tempImageView = UIImageView(frame: frame)
         let tintableImage = UIImage(systemName: "pin.circle.fill")?.withRenderingMode(.alwaysTemplate)
         tempImageView.image = tintableImage
