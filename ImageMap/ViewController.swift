@@ -33,6 +33,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     var dragPoint: CAShapeLayer.dragPoint?
     var selectedLayer: CAShapeLayer?
     var insideExistingRect = false
+    var insideExistingPin = false
     var subviewTapped: UIView?
     var subLabel: UILabel?
     var handImageView: UIImageView?
@@ -95,7 +96,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 handImageView?.frame.origin = handPoint
                 handImageView?.frame.size = CGSize(width: 50, height: 50)
                 self.imageView.addSubview(handImageView!)
-                
+                // check if inside rect
                 imageView.layer.sublayers?.forEach { layer in
                     let layer = layer as? CAShapeLayer
                     if let path = layer?.path, path.contains(startPoint!) {
@@ -107,16 +108,26 @@ class ViewController: UIViewController, UITextFieldDelegate {
                         insideExistingRect = true
                     }
                 }
+                 
                if !insideExistingRect {
+                if let pinTapped = getSubViewTouched(touchPoint: startPoint!) {
+                    // inside a pin
+                    subviewTapped = pinTapped
+                    let labels = subviewTapped?.subviews.compactMap { $0 as? UILabel }
+                    subLabel = labels?.first
+                    print("INSIDE A PIN *****")
+                    insideExistingPin = true
+                } else {
                     imageView.layer.addSublayer(rectShapeLayer)
+                }
                } else {
-                
+                // check drag point inside the pin
                     switch dragPoint {
                 case .noResizing: //moving
                     handImageView!.image = UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right")
                  case .isResizingLeftEdge:
                      handImageView!.image = UIImage(systemName: "arrow.left.and.right")
-                    let handPoint = CGPoint(x: startPoint!.x-70, y: startPoint!.y-50)
+                    let handPoint = CGPoint(x: startPoint!.x-60, y: startPoint!.y-50)
                     handImageView?.frame.origin = handPoint
                  case .isResizingRightEdge:
                     handImageView!.image = UIImage(systemName: "arrow.left.and.right")
@@ -128,7 +139,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     handImageView?.frame.origin = handPoint
                 case .isResizingTopEdge:
                     handImageView!.image = UIImage(systemName: "arrow.up.and.down")
-                    let handPoint = CGPoint(x: startPoint!.x, y: startPoint!.y-50)
+                    let handPoint = CGPoint(x: startPoint!.x, y: startPoint!.y-60)
                     handImageView?.frame.origin = handPoint
                 // corner cases
                 case .isResizingLeftCorner:
@@ -154,7 +165,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 let xOffset = currentPoint.x - touchedPoint!.x
                 let yOffset = currentPoint.y - touchedPoint!.y
                 
-                if insideExistingRect {
+                if insideExistingRect && !insideExistingPin {
                  
                 imageView.layer.sublayers?.forEach { layer in
                     let layer = layer as? CAShapeLayer
@@ -171,9 +182,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     guard let pathBox = selectedLayer?.path?.boundingBox else {return}
                     let center = CGPoint(x: pathBox.midX, y: pathBox.midY)
                      // apply offset to out drawn path
-                    // FIXME: - TRANSLATEDBY AFTER SCALE IS WRONG NOW!!!!
                     // https://stackoverflow.com/a/20322817/8707120
-                   // THIS SHOULD FIX, ADJUST OTHERS AND POSITIONING
+                 
                     switch dragPoint {
                     case .noResizing:
                         translation = CGAffineTransform(translationX: xOffset,y: yOffset)
@@ -214,12 +224,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
                      
                     let pathBack = selectedLayer?.path?.copy(using: &translateBack)
                     selectedLayer?.path = pathBack
-                   
-                    
-                    
-                   
-                    
-                    
                     
                     // highlight moving/resizing rect
                     let color = UIColor(red: 0, green: 0, blue: 1, alpha: 0.2).cgColor
@@ -231,17 +235,21 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     subviewTapped?.center = midPoint
                     subLabel?.text = "(\(Double(round(1000*midX)/1000)), \(Double(round(1000*midY)/1000)))"
                    }
-                if !insideExistingRect {
+                if !insideExistingRect && !insideExistingPin {
                     let frame = rect(from: startPoint!, to: currentPoint)
                     rectShapeLayer.path = UIBezierPath(rect: frame).cgPath
                   }
+                if insideExistingPin {
+                    subviewTapped?.center = currentPoint
+                    subLabel?.text = "(\(Double(round(1000*currentPoint.x)/1000)), \(Double(round(1000*currentPoint.y)/1000)))"
+                }
                     handImageView?.frame = (handImageView?.frame.offsetBy(dx: xOffset, dy: yOffset))!
                     touchedPoint = currentPoint
              } else if gesture.state == UIGestureRecognizer.State.ended {
             
                 let currentPoint = longPressRecognizer.location(in: imageView)
                 let middlePoint = CGPoint(x: (currentPoint.x + startPoint!.x)/2, y: (currentPoint.y + startPoint!.y)/2)
-                if !insideExistingRect {
+                if !insideExistingRect && !insideExistingPin {
                     let rectLayer = CAShapeLayer()
                     rectLayer.strokeColor = UIColor.black.cgColor
                     rectLayer.fillColor = UIColor.clear.cgColor
@@ -253,10 +261,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
                  }
                 selectedLayer?.fillColor = UIColor.clear.cgColor
                 insideExistingRect = false
+                insideExistingPin = false
+                dragPoint = CAShapeLayer.dragPoint.noResizing
                 selectedLayer = nil // ot chose new layers
                 subLabel = nil
                 handImageView!.removeFromSuperview()
-                dragPoint = CAShapeLayer.dragPoint.noResizing
              }
     }
     
@@ -299,7 +308,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @objc func tagTapped(gesture: UITapGestureRecognizer) {
         let touchPoint = singleTapRecognizer.location(in: imageView)
        
-        let subviewTapped = getSubViewTouched(touchPoint: touchPoint)
+        if let subviewTapped = getSubViewTouched(touchPoint: touchPoint) {
         subviewTapped.subviews.forEach({ $0.isHidden = !$0.isHidden })
           
         // TODO - add tint color selection
@@ -308,7 +317,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         } else {
             subviewTapped.tintColor = .cyan
         }
-        
+        }
         // Highlighting rect
         imageView.layer.sublayers?.forEach { layer in
             let layer = layer as? CAShapeLayer
@@ -335,13 +344,13 @@ class ViewController: UIViewController, UITextFieldDelegate {
         return subviewTapped
     }
     
-    func getSubViewTouched(touchPoint: CGPoint) -> UIView {
+    func getSubViewTouched(touchPoint: CGPoint) -> UIView? {
         
         let filteredSubviews = imageView.subviews.filter { subView -> Bool in
             return subView.frame.contains(touchPoint)
           }
         guard let subviewTapped = filteredSubviews.first else {
-            return UIView()
+            return nil
         }
         return subviewTapped
     }
