@@ -157,13 +157,17 @@ class ViewController: UIViewController, UITextFieldDelegate {
                         translateBack = CGAffineTransform(translationX: center.x, y: center.y + yOffset/2)
                     // corner cases
                     case .isResizingLeftCorner:
-                        translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1 - yOffset/pathBox.size.width).translatedBy(x: xOffset/2-center.x, y: yOffset/2-center.y)
+                        translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1 - yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
+                        translateBack = CGAffineTransform(translationX: center.x + xOffset/2, y: center.y + yOffset/2)
                     case .isResizingRightCorner:
-                        translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1 - yOffset/pathBox.size.width).translatedBy(x: xOffset/2-center.x, y: yOffset/2-center.y)
+                        translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1 - yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
+                        translateBack = CGAffineTransform(translationX: center.x + xOffset/2, y: center.y + yOffset/2)
                     case .isResizingBottomLeftCorner:
-                        translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1 + yOffset/pathBox.size.width).translatedBy(x: xOffset/2-center.x, y: yOffset/2-center.y)
+                        translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1 + yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
+                        translateBack = CGAffineTransform(translationX: center.x + xOffset/2, y: center.y + yOffset/2)
                     case .isResizingBottomRightCorner:
-                        translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1 + yOffset/pathBox.size.width).translatedBy(x: xOffset/2-center.x, y: yOffset/2-center.y)
+                        translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1 + yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
+                        translateBack = CGAffineTransform(translationX: center.x + xOffset/2, y: center.y + yOffset/2)
                     
                     case .none:
                         break
