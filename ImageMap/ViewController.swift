@@ -92,9 +92,10 @@ class ViewController: UIViewController, UITextFieldDelegate {
                startPoint = longPressRecognizer.location(in: imageView)
                 let handImg = UIImage(systemName: "hand.tap.fill")
                 handImageView = UIImageView(image: handImg)
-                let handPoint = CGPoint(x: startPoint!.x-50, y: startPoint!.y-50)
+                let handPoint = CGPoint(x: startPoint!.x-30, y: startPoint!.y-30)
                 handImageView?.frame.origin = handPoint
-                handImageView?.frame.size = CGSize(width: 50, height: 50)
+                handImageView?.frame.size = CGSize(width: 30, height: 30)
+                // careful! it can touch handView and use it as subview while checking with getSubViewTouched.
                 self.imageView.addSubview(handImageView!)
                 // check if inside rect
                 imageView.layer.sublayers?.forEach { layer in
@@ -129,19 +130,19 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     handImageView!.image = UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right")
                  case .isResizingLeftEdge:
                      handImageView!.image = UIImage(systemName: "arrow.left.and.right")
-                    let handPoint = CGPoint(x: startPoint!.x-60, y: startPoint!.y-50)
+                    let handPoint = CGPoint(x: startPoint!.x-50, y: startPoint!.y)
                     handImageView?.frame.origin = handPoint
                  case .isResizingRightEdge:
                     handImageView!.image = UIImage(systemName: "arrow.left.and.right")
-                    let handPoint = CGPoint(x: startPoint!.x+10, y: startPoint!.y-50)
+                    let handPoint = CGPoint(x: startPoint!.x+18, y: startPoint!.y)
                     handImageView?.frame.origin = handPoint
                 case .isResizingBottomEdge:
                     handImageView!.image = UIImage(systemName: "arrow.up.and.down")
-                    let handPoint = CGPoint(x: startPoint!.x, y: startPoint!.y-50)
+                    let handPoint = CGPoint(x: startPoint!.x, y: startPoint!.y+20)
                     handImageView?.frame.origin = handPoint
                 case .isResizingTopEdge:
                     handImageView!.image = UIImage(systemName: "arrow.up.and.down")
-                    let handPoint = CGPoint(x: startPoint!.x, y: startPoint!.y-60)
+                    let handPoint = CGPoint(x: startPoint!.x, y: startPoint!.y-50)
                     handImageView?.frame.origin = handPoint
                 // corner cases
                 case .isResizingLeftCorner:
@@ -439,7 +440,7 @@ extension ViewController: UIScrollViewDelegate {
 // touch on edges,corners
 extension CAShapeLayer {
  
-    static var kResizeThumbSize:CGFloat = 44.0
+    static var kResizeThumbSize:CGFloat = 22.0
     private typealias `Self` = CAShapeLayer
  
     enum dragPoint {
