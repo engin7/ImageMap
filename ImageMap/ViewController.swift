@@ -129,32 +129,38 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 case .noResizing: //moving
                     handImageView!.image = UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right")
                  case .isResizingLeftEdge:
-                     handImageView!.image = UIImage(systemName: "arrow.left.and.right")
+                     handImageView!.image = #imageLiteral(resourceName: "arrowLeftRightSides")
                     let handPoint = CGPoint(x: startPoint!.x-50, y: startPoint!.y)
                     handImageView?.frame.origin = handPoint
                  case .isResizingRightEdge:
-                    handImageView!.image = UIImage(systemName: "arrow.left.and.right")
-                    let handPoint = CGPoint(x: startPoint!.x+18, y: startPoint!.y)
+                    handImageView!.image = #imageLiteral(resourceName: "arrowLeftRightSides")
+                    let handPoint = CGPoint(x: startPoint!.x+20, y: startPoint!.y)
                     handImageView?.frame.origin = handPoint
                 case .isResizingBottomEdge:
-                    handImageView!.image = UIImage(systemName: "arrow.up.and.down")
+                    handImageView!.image = #imageLiteral(resourceName: "arrowTopBottomSides")
                     let handPoint = CGPoint(x: startPoint!.x, y: startPoint!.y+20)
                     handImageView?.frame.origin = handPoint
                 case .isResizingTopEdge:
-                    handImageView!.image = UIImage(systemName: "arrow.up.and.down")
+                    handImageView!.image = #imageLiteral(resourceName: "arrowTopBottomSides")
                     let handPoint = CGPoint(x: startPoint!.x, y: startPoint!.y-50)
                     handImageView?.frame.origin = handPoint
                 // corner cases
                 case .isResizingLeftCorner:
-                    handImageView!.image = UIImage(systemName: "arrow.up.left.and.arrow.down.right")
+                    handImageView!.image = #imageLiteral(resourceName: "arrowLeftCorner")
+                    let handPoint = CGPoint(x: startPoint!.x-50, y: startPoint!.y-50)
+                    handImageView?.frame.origin = handPoint
                 case .isResizingRightCorner:
-                    let image = UIImage(systemName: "arrow.up.left.and.arrow.down.right")!.rotate(radians: .pi/2)
-                    handImageView!.image = image
+                    handImageView!.image = #imageLiteral(resourceName: "arrowRightCorner")
+                    let handPoint = CGPoint(x: startPoint!.x+25, y: startPoint!.y-50)
+                    handImageView?.frame.origin = handPoint
                 case .isResizingBottomLeftCorner:
-                    let image = UIImage(systemName: "arrow.up.left.and.arrow.down.right")!.rotate(radians: .pi/2)
-                    handImageView!.image = image
+                    handImageView!.image = #imageLiteral(resourceName: "arrowRightCorner")
+                    let handPoint = CGPoint(x: startPoint!.x-50, y: startPoint!.y+25)
+                    handImageView?.frame.origin = handPoint
                 case .isResizingBottomRightCorner:
-                    handImageView!.image = UIImage(systemName: "arrow.up.left.and.arrow.down.right")
+                    handImageView!.image = #imageLiteral(resourceName: "arrowLeftCorner")
+                    let handPoint = CGPoint(x: startPoint!.x+25, y: startPoint!.y+25)
+                    handImageView?.frame.origin = handPoint
                 case .none:
                     break
                 }
@@ -491,27 +497,4 @@ extension CAShapeLayer {
     }
    
 }
-
-extension UIImage {
-    func rotate(radians: Float) -> UIImage? {
-        var newSize = CGRect(origin: CGPoint.zero, size: self.size).applying(CGAffineTransform(rotationAngle: CGFloat(radians))).size
-        // Trim off the extremely small float value to prevent core graphics from rounding it up
-        newSize.width = floor(newSize.width)
-        newSize.height = floor(newSize.height)
-
-        UIGraphicsBeginImageContextWithOptions(newSize, false, self.scale)
-        let context = UIGraphicsGetCurrentContext()!
-
-        // Move origin to middle
-        context.translateBy(x: newSize.width/2, y: newSize.height/2)
-        // Rotate around middle
-        context.rotate(by: CGFloat(radians))
-        // Draw the image at its center
-        self.draw(in: CGRect(x: -self.size.width/2, y: -self.size.height/2, width: self.size.width, height: self.size.height))
-
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-
-        return newImage
-    }
-}
+ 
