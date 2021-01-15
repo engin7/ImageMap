@@ -134,32 +134,36 @@ class ViewController: UIViewController, UITextFieldDelegate {
 
                     guard let pathBox = selectedLayer?.path?.boundingBox else {return}
                     let center = CGPoint(x: pathBox.midX, y: pathBox.midY)
-                    // apply offset to out drawn path
+                     // apply offset to out drawn path
                     // FIXME: - TRANSLATEDBY AFTER SCALE IS WRONG NOW!!!!
+                    // https://stackoverflow.com/a/20322817/8707120
+                   // THIS SHOULD FIX, ADJUST OTHERS AND POSITIONING
                     switch dragPoint {
                     case .noResizing:
                         translation = CGAffineTransform(translationX: xOffset,y: yOffset)
-                    case .isResizingLeftEdge:
+                        translateBack = CGAffineTransform(translationX: 0, y: 0)
+                     case .isResizingLeftEdge:
                         // xoffset negative
                         translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1).translatedBy(x: -center.x, y: -center.y)
-                        translateBack = CGAffineTransform(translationX: center.x, y: center.y)
-                        // https://stackoverflow.com/a/20322817/8707120
-                        // THIS SHOULD FIX, ADJUST OTHERS AND POSITIONING
+                        translateBack = CGAffineTransform(translationX: xOffset/2 + center.x, y: center.y)
                     case .isResizingRightEdge:
-                        translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1).translatedBy(x: xOffset/2, y: 0)
+                        translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1).translatedBy(x: -center.x, y: -center.y)
+                        translateBack = CGAffineTransform(translationX: xOffset/2 + center.x, y: center.y)
                     case .isResizingBottomEdge:
-                        translation = CGAffineTransform(scaleX: 1, y: 1 + yOffset/pathBox.size.width).translatedBy(x: 0, y:  yOffset/2)
+                        translation = CGAffineTransform(scaleX: 1, y: 1 + yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
+                        translateBack = CGAffineTransform(translationX: center.x, y: center.y + yOffset/2)
                     case .isResizingTopEdge:
-                        translation = CGAffineTransform(scaleX: 1, y: 1 - yOffset/pathBox.size.width).translatedBy(x: 0, y: yOffset/2)
+                        translation = CGAffineTransform(scaleX: 1, y: 1 - yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
+                        translateBack = CGAffineTransform(translationX: center.x, y: center.y + yOffset/2)
                     // corner cases
                     case .isResizingLeftCorner:
-                        translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1 - yOffset/pathBox.size.width)
+                        translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1 - yOffset/pathBox.size.width).translatedBy(x: xOffset/2-center.x, y: yOffset/2-center.y)
                     case .isResizingRightCorner:
-                        translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1 - yOffset/pathBox.size.width)
+                        translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1 - yOffset/pathBox.size.width).translatedBy(x: xOffset/2-center.x, y: yOffset/2-center.y)
                     case .isResizingBottomLeftCorner:
-                        translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1 + yOffset/pathBox.size.width)
+                        translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1 + yOffset/pathBox.size.width).translatedBy(x: xOffset/2-center.x, y: yOffset/2-center.y)
                     case .isResizingBottomRightCorner:
-                        translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1 + yOffset/pathBox.size.width)
+                        translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1 + yOffset/pathBox.size.width).translatedBy(x: xOffset/2-center.x, y: yOffset/2-center.y)
                     
                     case .none:
                         break
@@ -170,6 +174,10 @@ class ViewController: UIViewController, UITextFieldDelegate {
                      
                     let pathBack = selectedLayer?.path?.copy(using: &translateBack)
                     selectedLayer?.path = pathBack
+                   
+                    
+                    
+                   
                     
                     
                     
