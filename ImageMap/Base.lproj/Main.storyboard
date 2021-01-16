@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="aQf-Lc-V3H">
-    <device id="retina4_7" orientation="portrait" appearance="light"/>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="aQf-Lc-V3H">
+    <device id="retina5_5" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -14,14 +14,14 @@
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="ImageMap" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Y00-Kb-PAN">
-                                <rect key="frame" x="16" y="44" width="343" height="623"/>
+                                <rect key="frame" x="20" y="44" width="374" height="692"/>
                                 <subviews>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="ali-liston" translatesAutoresizingMaskIntoConstraints="NO" id="fh2-mv-i26">
-                                        <rect key="frame" x="0.0" y="0.0" width="1500" height="1066.5"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="1500" height="1066.6666666666667"/>
                                     </imageView>
                                 </subviews>
                                 <constraints>
@@ -52,13 +52,33 @@
                                 <action selector="clearPressed:" destination="BYZ-38-t0r" id="kMZ-CL-VEF"/>
                             </connections>
                         </barButtonItem>
+                        <rightBarButtonItems>
+                            <barButtonItem title="Item" image="circle.dashed" catalog="system" id="rJY-G5-o7L">
+                                <connections>
+                                    <action selector="ellipseButtonPressed:" destination="BYZ-38-t0r" id="3QU-nG-cVT"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem title="Item" image="hexagon" catalog="system" id="cgH-ME-z5B">
+                                <connections>
+                                    <action selector="polygonButtonPressed:" destination="BYZ-38-t0r" id="LFa-Zp-bQD"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem title="Item" image="rectangle.dashed" catalog="system" id="VDr-6v-EFH">
+                                <connections>
+                                    <action selector="rectButtonPressed:" destination="BYZ-38-t0r" id="WRb-rj-vaW"/>
+                                </connections>
+                            </barButtonItem>
+                        </rightBarButtonItems>
                     </navigationItem>
                     <connections>
+                        <outlet property="ellipseButton" destination="rJY-G5-o7L" id="Ulm-xM-ZYB"/>
                         <outlet property="imageView" destination="fh2-mv-i26" id="kVv-ED-tpT"/>
                         <outlet property="imageViewBottomConstraint" destination="aA8-TG-hoD" id="1ys-zY-bsu"/>
                         <outlet property="imageViewLeadingConstraint" destination="xfZ-T5-T1r" id="ZFo-Bu-cIS"/>
                         <outlet property="imageViewTopConstraint" destination="XdW-20-noS" id="GGZ-sl-rKK"/>
                         <outlet property="imageViewTrailingConstraint" destination="DFO-ek-Oqe" id="PwO-TR-IQ5"/>
+                        <outlet property="polygonButton" destination="cgH-ME-z5B" id="VqT-a7-8bz"/>
+                        <outlet property="rectButton" destination="VDr-6v-EFH" id="Bcl-de-jwx"/>
                         <outlet property="scrollView" destination="Y00-Kb-PAN" id="Yam-Ej-YhX"/>
                     </connections>
                 </viewController>
@@ -72,7 +92,7 @@
                 <navigationController title="Image Map" automaticallyAdjustsScrollViewInsets="NO" id="aQf-Lc-V3H" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="3MG-Ec-vek">
-                        <rect key="frame" x="0.0" y="0.0" width="375" height="44"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
@@ -87,6 +107,9 @@
     </scenes>
     <resources>
         <image name="ali-liston" width="1500" height="1066.5"/>
+        <image name="circle.dashed" catalog="system" width="128" height="121"/>
+        <image name="hexagon" catalog="system" width="128" height="124"/>
+        <image name="rectangle.dashed" catalog="system" width="128" height="93"/>
         <image name="trash.fill" catalog="system" width="121" height="128"/>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>

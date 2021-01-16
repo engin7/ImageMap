@@ -23,6 +23,19 @@ class ViewController: UIViewController, UITextFieldDelegate {
         imageView.subviews.forEach({ $0.removeFromSuperview() })
         imageView.layer.sublayers?.removeAll()
     }
+     
+    @IBOutlet weak var rectButton: UIBarButtonItem!
+    @IBAction func rectButtonPressed(_ sender: Any) {
+    }
+    
+    @IBOutlet weak var polygonButton: UIBarButtonItem!
+    
+    @IBAction func polygonButtonPressed(_ sender: Any) {
+    }
+    
+    @IBOutlet weak var ellipseButton: UIBarButtonItem!
+    @IBAction func ellipseButtonPressed(_ sender: Any) {
+    }
     
     var longPressRecognizer: UILongPressGestureRecognizer!
     var singleTapRecognizer: UITapGestureRecognizer!
