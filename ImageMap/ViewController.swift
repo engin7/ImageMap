@@ -75,12 +75,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
     var touchedPoint: CGPoint?
     var dragPoint: CAShapeLayer.dragPoint?
     var selectedLayer: CAShapeLayer?
-    var insideExistingRect = false
+    var insideExistingShape = false
     var insideExistingPin = false
     var subviewTapped: UIView?
     var subLabel: UILabel?
     var handImageView: UIImageView?
-    var drawingMode: drawMode!
+    var drawingMode = drawMode.noShape
     
     enum drawMode {
         case drawRect
@@ -89,7 +89,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         case noShape
     }
     
-    let rectShapeLayer: CAShapeLayer = {
+    let selectedShapeLayer: CAShapeLayer = {
           let shapeLayer = CAShapeLayer()
           shapeLayer.strokeColor = UIColor.black.cgColor
           shapeLayer.fillColor = UIColor.clear.cgColor
@@ -97,7 +97,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
           shapeLayer.lineDashPattern = [10,5,5,5]
           return shapeLayer
     }()
-    
+   
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -152,16 +152,17 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 imageView.layer.sublayers?.forEach { layer in
                     let layer = layer as? CAShapeLayer
                     if let path = layer?.path, path.contains(startPoint!) {
+                        // if path contains startPoint we're sure we're in a shape
                         subviewTapped = getSubViewSelected(bounds: (layer?.path!.boundingBox)!)
                         let labels = subviewTapped?.subviews.compactMap { $0 as? UILabel }
                         subLabel = labels?.first
                         dragPoint = layer?.resizingStartPoint(startPoint, in: layer!)
                         print(dragPoint) // detect edge/corners
-                        insideExistingRect = true
+                        insideExistingShape = true
                     }
                 }
                  
-               if !insideExistingRect {
+               if !insideExistingShape {
                 if let pinTapped = getSubViewTouched(touchPoint: startPoint!) {
                     // inside a pin
                     subviewTapped = pinTapped
@@ -171,8 +172,9 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     insideExistingPin = true
                     handImageView!.image = UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right")
                 } else {
-                    //
-                    imageView.layer.addSublayer(rectShapeLayer)
+                    // add shape layer
+                    imageView.layer.addSublayer(selectedShapeLayer)
+
                 }
                } else {
                 // check drag point inside the pin
@@ -218,14 +220,15 @@ class ViewController: UIViewController, UITextFieldDelegate {
             
                }
                 touchedPoint = startPoint
-               
+               // After start condition while keeping touch:
              } else if gesture.state == UIGestureRecognizer.State.changed {
                 
                 let currentPoint = longPressRecognizer.location(in: imageView)
                 let xOffset = currentPoint.x - touchedPoint!.x
                 let yOffset = currentPoint.y - touchedPoint!.y
                 
-                if insideExistingRect && !insideExistingPin {
+                 // insede shape conditon
+                if insideExistingShape && !insideExistingPin {
                  
                 imageView.layer.sublayers?.forEach { layer in
                     let layer = layer as? CAShapeLayer
@@ -295,10 +298,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     subviewTapped?.center = midPoint
                     subLabel?.text = "(\(Double(round(1000*midX)/1000)), \(Double(round(1000*midY)/1000)))"
                    }
-                if !insideExistingRect && !insideExistingPin {
-                    let frame = rect(from: startPoint!, to: currentPoint)
-                    rectShapeLayer.path = UIBezierPath(rect: frame).cgPath
+                if !insideExistingShape && !insideExistingPin {
+                    // draw rectangle, ellipse etc according to selection
+                    let path = drawShape(from: startPoint!, to: currentPoint, mode: drawingMode)
+                    selectedShapeLayer.path = path.cgPath
                   }
+                
                 if insideExistingPin {
                     subviewTapped?.center = currentPoint
                     subLabel?.text = "(\(Double(round(1000*currentPoint.x)/1000)), \(Double(round(1000*currentPoint.y)/1000)))"
@@ -309,8 +314,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
                  
                 let currentPoint = longPressRecognizer.location(in: imageView)
                 let middlePoint = CGPoint(x: (currentPoint.x + startPoint!.x)/2, y: (currentPoint.y + startPoint!.y)/2)
-                if !insideExistingRect && !insideExistingPin {
-                    if let width = rectShapeLayer.path?.boundingBox.size.width  {
+                if !insideExistingShape && !insideExistingPin {
+                    if let width = selectedShapeLayer.path?.boundingBox.size.width  {
                         // just pin if size too small
                         if width < 5 {
                             addTag(withLocation: middlePoint, toPhoto: imageView)
@@ -319,7 +324,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                             rectLayer.strokeColor = UIColor.black.cgColor
                             rectLayer.fillColor = UIColor.clear.cgColor
                             rectLayer.lineWidth = 4
-                            rectLayer.path = rectShapeLayer.path
+                            rectLayer.path = selectedShapeLayer.path
                             imageView.layer.addSublayer(rectLayer)
                             addTag(withLocation: middlePoint, toPhoto: imageView)
                         }
@@ -327,11 +332,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
                         // no rect drawn. Just add pin
                         addTag(withLocation: middlePoint, toPhoto: imageView)
                     }
-                      rectShapeLayer.path = nil
+                      selectedShapeLayer.path = nil
                     
                  }
                 selectedLayer?.fillColor = UIColor.clear.cgColor
-                insideExistingRect = false
+                insideExistingShape = false
                 insideExistingPin = false
                 dragPoint = CAShapeLayer.dragPoint.noResizing
                 selectedLayer = nil // ot chose new layers
@@ -340,14 +345,36 @@ class ViewController: UIViewController, UITextFieldDelegate {
              }
     }
     
-    // MARK: Helper method for drawing
+    // MARK: - Helper method for drawing Shapes
     
-     private func rect(from: CGPoint, to: CGPoint) -> CGRect {
-         return CGRect(x: min(from.x, to.x),
-                y: min(from.y, to.y),
-                width: abs(to.x - from.x),
-                height: abs(to.y - from.y))
-     }
+    private func drawShape(from: CGPoint, to: CGPoint, mode: drawMode) -> UIBezierPath {
+    
+        let width = abs(to.x - from.x)
+        let height = abs(to.y - from.y)
+        let frame = CGRect(x: min(from.x, to.x),
+                          y: min(from.y, to.y),
+                          width: width,
+                          height: height)
+        
+        let radius = sqrt(width * width + height * height)
+        
+        switch mode {
+        case .drawRect:
+            return UIBezierPath(rect: frame)
+        case .drawPolygon:
+            return UIBezierPath(rect: frame)
+        case .drawEllipse:
+            return UIBezierPath(roundedRect: frame, cornerRadius: radius)
+        default:
+            return UIBezierPath()
+        }
+         
+    }
+    
+    
+     
+    
+    
     
     // MARK: - Adding Tag
 
