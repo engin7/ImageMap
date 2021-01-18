@@ -227,7 +227,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     let handPoint = CGPoint(x: startPoint!.x+25, y: startPoint!.y+25)
                     handImageView.frame.origin = handPoint
                 case .isRotating:
-                    break
+                    handImageView.removeFromSuperview()
                 case .none:
                     break
                 }
@@ -291,11 +291,17 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     case .isResizingBottomRightCorner:
                         translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1 + yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
                         translateBack = CGAffineTransform(translationX: center.x + xOffset/2, y: center.y + yOffset/2)
+                    case .isRotating:
+                        print("ROTATING")
+                        if yOffset < 0 {
+                            translation = CGAffineTransform(rotationAngle: 0.99*CGFloat.pi).translatedBy(x: -center.x, y: -center.y)
+                        } else {
+                            translation = CGAffineTransform(rotationAngle: -0.99*CGFloat.pi).translatedBy(x: -center.x, y: -center.y)
+                        }
+                        translateBack = CGAffineTransform(translationX: center.x, y: center.y)
                     case .none:
                         print("no point")
                         break
-                    case .isRotating:
-                        print("ROTATING")
                     }
                      
                     let path = selectedLayer?.path?.copy(using: &translation)
