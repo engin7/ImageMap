@@ -319,9 +319,10 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     let midPoint = CGPoint(x: midX, y: midY)
                     subviewTapped.center = midPoint
                     subLabel?.text = "(\(Double(round(1000*midX)/1000)), \(Double(round(1000*midY)/1000)))"
-                    
-                    guard let maxX = selectedLayer?.path?.boundingBox.maxX else { return }
+                     
                     guard let maxY = selectedLayer?.path?.boundingBox.maxY else { return }
+                    guard let maxX = selectedLayer?.path?.boundingBox.maxX else { return }
+                    // TODO: - Make rotation overlay image look nice while rotating. Right now it's getting bottom right values of all path points
                     overlayImageView.frame.origin = CGPoint(x: maxX, y: maxY)
                     
                    }
