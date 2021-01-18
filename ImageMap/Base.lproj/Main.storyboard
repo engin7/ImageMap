@@ -9,7 +9,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--imgMap-->
+        <!--Image Map-->
         <scene sceneID="tne-QT-ifu">
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="ImageMap" customModuleProvider="target" sceneMemberID="viewController">
@@ -46,7 +46,7 @@
                             <constraint firstItem="Y00-Kb-PAN" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="V8m-J6-4lv"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="imgMap" id="90G-tu-d3f">
+                    <navigationItem key="navigationItem" title="Image Map" id="90G-tu-d3f">
                         <leftBarButtonItems>
                             <barButtonItem title="Item" image="rectangle.dashed" catalog="system" id="VDr-6v-EFH">
                                 <connections>
