@@ -77,7 +77,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     var selectedLayer: CAShapeLayer?
     var insideExistingShape = false
     var insideExistingPin = false
-    var subviewTapped: UIView?
+    var subviewTapped = UIView()
     var subLabel: UILabel?
     var handImageView = UIImageView()
     var overlayImageView = UIImageView()
@@ -142,6 +142,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 
                startPoint = nil
                startPoint = longPressRecognizer.location(in: imageView)
+                
                 let handImg = UIImage(systemName: "hand.tap.fill")
                 handImageView = UIImageView(image: handImg)
                 let handPoint = CGPoint(x: startPoint!.x-30, y: startPoint!.y-30)
@@ -149,14 +150,25 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 handImageView.frame.size = CGSize(width: 30, height: 30)
                 // careful! it can touch handView and use it as subview while checking with getSubViewTouched.
                 self.imageView.addSubview(handImageView)
+                
+                // is rotating ?
+                 var rotationPoint = startPoint!
+                 if let subviewTapped = getSubViewTouched(touchPoint: startPoint!) {
+                    if subviewTapped == overlayImageView {
+                        subviewTapped.tintColor = .white
+                        print(subviewTapped.frame.origin)
+                        rotationPoint = CGPoint(x: startPoint!.x-30, y: startPoint!.y-30)
+                        // rotating point is outside the path so move the point inside to proceed
+                     }
+                }
                 // check if inside rect
                 imageView.layer.sublayers?.forEach { layer in
                     let layer = layer as? CAShapeLayer
-                    if let path = layer?.path, path.contains(startPoint!) {
-                        // if path contains startPoint we're sure we're in a shape
-                        subviewTapped = getSubViewSelected(bounds: (layer?.path!.boundingBox)!)
-                        let labels = subviewTapped?.subviews.compactMap { $0 as? UILabel }
-                        subLabel = labels?.first
+                    if let path = layer?.path, path.contains(startPoint!) || path.contains(rotationPoint) {
+                        // if path contains startPoint or rotationPoint we're sure we're in a shape
+                        subviewTapped = getSubViewSelected(bounds: (layer?.path!.boundingBox)!).first!
+                        let labels = subviewTapped.subviews.compactMap { $0 as? UILabel }
+                        subLabel = labels.first
                         dragPoint = layer?.resizingStartPoint(startPoint, in: layer!)
                         print(dragPoint) // detect edge/corners
                         insideExistingShape = true
@@ -164,11 +176,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 }
                  
                if !insideExistingShape {
-                if let pinTapped = getSubViewTouched(touchPoint: startPoint!) {
+                if let pinTapped = getSubViewTouched(touchPoint: startPoint!), pinTapped != overlayImageView {
                     // inside a pin
                     subviewTapped = pinTapped
-                    let labels = subviewTapped?.subviews.compactMap { $0 as? UILabel }
-                    subLabel = labels?.first
+                    let labels = subviewTapped.subviews.compactMap { $0 as? UILabel }
+                    subLabel = labels.first
                     print("INSIDE A PIN *****")
                     insideExistingPin = true
                     handImageView.image = UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right")
@@ -214,12 +226,14 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     handImageView.image = #imageLiteral(resourceName: "arrowLeftCorner")
                     let handPoint = CGPoint(x: startPoint!.x+25, y: startPoint!.y+25)
                     handImageView.frame.origin = handPoint
+                case .isRotating:
+                    break
                 case .none:
                     break
                 }
             
                }
-                touchedPoint = startPoint
+                touchedPoint = startPoint // offset reference
                // After start condition while keeping touch:
              } else if gesture.state == UIGestureRecognizer.State.changed {
                 
@@ -277,9 +291,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     case .isResizingBottomRightCorner:
                         translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1 + yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
                         translateBack = CGAffineTransform(translationX: center.x + xOffset/2, y: center.y + yOffset/2)
-                    
                     case .none:
+                        print("no point")
                         break
+                    case .isRotating:
+                        print("ROTATING")
                     }
                      
                     let path = selectedLayer?.path?.copy(using: &translation)
@@ -295,7 +311,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     guard let midX = selectedLayer?.path?.boundingBox.midX else { return }
                     guard let midY = selectedLayer?.path?.boundingBox.midY else { return }
                     let midPoint = CGPoint(x: midX, y: midY)
-                    subviewTapped?.center = midPoint
+                    subviewTapped.center = midPoint
                     subLabel?.text = "(\(Double(round(1000*midX)/1000)), \(Double(round(1000*midY)/1000)))"
                     
                     guard let maxX = selectedLayer?.path?.boundingBox.maxX else { return }
@@ -310,7 +326,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                   }
                 
                 if insideExistingPin {
-                    subviewTapped?.center = currentPoint
+                    subviewTapped.center = currentPoint
                     subLabel?.text = "(\(Double(round(1000*currentPoint.x)/1000)), \(Double(round(1000*currentPoint.y)/1000)))"
                 }
                     handImageView.frame = (handImageView.frame.offsetBy(dx: xOffset, dy: yOffset))
@@ -377,8 +393,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
          
     }
     
-    
-    
+     
     // MARK: - Adding Tag
 
     func addTag(withLocation location: CGPoint, toPhoto photo: UIImageView) {
@@ -409,16 +424,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
     @objc func tagTapped(gesture: UITapGestureRecognizer) {
         let touchPoint = singleTapRecognizer.location(in: imageView)
        
-        if let subviewTapped = getSubViewTouched(touchPoint: touchPoint) {
-        subviewTapped.subviews.forEach({ $0.isHidden = !$0.isHidden })
-          
-        // TODO - add tint color selection
-        if subviewTapped.tintColor == .cyan {
-            subviewTapped.tintColor = .red
-        } else {
-            subviewTapped.tintColor = .cyan
-        }
-        }
         // Highlighting rect
         imageView.layer.sublayers?.forEach { layer in
             let layer = layer as? CAShapeLayer
@@ -431,6 +436,27 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 addRotationOverlay(layer)
             }
         }
+        // subViews: pin, rotating overlay,
+        
+        if let subviewTapped = getSubViewTouched(touchPoint: touchPoint) {
+            // hide label etc
+        subviewTapped.subviews.forEach({ $0.isHidden = !$0.isHidden })
+           
+            if subviewTapped == overlayImageView {
+                 
+                // rotating button
+                
+            } else {
+                // TODO - add tint color selection
+                if subviewTapped.tintColor == .cyan {
+                    subviewTapped.tintColor = .red
+                } else {
+                    subviewTapped.tintColor = .cyan
+                }
+            }
+            
+        }
+      
     }
     
     func addRotationOverlay(_ layer: CAShapeLayer?) {
@@ -447,15 +473,13 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     // MARK: - Get Subviews from clicked area
 
-    func getSubViewSelected(bounds: CGRect) -> UIView {
+    func getSubViewSelected(bounds: CGRect) -> [UIView] {
         
         let filteredSubviews = imageView.subviews.filter { subView -> Bool in
             return bounds.contains(subView.frame)
           }
-        guard let subviewTapped = filteredSubviews.first else {
-            return UIView()
-        }
-        return subviewTapped
+         
+        return filteredSubviews
     }
     
     func getSubViewTouched(touchPoint: CGPoint) -> UIView? {
@@ -554,7 +578,9 @@ extension CAShapeLayer {
     case isResizingLeftCorner
     case isResizingRightCorner
     case isResizingBottomLeftCorner
-     
+    // rotation
+    case isRotating
+        
     case noResizing
         
     init() {
@@ -568,7 +594,9 @@ extension CAShapeLayer {
 
         if let touch = touch {
             
-            if ((layer.path?.boundingBox.maxY)! - touch.y < Self.kResizeThumbSize) && ((layer.path?.boundingBox.maxX)! - touch.x < Self.kResizeThumbSize) {
+            if ((layer.path?.boundingBox.maxY)! - touch.y < 0) && ((layer.path?.boundingBox.maxX)! - touch.x < 0) {
+             dragP = dragPoint.isRotating // outside the box calling this func only possible with touching rotation overlay image
+            } else if ((layer.path?.boundingBox.maxY)! - touch.y < Self.kResizeThumbSize) && ((layer.path?.boundingBox.maxX)! - touch.x < Self.kResizeThumbSize) {
                 dragP = dragPoint.isResizingBottomRightCorner
             } else if (touch.x - (layer.path?.boundingBox.minX)! < Self.kResizeThumbSize) && (touch.y - (layer.path?.boundingBox.minY)! < Self.kResizeThumbSize) {
                 dragP = dragPoint.isResizingLeftCorner
@@ -585,7 +613,7 @@ extension CAShapeLayer {
            } else if ((layer.path?.boundingBox.maxY)! - touch.y < Self.kResizeThumbSize) {
                dragP = dragPoint.isResizingBottomEdge
            }
-            
+             
         }
         return dragP
     }
