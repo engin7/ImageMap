@@ -79,7 +79,8 @@ class ViewController: UIViewController, UITextFieldDelegate {
     var insideExistingPin = false
     var subviewTapped: UIView?
     var subLabel: UILabel?
-    var handImageView: UIImageView?
+    var handImageView = UIImageView()
+    var overlayImageView = UIImageView()
     var drawingMode = drawMode.noShape
     
     enum drawMode {
@@ -144,10 +145,10 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 let handImg = UIImage(systemName: "hand.tap.fill")
                 handImageView = UIImageView(image: handImg)
                 let handPoint = CGPoint(x: startPoint!.x-30, y: startPoint!.y-30)
-                handImageView?.frame.origin = handPoint
-                handImageView?.frame.size = CGSize(width: 30, height: 30)
+                handImageView.frame.origin = handPoint
+                handImageView.frame.size = CGSize(width: 30, height: 30)
                 // careful! it can touch handView and use it as subview while checking with getSubViewTouched.
-                self.imageView.addSubview(handImageView!)
+                self.imageView.addSubview(handImageView)
                 // check if inside rect
                 imageView.layer.sublayers?.forEach { layer in
                     let layer = layer as? CAShapeLayer
@@ -170,50 +171,49 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     subLabel = labels?.first
                     print("INSIDE A PIN *****")
                     insideExistingPin = true
-                    handImageView!.image = UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right")
+                    handImageView.image = UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right")
                 } else {
                     // add shape layer
                     imageView.layer.addSublayer(selectedShapeLayer)
-
                 }
                } else {
                 // check drag point inside the pin
                     switch dragPoint {
                 case .noResizing: //moving
-                    handImageView!.image = UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right")
+                    handImageView.image = UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right")
                  case .isResizingLeftEdge:
-                     handImageView!.image = #imageLiteral(resourceName: "arrowLeftRightSides")
+                     handImageView.image = #imageLiteral(resourceName: "arrowLeftRightSides")
                     let handPoint = CGPoint(x: startPoint!.x-50, y: startPoint!.y)
-                    handImageView?.frame.origin = handPoint
+                    handImageView.frame.origin = handPoint
                  case .isResizingRightEdge:
-                    handImageView!.image = #imageLiteral(resourceName: "arrowLeftRightSides")
+                    handImageView.image = #imageLiteral(resourceName: "arrowLeftRightSides")
                     let handPoint = CGPoint(x: startPoint!.x+20, y: startPoint!.y)
-                    handImageView?.frame.origin = handPoint
+                    handImageView.frame.origin = handPoint
                 case .isResizingBottomEdge:
-                    handImageView!.image = #imageLiteral(resourceName: "arrowTopBottomSides")
+                    handImageView.image = #imageLiteral(resourceName: "arrowTopBottomSides")
                     let handPoint = CGPoint(x: startPoint!.x, y: startPoint!.y+20)
-                    handImageView?.frame.origin = handPoint
+                    handImageView.frame.origin = handPoint
                 case .isResizingTopEdge:
-                    handImageView!.image = #imageLiteral(resourceName: "arrowTopBottomSides")
+                    handImageView.image = #imageLiteral(resourceName: "arrowTopBottomSides")
                     let handPoint = CGPoint(x: startPoint!.x, y: startPoint!.y-50)
-                    handImageView?.frame.origin = handPoint
+                    handImageView.frame.origin = handPoint
                 // corner cases
                 case .isResizingLeftCorner:
-                    handImageView!.image = #imageLiteral(resourceName: "arrowLeftCorner")
+                    handImageView.image = #imageLiteral(resourceName: "arrowLeftCorner")
                     let handPoint = CGPoint(x: startPoint!.x-50, y: startPoint!.y-50)
-                    handImageView?.frame.origin = handPoint
+                    handImageView.frame.origin = handPoint
                 case .isResizingRightCorner:
-                    handImageView!.image = #imageLiteral(resourceName: "arrowRightCorner")
+                    handImageView.image = #imageLiteral(resourceName: "arrowRightCorner")
                     let handPoint = CGPoint(x: startPoint!.x+25, y: startPoint!.y-50)
-                    handImageView?.frame.origin = handPoint
+                    handImageView.frame.origin = handPoint
                 case .isResizingBottomLeftCorner:
-                    handImageView!.image = #imageLiteral(resourceName: "arrowRightCorner")
+                    handImageView.image = #imageLiteral(resourceName: "arrowRightCorner")
                     let handPoint = CGPoint(x: startPoint!.x-50, y: startPoint!.y+25)
-                    handImageView?.frame.origin = handPoint
+                    handImageView.frame.origin = handPoint
                 case .isResizingBottomRightCorner:
-                    handImageView!.image = #imageLiteral(resourceName: "arrowLeftCorner")
+                    handImageView.image = #imageLiteral(resourceName: "arrowLeftCorner")
                     let handPoint = CGPoint(x: startPoint!.x+25, y: startPoint!.y+25)
-                    handImageView?.frame.origin = handPoint
+                    handImageView.frame.origin = handPoint
                 case .none:
                     break
                 }
@@ -292,11 +292,16 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     let color = UIColor(red: 0, green: 0, blue: 1, alpha: 0.2).cgColor
                     selectedLayer?.fillColor? = color
                     // update tag
-                    guard let midX = selectedLayer?.path?.boundingBox.midX else { return }  // TODO: - reset values
+                    guard let midX = selectedLayer?.path?.boundingBox.midX else { return }
                     guard let midY = selectedLayer?.path?.boundingBox.midY else { return }
                     let midPoint = CGPoint(x: midX, y: midY)
                     subviewTapped?.center = midPoint
                     subLabel?.text = "(\(Double(round(1000*midX)/1000)), \(Double(round(1000*midY)/1000)))"
+                    
+                    guard let maxX = selectedLayer?.path?.boundingBox.maxX else { return }
+                    guard let maxY = selectedLayer?.path?.boundingBox.maxY else { return }
+                    overlayImageView.frame.origin = CGPoint(x: maxX, y: maxY)
+                    
                    }
                 if !insideExistingShape && !insideExistingPin {
                     // draw rectangle, ellipse etc according to selection
@@ -308,7 +313,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     subviewTapped?.center = currentPoint
                     subLabel?.text = "(\(Double(round(1000*currentPoint.x)/1000)), \(Double(round(1000*currentPoint.y)/1000)))"
                 }
-                    handImageView?.frame = (handImageView?.frame.offsetBy(dx: xOffset, dy: yOffset))!
+                    handImageView.frame = (handImageView.frame.offsetBy(dx: xOffset, dy: yOffset))
                     touchedPoint = currentPoint
              } else if gesture.state == UIGestureRecognizer.State.ended {
                  
@@ -341,7 +346,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 dragPoint = CAShapeLayer.dragPoint.noResizing
                 selectedLayer = nil // ot chose new layers
                 subLabel = nil
-                handImageView!.removeFromSuperview()
+                handImageView.removeFromSuperview()
              }
     }
     
@@ -362,6 +367,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         case .drawRect:
             return UIBezierPath(rect: frame)
         case .drawPolygon:
+            // TODO: Rotation
             return UIBezierPath(rect: frame)
         case .drawEllipse:
             return UIBezierPath(roundedRect: frame, cornerRadius: radius)
@@ -370,9 +376,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
         }
          
     }
-    
-    
-     
     
     
     
@@ -425,10 +428,23 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     layer?.fillColor? = UIColor.clear.cgColor
                 }
+                addRotationOverlay(layer)
             }
         }
-        
     }
+    
+    func addRotationOverlay(_ layer: CAShapeLayer?) {
+        let pathBox = layer?.path?.boundingBox
+        guard let x = pathBox?.maxX else {return}
+        guard let y = pathBox?.maxY else {return}
+        let overlayOrigin = CGPoint(x: x, y: y) // right Corner
+        
+        overlayImageView.image = UIImage(systemName: "arrow.counterclockwise")
+        overlayImageView.frame.origin = overlayOrigin
+        overlayImageView.frame.size = CGSize(width: 30, height: 30)
+        self.imageView.addSubview(overlayImageView)
+    }
+    
     // MARK: - Get Subviews from clicked area
 
     func getSubViewSelected(bounds: CGRect) -> UIView {
@@ -524,7 +540,7 @@ extension ViewController: UIScrollViewDelegate {
 // touch on edges,corners
 extension CAShapeLayer {
  
-    static var kResizeThumbSize:CGFloat = 22.0
+    static var kResizeThumbSize:CGFloat = 44.0
     private typealias `Self` = CAShapeLayer
  
     enum dragPoint {
