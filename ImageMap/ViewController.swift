@@ -26,15 +26,45 @@ class ViewController: UIViewController, UITextFieldDelegate {
      
     @IBOutlet weak var rectButton: UIBarButtonItem!
     @IBAction func rectButtonPressed(_ sender: Any) {
+        switch drawingMode {
+        case .drawRect:
+            rectButton.tintColor = .systemBlue
+            drawingMode = drawMode.noShape
+        default:
+            rectButton.tintColor = .red
+            ellipseButton.tintColor = .systemBlue
+            polygonButton.tintColor = .systemBlue
+            drawingMode = drawMode.drawRect
+        }
     }
     
     @IBOutlet weak var polygonButton: UIBarButtonItem!
     
     @IBAction func polygonButtonPressed(_ sender: Any) {
+        switch drawingMode {
+        case .drawPolygon:
+            polygonButton.tintColor = .systemBlue
+            drawingMode = drawMode.noShape
+        default:
+            polygonButton.tintColor = .red
+            rectButton.tintColor = .systemBlue
+            ellipseButton.tintColor = .systemBlue
+            drawingMode = drawMode.drawPolygon
+        }
     }
     
     @IBOutlet weak var ellipseButton: UIBarButtonItem!
     @IBAction func ellipseButtonPressed(_ sender: Any) {
+        switch drawingMode {
+        case .drawEllipse:
+            ellipseButton.tintColor = .systemBlue
+            drawingMode = drawMode.noShape
+        default:
+            ellipseButton.tintColor = .red
+            rectButton.tintColor = .systemBlue
+            polygonButton.tintColor = .systemBlue
+            drawingMode = drawMode.drawEllipse
+        }
     }
     
     var longPressRecognizer: UILongPressGestureRecognizer!
@@ -50,6 +80,14 @@ class ViewController: UIViewController, UITextFieldDelegate {
     var subviewTapped: UIView?
     var subLabel: UILabel?
     var handImageView: UIImageView?
+    var drawingMode: drawMode!
+    
+    enum drawMode {
+        case drawRect
+        case drawPolygon
+        case drawEllipse
+        case noShape
+    }
     
     let rectShapeLayer: CAShapeLayer = {
           let shapeLayer = CAShapeLayer()
@@ -78,7 +116,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
         notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillHideNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
-        
+         
     }
 
     @objc func adjustForKeyboard(notification: Notification) {

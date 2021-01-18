@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="aQf-Lc-V3H">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="aQf-Lc-V3H">
     <device id="retina5_5" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17505"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Image Map-->
+        <!--imgMap-->
         <scene sceneID="tne-QT-ifu">
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="ImageMap" customModuleProvider="target" sceneMemberID="viewController">
@@ -46,16 +46,11 @@
                             <constraint firstItem="Y00-Kb-PAN" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="V8m-J6-4lv"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Image Map" id="90G-tu-d3f">
-                        <barButtonItem key="leftBarButtonItem" title="Item" image="trash.fill" catalog="system" id="iKS-ma-C9t">
-                            <connections>
-                                <action selector="clearPressed:" destination="BYZ-38-t0r" id="kMZ-CL-VEF"/>
-                            </connections>
-                        </barButtonItem>
-                        <rightBarButtonItems>
-                            <barButtonItem title="Item" image="circle.dashed" catalog="system" id="rJY-G5-o7L">
+                    <navigationItem key="navigationItem" title="imgMap" id="90G-tu-d3f">
+                        <leftBarButtonItems>
+                            <barButtonItem title="Item" image="rectangle.dashed" catalog="system" id="VDr-6v-EFH">
                                 <connections>
-                                    <action selector="ellipseButtonPressed:" destination="BYZ-38-t0r" id="3QU-nG-cVT"/>
+                                    <action selector="rectButtonPressed:" destination="BYZ-38-t0r" id="WRb-rj-vaW"/>
                                 </connections>
                             </barButtonItem>
                             <barButtonItem title="Item" image="hexagon" catalog="system" id="cgH-ME-z5B">
@@ -63,12 +58,17 @@
                                     <action selector="polygonButtonPressed:" destination="BYZ-38-t0r" id="LFa-Zp-bQD"/>
                                 </connections>
                             </barButtonItem>
-                            <barButtonItem title="Item" image="rectangle.dashed" catalog="system" id="VDr-6v-EFH">
+                            <barButtonItem title="Item" image="circle.dashed" catalog="system" id="rJY-G5-o7L">
                                 <connections>
-                                    <action selector="rectButtonPressed:" destination="BYZ-38-t0r" id="WRb-rj-vaW"/>
+                                    <action selector="ellipseButtonPressed:" destination="BYZ-38-t0r" id="3QU-nG-cVT"/>
                                 </connections>
                             </barButtonItem>
-                        </rightBarButtonItems>
+                        </leftBarButtonItems>
+                        <barButtonItem key="rightBarButtonItem" title="Item" image="trash.fill" catalog="system" id="iKS-ma-C9t">
+                            <connections>
+                                <action selector="clearPressed:" destination="BYZ-38-t0r" id="kMZ-CL-VEF"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                     <connections>
                         <outlet property="ellipseButton" destination="rJY-G5-o7L" id="Ulm-xM-ZYB"/>
