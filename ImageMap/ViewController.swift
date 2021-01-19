@@ -9,8 +9,13 @@ import UIKit
 
 // TODO:  remove @available(iOS 13.0, *) after changing system Images (also in extension)
 @available(iOS 13.0, *)
-class ViewController: UIViewController, UITextFieldDelegate {
-
+class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizerDelegate {
+ 
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                              shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+           return true
+       }
+    
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var imageViewBottomConstraint: NSLayoutConstraint!
     @IBOutlet weak var imageViewLeadingConstraint: NSLayoutConstraint!
@@ -69,7 +74,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     var longPressRecognizer: UILongPressGestureRecognizer!
     var singleTapRecognizer: UITapGestureRecognizer!
-    var rotationTapRecognizer: UIPanGestureRecognizer!
+    var rotationPanRecognizer : UIPanGestureRecognizer!
     let notificationCenter = NotificationCenter.default
  
     var startPoint: CGPoint?
@@ -114,8 +119,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
         singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(tagTapped))
         scrollView.addGestureRecognizer(singleTapRecognizer)
         
-        rotationTapRecognizer = UIPanGestureRecognizer(target: self, action: #selector(rotationTapped))
-        overlayImageView.addGestureRecognizer(rotationTapRecognizer)
+        rotationPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(rotationTapped))
+        rotationPanRecognizer.delegate = self
+        imageView.isUserInteractionEnabled = true
+        imageView.addGestureRecognizer(rotationPanRecognizer) // pan tutup surmek
+         
         
         notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillHideNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
@@ -152,21 +160,11 @@ class ViewController: UIViewController, UITextFieldDelegate {
                 handImageView.frame.size = CGSize(width: 30, height: 30)
                 // careful! it can touch handView and use it as subview while checking with getSubViewTouched.
                 self.imageView.addSubview(handImageView)
-                
-                // is rotating ?
-                 var rotationPoint = startPoint!
-                 if let subviewTapped = getSubViewTouched(touchPoint: startPoint!) {
-                    if subviewTapped == overlayImageView {
-                        subviewTapped.tintColor = .white
-                        print(subviewTapped.frame.origin)
-                        rotationPoint = CGPoint(x: startPoint!.x-30, y: startPoint!.y-30)
-                        // rotating point is outside the path so move the point inside to proceed
-                     }
-                }
+                 
                 // check if inside rect
                 imageView.layer.sublayers?.forEach { layer in
                     let layer = layer as? CAShapeLayer
-                    if let path = layer?.path, path.contains(startPoint!) || path.contains(rotationPoint) {
+                    if let path = layer?.path, path.contains(startPoint!) {
                         // if path contains startPoint or rotationPoint we're sure we're in a shape
                         subviewTapped = getSubViewSelected(bounds: (layer?.path!.boundingBox)!).first! // fix crash
                         let labels = subviewTapped.subviews.compactMap { $0 as? UILabel }
@@ -228,8 +226,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     handImageView.image = #imageLiteral(resourceName: "arrowLeftCorner")
                     let handPoint = CGPoint(x: startPoint!.x+25, y: startPoint!.y+25)
                     handImageView.frame.origin = handPoint
-                case .isRotating:
-                    handImageView.removeFromSuperview()
                 case .none:
                     break
                 }
@@ -293,14 +289,6 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     case .isResizingBottomRightCorner:
                         translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1 + yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
                         translateBack = CGAffineTransform(translationX: center.x + xOffset/2, y: center.y + yOffset/2)
-                    case .isRotating:
-                        print("ROTATING")
-                        if yOffset < 0 {
-                            translation = CGAffineTransform(rotationAngle: 0.99*CGFloat.pi).translatedBy(x: -center.x, y: -center.y)
-                        } else {
-                            translation = CGAffineTransform(rotationAngle: -0.99*CGFloat.pi).translatedBy(x: -center.x, y: -center.y)
-                        }
-                        translateBack = CGAffineTransform(translationX: center.x, y: center.y)
                     case .none:
                         print("no point")
                         break
@@ -430,7 +418,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     // MARK: - Tapping Tag
 
-    @objc func tagTapped(gesture: UITapGestureRecognizer) {
+    @objc func tagTapped(gesture: UIRotationGestureRecognizer) {
         let touchPoint = singleTapRecognizer.location(in: imageView)
        
         // Highlighting rect
@@ -470,29 +458,56 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     // MARK: - Rotation logic
     
-    @objc func rotationTapped(gesture: UITapGestureRecognizer) {
+    @objc func rotationTapped(gesture: UIPanGestureRecognizer) {
     
-        let touchPoint = rotationTapRecognizer.location(in: imageView) //
-        var selectedLayer: CAShapeLayer?
+        print("----- PAN")
+        if gesture.state == UIGestureRecognizer.State.began {
+            
+             // if clicked on rotation image cancel scrollView pangesture
+            
+        }
+         
+        let touchPoint = rotationPanRecognizer.location(in: imageView) //
+        var selectedLayer = CAShapeLayer()
+        // to be able to inside the layer path use shifted point
+        let shiftedRotationPoint = CGPoint(x: touchPoint.x-50, y: touchPoint.y-50) // move left top corner of real touch point to make sure inside the path
         
         // Highlighting rect
         imageView.layer.sublayers?.forEach { layer in
             let layer = layer as? CAShapeLayer
-            if let path = layer?.path, path.contains(touchPoint) {
+            if let path = layer?.path, path.contains(shiftedRotationPoint) {
                 let color = UIColor(red: 0, green: 1, blue: 0, alpha: 0.2).cgColor
                 layer?.fillColor? = color
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     layer?.fillColor? = UIColor.clear.cgColor
                 }
-                selectedLayer = layer
+                selectedLayer = layer!
+                scrollView.isScrollEnabled = false // disabled scroll
                 //
             }
         }
         
+        if gesture.state == UIGestureRecognizer.State.ended {
+            
+             // if clicked on rotation image cancel scrollView pangesture
+            
+            scrollView.isScrollEnabled = true // disabled scroll
+
+            
+        }
         
         
-        
-        
+//        case .isRotating:
+//            print("ROTATING")
+//            if yOffset < 0 {
+//                translation = CGAffineTransform(rotationAngle: 0.99*CGFloat.pi).translatedBy(x: -center.x, y: -center.y)
+//            } else {
+//                translation = CGAffineTransform(rotationAngle: -0.99*CGFloat.pi).translatedBy(x: -center.x, y: -center.y)
+//            }
+//            translateBack = CGAffineTransform(translationX: center.x, y: center.y)
+//
+//
+//
         
     }
     
@@ -502,12 +517,12 @@ class ViewController: UIViewController, UITextFieldDelegate {
         guard let x = pathBox?.maxX else {return}
         guard let y = pathBox?.maxY else {return}
         let overlayOrigin = CGPoint(x: x, y: y) // right Corner
-        
+  
         overlayImageView.image = UIImage(systemName: "arrow.counterclockwise")
         overlayImageView.frame.origin = overlayOrigin
-        overlayImageView.frame.size = CGSize(width: 30, height: 30)
+        overlayImageView.frame.size = CGSize(width: 50, height: 50)
         self.imageView.addSubview(overlayImageView)
-    }
+      }
     
     // MARK: - Get Subviews from clicked area
 
@@ -594,7 +609,7 @@ extension ViewController: UIScrollViewDelegate {
  
         scrollView.zoom(to: rectToZoomTo, animated: true)
     }
-    
+        
 }
 
 // TODO: - Resizing
@@ -616,9 +631,8 @@ extension CAShapeLayer {
     case isResizingLeftCorner
     case isResizingRightCorner
     case isResizingBottomLeftCorner
-    // rotation
-    case isRotating
-        
+    
+    // rotation logic is inside pangesture not longpress
     case noResizing
         
     init() {
@@ -632,9 +646,7 @@ extension CAShapeLayer {
 
         if let touch = touch {
             
-            if ((layer.path?.boundingBox.maxY)! - touch.y < 0) && ((layer.path?.boundingBox.maxX)! - touch.x < 0) {
-             dragP = dragPoint.isRotating // outside the box calling this func only possible with touching rotation overlay image
-            } else if ((layer.path?.boundingBox.maxY)! - touch.y < Self.kResizeThumbSize) && ((layer.path?.boundingBox.maxX)! - touch.x < Self.kResizeThumbSize) {
+            if ((layer.path?.boundingBox.maxY)! - touch.y < Self.kResizeThumbSize) && ((layer.path?.boundingBox.maxX)! - touch.x < Self.kResizeThumbSize) {
                 dragP = dragPoint.isResizingBottomRightCorner
             } else if (touch.x - (layer.path?.boundingBox.minX)! < Self.kResizeThumbSize) && (touch.y - (layer.path?.boundingBox.minY)! < Self.kResizeThumbSize) {
                 dragP = dragPoint.isResizingLeftCorner
