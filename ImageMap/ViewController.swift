@@ -69,6 +69,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
     
     var longPressRecognizer: UILongPressGestureRecognizer!
     var singleTapRecognizer: UITapGestureRecognizer!
+    var rotationTapRecognizer: UIPanGestureRecognizer!
     let notificationCenter = NotificationCenter.default
  
     var startPoint: CGPoint?
@@ -105,15 +106,16 @@ class ViewController: UIViewController, UITextFieldDelegate {
         
         let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(scrollViewDoubleTapped))
         doubleTapRecognizer.numberOfTapsRequired = 2
-        doubleTapRecognizer.numberOfTouchesRequired = 1
         scrollView.addGestureRecognizer(doubleTapRecognizer)
         
         longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(longPressed))
         scrollView.addGestureRecognizer(longPressRecognizer)
         
         singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(tagTapped))
-        singleTapRecognizer.numberOfTouchesRequired = 1
         scrollView.addGestureRecognizer(singleTapRecognizer)
+        
+        rotationTapRecognizer = UIPanGestureRecognizer(target: self, action: #selector(rotationTapped))
+        overlayImageView.addGestureRecognizer(rotationTapRecognizer)
         
         notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillHideNotification, object: nil)
         notificationCenter.addObserver(self, selector: #selector(adjustForKeyboard), name: UIResponder.keyboardWillChangeFrameNotification, object: nil)
@@ -166,7 +168,7 @@ class ViewController: UIViewController, UITextFieldDelegate {
                     let layer = layer as? CAShapeLayer
                     if let path = layer?.path, path.contains(startPoint!) || path.contains(rotationPoint) {
                         // if path contains startPoint or rotationPoint we're sure we're in a shape
-                        subviewTapped = getSubViewSelected(bounds: (layer?.path!.boundingBox)!).first!
+                        subviewTapped = getSubViewSelected(bounds: (layer?.path!.boundingBox)!).first! // fix crash
                         let labels = subviewTapped.subviews.compactMap { $0 as? UILabel }
                         subLabel = labels.first
                         dragPoint = layer?.resizingStartPoint(startPoint, in: layer!)
@@ -465,6 +467,35 @@ class ViewController: UIViewController, UITextFieldDelegate {
         }
       
     }
+    
+    // MARK: - Rotation logic
+    
+    @objc func rotationTapped(gesture: UITapGestureRecognizer) {
+    
+        let touchPoint = rotationTapRecognizer.location(in: imageView) //
+        var selectedLayer: CAShapeLayer?
+        
+        // Highlighting rect
+        imageView.layer.sublayers?.forEach { layer in
+            let layer = layer as? CAShapeLayer
+            if let path = layer?.path, path.contains(touchPoint) {
+                let color = UIColor(red: 0, green: 1, blue: 0, alpha: 0.2).cgColor
+                layer?.fillColor? = color
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    layer?.fillColor? = UIColor.clear.cgColor
+                }
+                selectedLayer = layer
+                //
+            }
+        }
+        
+        
+        
+        
+        
+        
+    }
+    
     
     func addRotationOverlay(_ layer: CAShapeLayer?) {
         let pathBox = layer?.path?.boundingBox
