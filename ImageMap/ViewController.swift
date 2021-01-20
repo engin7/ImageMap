@@ -87,6 +87,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var subLabel: UILabel?
     var handImageView = UIImageView()
     var overlayImageView = UIImageView()
+    var cornersImageView: [UIImageView] = []
     var drawingMode = drawMode.noShape
     
     enum drawMode {
@@ -166,7 +167,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     let layer = layer as? CAShapeLayer
                     if let path = layer?.path, path.contains(startPoint!) {
                         // if path contains startPoint or rotationPoint we're sure we're in a shape
-                        subviewTapped = getSubViewSelected(bounds: (layer?.path!.boundingBox)!).first! // fix crash
+                        
+                        if let box =  layer?.path?.boundingBox {
+                            subviewTapped = getSubViewSelected(bounds: box).first!
+                        }
+                         
                         let labels = subviewTapped.subviews.compactMap { $0 as? UILabel }
                         subLabel = labels.first
                         dragPoint = layer?.resizingStartPoint(startPoint, in: layer!)
@@ -380,7 +385,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         case .drawRect:
             return UIBezierPath(rect: frame)
         case .drawPolygon:
-            // TODO: Rotation
+            // TODO: make polygon possible
             return UIBezierPath(rect: frame)
         case .drawEllipse:
             return UIBezierPath(roundedRect: frame, cornerRadius: radius)
@@ -430,7 +435,9 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     layer?.fillColor? = UIColor.clear.cgColor
                 }
+                // add the rotation and 4 corners image
                 addRotationOverlay(layer)
+                addCornersOverlay(layer)
             }
         }
         // subViews: pin, rotating overlay,
@@ -462,7 +469,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     
         print("----- PAN")
         if gesture.state == UIGestureRecognizer.State.began {
-            
+            // TODO:
              // if clicked on rotation image cancel scrollView pangesture
             
         }
@@ -492,11 +499,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
              // if clicked on rotation image cancel scrollView pangesture
             
             scrollView.isScrollEnabled = true // disabled scroll
-
-            
         }
-        
-        
+         
 //        case .isRotating:
 //            print("ROTATING")
 //            if yOffset < 0 {
@@ -506,12 +510,9 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
 //            }
 //            translateBack = CGAffineTransform(translationX: center.x, y: center.y)
 //
-//
-//
         
     }
-    
-    
+     
     func addRotationOverlay(_ layer: CAShapeLayer?) {
         let pathBox = layer?.path?.boundingBox
         guard let x = pathBox?.maxX else {return}
@@ -523,6 +524,46 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         overlayImageView.frame.size = CGSize(width: 50, height: 50)
         self.imageView.addSubview(overlayImageView)
       }
+    
+    func addCornersOverlay(_ layer: CAShapeLayer?) {
+        // reset
+        
+        let pathBox = layer?.path?.boundingBox
+        guard let xMax = pathBox?.maxX else {return}
+        guard let yMax = pathBox?.maxY else {return}
+        guard let xMin = pathBox?.minX else {return}
+        guard let yMin = pathBox?.minY else {return}
+        
+        let rightBottomOrigin = CGPoint(x: xMax-15, y: yMax-15)
+        let leftBottomOrigin = CGPoint(x: xMin-15, y: yMax-15)
+        let rightTopOrigin = CGPoint(x: xMax-15, y: yMin-15)
+        let leftTopOrigin = CGPoint(x: xMin-15, y: yMin-15)
+        
+        let corners = [rightBottomOrigin, leftBottomOrigin, rightTopOrigin, leftTopOrigin]
+        
+        if cornersImageView.count != 0 {
+            for i in 0...3 {
+                cornersImageView[i].removeFromSuperview()
+                
+            }
+            cornersImageView = [] // reset
+        }
+         
+        
+        for i in 0...3 {
+            
+            let imageView = UIImageView(image: UIImage(systemName: "largecircle.fill.circle"))
+            imageView.frame.origin = corners[i]
+            imageView.frame.size = CGSize(width: 30, height: 30)
+            self.imageView.addSubview(imageView)
+            cornersImageView.append(imageView)
+             
+        }
+          
+   
+      }
+    
+    
     
     // MARK: - Get Subviews from clicked area
 
