@@ -169,7 +169,9 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                         // if path contains startPoint or rotationPoint we're sure we're in a shape
                         
                         if let box =  layer?.path?.boundingBox {
-                            subviewTapped = getSubViewSelected(bounds: box).first!
+                            if let subView = getSubViewSelected(bounds: box).first {
+                                subviewTapped = subView
+                            }
                         }
                          
                         let labels = subviewTapped.subviews.compactMap { $0 as? UILabel }
@@ -191,6 +193,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     handImageView.image = UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right")
                 } else {
                     // add shape layer
+                    // FIXME: for ipad when shape is small outside the image is  not be able to drawn. If you add layer to scrollView it's possible but you need to adjust coordinates
                     imageView.layer.addSublayer(selectedShapeLayer)
                 }
                } else {
@@ -449,13 +452,12 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             if subviewTapped == overlayImageView {
                  
                 // rotating button
-                
             } else {
                 // TODO - add tint color selection
-                if subviewTapped.tintColor == .cyan {
-                    subviewTapped.tintColor = .red
+                if subviewTapped.tintColor == .red {
+                    subviewTapped.tintColor = .systemBlue
                 } else {
-                    subviewTapped.tintColor = .cyan
+                    subviewTapped.tintColor = .red
                 }
             }
             
@@ -465,17 +467,56 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     
     // MARK: - Rotation logic
     
+    enum cornerPoint {
+    // corners selected
+    case rightBottom
+    case leftBottom
+    case rightTop
+    case leftTop
+    case noCornersSelected
+        init() {
+            self = .noCornersSelected
+            }
+    }
+ 
+    var corner = cornerPoint()
+    
     @objc func rotationTapped(gesture: UIPanGestureRecognizer) {
     
-        print("----- PAN")
-        if gesture.state == UIGestureRecognizer.State.began {
-            // TODO:
-             // if clicked on rotation image cancel scrollView pangesture
-            
-        }
-         
         let touchPoint = rotationPanRecognizer.location(in: imageView) //
         var selectedLayer = CAShapeLayer()
+        
+         
+        if gesture.state == UIGestureRecognizer.State.began {
+            
+            if let subviewTapped = getSubViewTouched(touchPoint: touchPoint) {
+
+                if subviewTapped == overlayImageView {
+                    scrollView.isScrollEnabled = false // disabled scroll
+                    // rotating button
+                    print("INSIDE rot overlay")
+                } else {
+                    print("INSIDE CORNERS")
+                    // corners or pin
+                    if cornersImageView.count > 0 {
+                        if subviewTapped == cornersImageView[0] {
+                            corner = .rightBottom
+                        } else if subviewTapped == cornersImageView[1] {
+                            corner = .leftBottom
+                        } else if subviewTapped == cornersImageView[2] {
+                            corner = .rightTop
+                        } else if subviewTapped == cornersImageView[3] {
+                            corner = .leftTop
+                        }
+                    }
+                        print(corner)
+                }
+                
+            }
+             
+        }
+         
+        
         // to be able to inside the layer path use shifted point
         let shiftedRotationPoint = CGPoint(x: touchPoint.x-50, y: touchPoint.y-50) // move left top corner of real touch point to make sure inside the path
         
@@ -489,10 +530,32 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     layer?.fillColor? = UIColor.clear.cgColor
                 }
                 selectedLayer = layer!
-                scrollView.isScrollEnabled = false // disabled scroll
+               
                 //
             }
         }
+        
+        if gesture.state == UIGestureRecognizer.State.changed {
+            
+            scrollView.isScrollEnabled = false
+            
+            switch corner {
+            
+             case .rightBottom:
+                print("rightBottom")
+             case .leftBottom:
+                print("leftBottom")
+             case .rightTop:
+                print("rightTop")
+             case .leftTop:
+                print("leftTop")
+            
+            case .noCornersSelected:
+                print("NONE Selected")
+            }
+            
+        }
+         
         
         if gesture.state == UIGestureRecognizer.State.ended {
             
@@ -517,7 +580,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         let pathBox = layer?.path?.boundingBox
         guard let x = pathBox?.maxX else {return}
         guard let y = pathBox?.maxY else {return}
-        let overlayOrigin = CGPoint(x: x, y: y) // right Corner
+        let overlayOrigin = CGPoint(x: x+20, y: y+20) // right Corner
   
         overlayImageView.image = UIImage(systemName: "arrow.counterclockwise")
         overlayImageView.frame.origin = overlayOrigin
