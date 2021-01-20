@@ -12,7 +12,7 @@ class SkewLayer:CAShapeLayer
     {
     func transformToFitQuadTopLeft(tl:CGPoint,tr:CGPoint,bl:CGPoint,br:CGPoint)
         {
-        guard self.anchorPoint.equalTo(CGPoint(x: 0, y: 0)) else { print("suck");return }
+        guard self.anchorPoint.equalTo(CGPoint(x: 0.5, y: 0.5)) else { print("suck");return }
         
         let b:CGRect = boundingBoxForQuadTR(tl, tr, bl, br)
         self.frame = b
