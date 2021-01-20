@@ -8,15 +8,15 @@
  
 import UIKit
 
-class SkewView:UIView
+class SkewLayer:CAShapeLayer
     {
     func transformToFitQuadTopLeft(tl:CGPoint,tr:CGPoint,bl:CGPoint,br:CGPoint)
         {
-        guard self.layer.anchorPoint.equalTo(CGPoint(x: 0, y: 0)) else { print("suck");return }
+        guard self.anchorPoint.equalTo(CGPoint(x: 0, y: 0)) else { print("suck");return }
         
         let b:CGRect = boundingBoxForQuadTR(tl, tr, bl, br)
         self.frame = b
-        self.layer.transform = rectToQuad( rect: self.bounds,
+        self.transform = rectToQuad( rect: self.bounds,
                                            CGPoint(x: tl.x-b.origin.x, y: tl.y-b.origin.y),
                                            CGPoint(x: tr.x-b.origin.x, y: tr.y-b.origin.y),
                                            CGPoint(x: bl.x-b.origin.x, y: bl.y-b.origin.y),
@@ -48,7 +48,7 @@ class SkewView:UIView
             _ bottomLeft:CGPoint,
             _ bottomRight:CGPoint   )->(CATransform3D)
         {
-        return rectToQuadTransform(rect: rect, topLeft.x, topLeft.y, topRight.x, y: topRight.y, bottomLeft.x, bottomLeft.y, bottomRight.x, bottomRight.y)
+        return rectToQuadTransform(rect: rect, topLeft.x, topLeft.y, topRight.x, topRight.y, bottomLeft.x, bottomLeft.y, bottomRight.x, bottomRight.y)
         }
 
 

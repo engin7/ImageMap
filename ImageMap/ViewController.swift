@@ -80,8 +80,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
  
     var startPoint: CGPoint?
     var touchedPoint: CGPoint?
-    var dragPoint: CAShapeLayer.dragPoint?
-    var selectedLayer: CAShapeLayer?
+    var dragPoint: SkewLayer.dragPoint?
+    var selectedLayer: SkewLayer?
     var insideExistingShape = false
     var insideExistingPin = false
     var subviewTapped = UIView()
@@ -98,8 +98,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         case noShape
     }
     
-    let selectedShapeLayer: CAShapeLayer = {
-          let shapeLayer = CAShapeLayer()
+    let selectedShapeLayer: SkewLayer = {
+          let shapeLayer = SkewLayer()
           shapeLayer.strokeColor = UIColor.black.cgColor
           shapeLayer.fillColor = UIColor.clear.cgColor
           shapeLayer.lineWidth = 4
@@ -132,6 +132,13 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
          
     }
 
+    override func viewDidLayoutSubviews()
+           {
+           // don't forget to do this....is critical.
+        selectedLayer?.anchorPoint = CGPoint(x: 0, y: 0)
+           }
+       
+    
     @objc func adjustForKeyboard(notification: Notification) {
         guard let keyboardValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
 
@@ -165,7 +172,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                  
                 // check if inside rect
                 imageView.layer.sublayers?.forEach { layer in
-                    let layer = layer as? CAShapeLayer
+                    let layer = layer as? SkewLayer
                     if let path = layer?.path, path.contains(startPoint!) {
                         // if path contains startPoint or rotationPoint we're sure we're in a shape
                         
@@ -252,7 +259,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                 if insideExistingShape && !insideExistingPin {
                  
                 imageView.layer.sublayers?.forEach { layer in
-                    let layer = layer as? CAShapeLayer
+                    let layer = layer as? SkewLayer
                         if let path = layer?.path, path.contains(currentPoint) {
                             if (selectedLayer == nil) {
                                 selectedLayer = layer!
@@ -347,7 +354,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                         if width < 5 {
                             addTag(withLocation: middlePoint, toPhoto: imageView)
                         } else {
-                            let rectLayer = CAShapeLayer()
+                            let rectLayer = SkewLayer()
                             rectLayer.strokeColor = UIColor.black.cgColor
                             rectLayer.fillColor = UIColor.clear.cgColor
                             rectLayer.lineWidth = 4
@@ -365,7 +372,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                 selectedLayer?.fillColor = UIColor.clear.cgColor
                 insideExistingShape = false
                 insideExistingPin = false
-                dragPoint = CAShapeLayer.dragPoint.noResizing
+                dragPoint = SkewLayer.dragPoint.noResizing
                 selectedLayer = nil // ot chose new layers
                 subLabel = nil
                 handImageView.removeFromSuperview()
@@ -434,7 +441,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
        
         // Highlighting rect
         imageView.layer.sublayers?.forEach { layer in
-            let layer = layer as? CAShapeLayer
+            let layer = layer as? SkewLayer
             if let path = layer?.path, path.contains(touchPoint) {
                 let color = UIColor(red: 0, green: 1, blue: 0, alpha: 0.2).cgColor
                 layer?.fillColor? = color
@@ -492,10 +499,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             
             let possiblePoints = CGPoint(x: startPoint.x-50, y: startPoint.y-50) // sa[ alt
             imageView.layer.sublayers?.forEach { layer in
-                let layer = layer as? CAShapeLayer
+                let layer = layer as? SkewLayer
                     if let path = layer?.path, path.contains(possiblePoints) {
                         if (selectedLayer == nil) {
                             selectedLayer = layer!
+                            
                             
                         }
                     }
@@ -550,7 +558,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             var translation = CGAffineTransform()
             var translateBack = CGAffineTransform()
             
-            var transform = CATransform3DIdentity
             
             switch corner {
              
@@ -558,11 +565,17 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                 print("rightBottom")
                 translation = CGAffineTransform(translationX: 0,y: 0)
                 translateBack = CGAffineTransform(translationX: 0, y: 0)
-                
-                let angle     = -CGFloat.pi / yOffset / 3
-                transform.m34 = -1.0 / 40.0 // [500]: Smaller -> Closer to the 'camera', more distorted
-                transform     = CATransform3DRotate(transform, angle, 0, 1, 0)
-                
+                let tr = gesture.translation(in: cornersImageView[0])
+                cornersImageView[0].center.x += tr.x
+                cornersImageView[0].center.y += tr.y
+                gesture.setTranslation(CGPoint(x: 0, y: 0), in: cornersImageView[0])
+                        
+                selectedLayer?.transformToFitQuadTopLeft(tl: cornersImageView[3].center, tr: cornersImageView[2].center,
+                            bl: cornersImageView[1].center, br: cornersImageView[0].center )
+                        // it's that simple, there's nothing else to do
+                        
+                gesture.setTranslation(CGPoint(x: 0, y: 0), in: cornersImageView[0])
+             
              case .leftBottom:
                 translation = CGAffineTransform(translationX: xOffset/100,y: yOffset/100)
                 translateBack = CGAffineTransform(translationX: 0, y: 0)
@@ -584,11 +597,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             
             let path = selectedLayer?.path?.copy(using: &translation)
             selectedLayer?.path = path
-             
+ 
             let pathBack = selectedLayer?.path?.copy(using: &translateBack)
             selectedLayer?.path = pathBack
             
-            selectedLayer?.transform = transform
+            
             
             // highlight moving/resizing rect
             let color = UIColor(red: 1, green: 0, blue: 0.3, alpha: 0.4).cgColor
@@ -623,7 +636,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         
     }
      
-    func addRotationOverlay(_ layer: CAShapeLayer?) {
+    func addRotationOverlay(_ layer: SkewLayer?) {
         let pathBox = layer?.path?.boundingBox
         guard let x = pathBox?.maxX else {return}
         guard let y = pathBox?.maxY else {return}
@@ -635,7 +648,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         self.imageView.addSubview(overlayImageView)
       }
     
-    func addCornersOverlay(_ layer: CAShapeLayer?) {
+    func addCornersOverlay(_ layer: SkewLayer?) {
         // reset
         
         let pathBox = layer?.path?.boundingBox
@@ -766,10 +779,10 @@ extension ViewController: UIScrollViewDelegate {
 // TODO: - Resizing
 
 // touch on edges,corners
-extension CAShapeLayer {
+extension SkewLayer {
  
     static var kResizeThumbSize:CGFloat = 44.0
-    private typealias `Self` = CAShapeLayer
+    private typealias `Self` = SkewLayer
  
     enum dragPoint {
     // edges
@@ -791,7 +804,7 @@ extension CAShapeLayer {
         }
     }
  
-    func resizingStartPoint(_ touch: CGPoint?,in layer: CAShapeLayer) -> dragPoint {
+    func resizingStartPoint(_ touch: CGPoint?,in layer: SkewLayer) -> dragPoint {
         
         var dragP = dragPoint()
 
