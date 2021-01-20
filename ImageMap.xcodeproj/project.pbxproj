@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		288564F725B8605C005B7A84 /* SkewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 288564F625B8605C005B7A84 /* SkewExtension.swift */; };
 		28A5402B25AC3B1300619B48 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A5402A25AC3B1300619B48 /* AppDelegate.swift */; };
 		28A5402D25AC3B1300619B48 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A5402C25AC3B1300619B48 /* SceneDelegate.swift */; };
 		28A5402F25AC3B1300619B48 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A5402E25AC3B1300619B48 /* ViewController.swift */; };
@@ -16,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		288564F625B8605C005B7A84 /* SkewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkewExtension.swift; sourceTree = "<group>"; };
 		28A5402725AC3B1300619B48 /* ImageMap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImageMap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		28A5402A25AC3B1300619B48 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		28A5402C25AC3B1300619B48 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -59,6 +61,7 @@
 				28A5402A25AC3B1300619B48 /* AppDelegate.swift */,
 				28A5402C25AC3B1300619B48 /* SceneDelegate.swift */,
 				28A5402E25AC3B1300619B48 /* ViewController.swift */,
+				288564F625B8605C005B7A84 /* SkewExtension.swift */,
 				28A5403025AC3B1300619B48 /* Main.storyboard */,
 				28A5403325AC3B1600619B48 /* Assets.xcassets */,
 				28A5403525AC3B1600619B48 /* LaunchScreen.storyboard */,
@@ -138,6 +141,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				28A5402F25AC3B1300619B48 /* ViewController.swift in Sources */,
+				288564F725B8605C005B7A84 /* SkewExtension.swift in Sources */,
 				28A5402B25AC3B1300619B48 /* AppDelegate.swift in Sources */,
 				28A5402D25AC3B1300619B48 /* SceneDelegate.swift in Sources */,
 			);

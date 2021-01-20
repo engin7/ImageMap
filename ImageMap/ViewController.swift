@@ -27,6 +27,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     @IBAction func clearPressed(_ sender: Any) {
         imageView.subviews.forEach({ $0.removeFromSuperview() })
         imageView.layer.sublayers?.removeAll()
+        longPressRecognizer.isEnabled = true
     }
      
     @IBOutlet weak var rectButton: UIBarButtonItem!
@@ -368,6 +369,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                 selectedLayer = nil // ot chose new layers
                 subLabel = nil
                 handImageView.removeFromSuperview()
+                longPressRecognizer.isEnabled = false // remove later: to test PAN
+
              }
     }
     
@@ -482,17 +485,27 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var corner = cornerPoint()
     
     @objc func rotationTapped(gesture: UIPanGestureRecognizer) {
-    
-        let touchPoint = rotationPanRecognizer.location(in: imageView) //
-        var selectedLayer = CAShapeLayer()
-        
-         
+     
         if gesture.state == UIGestureRecognizer.State.began {
             
-            if let subviewTapped = getSubViewTouched(touchPoint: touchPoint) {
+            let startPoint = rotationPanRecognizer.location(in: imageView)
+            
+            let possiblePoints = CGPoint(x: startPoint.x-50, y: startPoint.y-50) // sa[ alt
+            imageView.layer.sublayers?.forEach { layer in
+                let layer = layer as? CAShapeLayer
+                    if let path = layer?.path, path.contains(possiblePoints) {
+                        if (selectedLayer == nil) {
+                            selectedLayer = layer!
+                            
+                        }
+                    }
+               }
+            
+            if let subviewTapped = getSubViewTouched(touchPoint: startPoint) {
+
+                scrollView.isScrollEnabled = false // disabled scroll
 
                 if subviewTapped == overlayImageView {
-                    scrollView.isScrollEnabled = false // disabled scroll
                     // rotating button
                     print("INSIDE rot overlay")
                 } else {
@@ -509,61 +522,95 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                             corner = .leftTop
                         }
                     }
-                        print(corner)
+                        
+                        print("***** Touch started")
                 }
                 
             }
              
         }
-         
-        
-        // to be able to inside the layer path use shifted point
-        let shiftedRotationPoint = CGPoint(x: touchPoint.x-50, y: touchPoint.y-50) // move left top corner of real touch point to make sure inside the path
-        
-        // Highlighting rect
-        imageView.layer.sublayers?.forEach { layer in
-            let layer = layer as? CAShapeLayer
-            if let path = layer?.path, path.contains(shiftedRotationPoint) {
-                let color = UIColor(red: 0, green: 1, blue: 0, alpha: 0.2).cgColor
-                layer?.fillColor? = color
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    layer?.fillColor? = UIColor.clear.cgColor
-                }
-                selectedLayer = layer!
-               
-                //
-            }
-        }
+ 
+        touchedPoint = startPoint // offset reference
         
         if gesture.state == UIGestureRecognizer.State.changed {
             
-            scrollView.isScrollEnabled = false
+            scrollView.isScrollEnabled = false // disabled scroll
+
+            let currentPoint = rotationPanRecognizer.location(in: imageView)
+           
+            
+           
+            guard let pathBox = selectedLayer?.path?.boundingBox else {return}
+            let center = CGPoint(x: pathBox.midX, y: pathBox.midY)
+            
+             
+            let xOffset = currentPoint.x - touchedPoint!.x
+            let yOffset = currentPoint.y - touchedPoint!.y
+            
+            var translation = CGAffineTransform()
+            var translateBack = CGAffineTransform()
+            
+            var transform = CATransform3DIdentity
             
             switch corner {
-            
+             
              case .rightBottom:
                 print("rightBottom")
+                translation = CGAffineTransform(translationX: 0,y: 0)
+                translateBack = CGAffineTransform(translationX: 0, y: 0)
+                
+                let angle     = -CGFloat.pi / yOffset / 3
+                transform.m34 = -1.0 / 40.0 // [500]: Smaller -> Closer to the 'camera', more distorted
+                transform     = CATransform3DRotate(transform, angle, 0, 1, 0)
+                
              case .leftBottom:
+                translation = CGAffineTransform(translationX: xOffset/100,y: yOffset/100)
+                translateBack = CGAffineTransform(translationX: 0, y: 0)
                 print("leftBottom")
              case .rightTop:
+                translation = CGAffineTransform(translationX: xOffset/100,y: yOffset/100)
+                translateBack = CGAffineTransform(translationX: 0, y: 0)
                 print("rightTop")
              case .leftTop:
-                print("leftTop")
+                translation = CGAffineTransform(translationX: xOffset/100,y: yOffset/100)
+                translateBack = CGAffineTransform(translationX: 0, y: 0)
+                print("leftTop  ")
             
             case .noCornersSelected:
+                translation = CGAffineTransform(translationX: 0,y: 0)
+                translateBack = CGAffineTransform(translationX: 0, y: 0)
                 print("NONE Selected")
             }
             
+            let path = selectedLayer?.path?.copy(using: &translation)
+            selectedLayer?.path = path
+             
+            let pathBack = selectedLayer?.path?.copy(using: &translateBack)
+            selectedLayer?.path = pathBack
+            
+            selectedLayer?.transform = transform
+            
+            // highlight moving/resizing rect
+            let color = UIColor(red: 1, green: 0, blue: 0.3, alpha: 0.4).cgColor
+            selectedLayer?.fillColor? = color
+            
+            touchedPoint = currentPoint
+
         }
          
         
         if gesture.state == UIGestureRecognizer.State.ended {
             
              // if clicked on rotation image cancel scrollView pangesture
+            print("***** Touch Ended")
+            scrollView.isScrollEnabled = true // enabled scroll
             
-            scrollView.isScrollEnabled = true // disabled scroll
+
         }
          
+        
+  
+       
 //        case .isRotating:
 //            print("ROTATING")
 //            if yOffset < 0 {

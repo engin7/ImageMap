@@ -20,7 +20,7 @@
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Y00-Kb-PAN">
                                 <rect key="frame" x="20" y="44" width="374" height="692"/>
                                 <subviews>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="architect" translatesAutoresizingMaskIntoConstraints="NO" id="fh2-mv-i26">
+                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="architect" translatesAutoresizingMaskIntoConstraints="NO" id="fh2-mv-i26">
                                         <rect key="frame" x="0.0" y="0.0" width="800" height="466"/>
                                     </imageView>
                                 </subviews>
