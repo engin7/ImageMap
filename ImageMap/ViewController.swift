@@ -408,6 +408,46 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
          
     }
     
+    private func skewShape(_ rect: CGRect,_ corner: cornerPoint,_ withShift: CGFloat ) -> UIBezierPath {
+        
+        let thePath = UIBezierPath()
+        
+        switch corner {
+
+         case .rightBottom:
+            thePath.move(to: rect.origin)
+            thePath.addLine(to: CGPoint(x: (rect.origin.x), y: rect.maxY))
+            thePath.addLine(to: CGPoint(x: rect.maxX + withShift - rect.width, y: rect.maxY))
+            thePath.addLine(to: CGPoint(x: rect.maxX , y: rect.origin.y))
+           
+         case .leftBottom:
+            thePath.move(to: rect.origin)
+            thePath.addLine(to: CGPoint(x: (rect.origin.x + withShift), y: rect.maxY))
+            thePath.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+            thePath.addLine(to: CGPoint(x: rect.maxX , y: rect.origin.y))
+         case .rightTop:
+            thePath.move(to: rect.origin)
+            thePath.addLine(to: CGPoint(x: (rect.origin.x), y: rect.maxY))
+            thePath.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+            thePath.addLine(to: CGPoint(x: rect.maxX + withShift - rect.width, y: rect.origin.y))
+             
+         case .leftTop:
+            thePath.move(to: CGPoint(x: (rect.origin.x + withShift), y: rect.origin.y))
+            thePath.addLine(to: CGPoint(x: (rect.origin.x), y: rect.maxY))
+            thePath.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
+            thePath.addLine(to: CGPoint(x: rect.maxX, y: rect.origin.y))
+             
+        case .noCornersSelected:
+          
+            print("NONE Selected")
+        }
+        
+        thePath.close()
+         
+        return thePath
+        
+    }
+    
      
     // MARK: - Adding Tag
 
@@ -490,20 +530,27 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     }
  
     var corner = cornerPoint()
+    var rectOriginal = CGRect.zero
     
     @objc func rotationTapped(gesture: UIPanGestureRecognizer) {
      
         if gesture.state == UIGestureRecognizer.State.began {
             
-            let startPoint = rotationPanRecognizer.location(in: imageView)
             
-            let possiblePoints = CGPoint(x: startPoint.x-50, y: startPoint.y-50) // sa[ alt
+            let startPoint = rotationPanRecognizer.location(in: imageView)
+            // possiblePoints to detect rect
+            let tl = CGPoint(x: startPoint.x-50, y: startPoint.y+50)
+            let bl = CGPoint(x: startPoint.x+50, y: startPoint.y-50)
+            let tr = CGPoint(x: startPoint.x+50, y: startPoint.y+50)
+            let br = CGPoint(x: startPoint.x-50, y: startPoint.y-50)
+            
+                // TODO: - Refactor this point detection
             imageView.layer.sublayers?.forEach { layer in
                 let layer = layer as? SkewLayer
-                    if let path = layer?.path, path.contains(possiblePoints) {
+                if let path = layer?.path, path.contains(tl) || path.contains(bl) || path.contains(tr) || path.contains(br) {
                         if (selectedLayer == nil) {
                             selectedLayer = layer!
-                            
+                            rectOriginal = (selectedLayer?.path?.boundingBoxOfPath)!
                             
                         }
                     }
@@ -545,64 +592,13 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             scrollView.isScrollEnabled = false // disabled scroll
 
             let currentPoint = rotationPanRecognizer.location(in: imageView)
-           
             
-           
-            guard let pathBox = selectedLayer?.path?.boundingBox else {return}
-            let center = CGPoint(x: pathBox.midX, y: pathBox.midY)
             
-             
             let xOffset = currentPoint.x - touchedPoint!.x
             let yOffset = currentPoint.y - touchedPoint!.y
-            
-            var translation = CGAffineTransform()
-            var translateBack = CGAffineTransform()
-            
-            
-            switch corner {
-             
-             case .rightBottom:
-                print("rightBottom")
-                translation = CGAffineTransform(translationX: 0,y: 0)
-                translateBack = CGAffineTransform(translationX: 0, y: 0)
-                let tr = gesture.translation(in: cornersImageView[0])
-                cornersImageView[0].center.x += tr.x
-                cornersImageView[0].center.y += tr.y
-                gesture.setTranslation(CGPoint(x: 0, y: 0), in: cornersImageView[0])
-                        
-                selectedLayer?.transformToFitQuadTopLeft(tl: cornersImageView[3].center, tr: cornersImageView[2].center,
-                            bl: cornersImageView[1].center, br: cornersImageView[0].center )
-                        // it's that simple, there's nothing else to do
-                        
-                gesture.setTranslation(CGPoint(x: 0, y: 0), in: cornersImageView[0])
-             
-             case .leftBottom:
-                translation = CGAffineTransform(translationX: xOffset/100,y: yOffset/100)
-                translateBack = CGAffineTransform(translationX: 0, y: 0)
-                print("leftBottom")
-             case .rightTop:
-                translation = CGAffineTransform(translationX: xOffset/100,y: yOffset/100)
-                translateBack = CGAffineTransform(translationX: 0, y: 0)
-                print("rightTop")
-             case .leftTop:
-                translation = CGAffineTransform(translationX: xOffset/100,y: yOffset/100)
-                translateBack = CGAffineTransform(translationX: 0, y: 0)
-                print("leftTop  ")
-            
-            case .noCornersSelected:
-                translation = CGAffineTransform(translationX: 0,y: 0)
-                translateBack = CGAffineTransform(translationX: 0, y: 0)
-                print("NONE Selected")
-            }
-            
-            let path = selectedLayer?.path?.copy(using: &translation)
-            selectedLayer?.path = path
+              
+            selectedLayer?.path = skewShape(rectOriginal,corner,xOffset).cgPath
  
-            let pathBack = selectedLayer?.path?.copy(using: &translateBack)
-            selectedLayer?.path = pathBack
-            
-            
-            
             // highlight moving/resizing rect
             let color = UIColor(red: 1, green: 0, blue: 0.3, alpha: 0.4).cgColor
             selectedLayer?.fillColor? = color
@@ -618,12 +614,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             print("***** Touch Ended")
             scrollView.isScrollEnabled = true // enabled scroll
             
-
         }
          
-        
-  
-       
 //        case .isRotating:
 //            print("ROTATING")
 //            if yOffset < 0 {
@@ -683,10 +675,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
              
         }
           
-   
       }
-    
-    
     
     // MARK: - Get Subviews from clicked area
 
