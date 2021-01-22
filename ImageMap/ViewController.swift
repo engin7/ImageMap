@@ -78,10 +78,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var rotationPanRecognizer : UIPanGestureRecognizer!
     let notificationCenter = NotificationCenter.default
  
-    var startPoint: CGPoint?
-    var touchedPoint: CGPoint?
-    var dragPoint: SkewLayer.dragPoint?
-    var selectedLayer: SkewLayer?
+    var dragPoint: CAShapeLayer.dragPoint?
+    var selectedLayer: CAShapeLayer?
     var insideExistingShape = false
     var insideExistingPin = false
     var subviewTapped = UIView()
@@ -98,8 +96,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         case noShape
     }
     
-    let selectedShapeLayer: SkewLayer = {
-          let shapeLayer = SkewLayer()
+    let selectedShapeLayer: CAShapeLayer = {
+          let shapeLayer = CAShapeLayer()
           shapeLayer.strokeColor = UIColor.black.cgColor
           shapeLayer.fillColor = UIColor.clear.cgColor
           shapeLayer.lineWidth = 4
@@ -154,17 +152,19 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         
     }
    
+    var startPoint = CGPoint.zero
+    var touchedPoint = CGPoint.zero
+
     // MARK: - Long Press Gesture Logic
     @objc func longPressed(gesture: UILongPressGestureRecognizer) {
              
              if gesture.state == UIGestureRecognizer.State.began {
                 
-               startPoint = nil
-               startPoint = longPressRecognizer.location(in: imageView)
+                  startPoint = longPressRecognizer.location(in: imageView)
                 
                 let handImg = UIImage(systemName: "hand.tap.fill")
                 handImageView = UIImageView(image: handImg)
-                let handPoint = CGPoint(x: startPoint!.x-30, y: startPoint!.y-30)
+                let handPoint = CGPoint(x: startPoint.x-30, y: startPoint.y-30)
                 handImageView.frame.origin = handPoint
                 handImageView.frame.size = CGSize(width: 30, height: 30)
                 // careful! it can touch handView and use it as subview while checking with getSubViewTouched.
@@ -172,8 +172,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                  
                 // check if inside rect
                 imageView.layer.sublayers?.forEach { layer in
-                    let layer = layer as? SkewLayer
-                    if let path = layer?.path, path.contains(startPoint!) {
+                    let layer = layer as? CAShapeLayer
+                    if let path = layer?.path, path.contains(startPoint) {
                         // if path contains startPoint or rotationPoint we're sure we're in a shape
                         
                         if let box =  layer?.path?.boundingBox {
@@ -191,7 +191,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                 }
                  
                if !insideExistingShape {
-                if let pinTapped = getSubViewTouched(touchPoint: startPoint!), pinTapped != overlayImageView {
+                if let pinTapped = getSubViewTouched(touchPoint: startPoint), pinTapped != overlayImageView {
                     // inside a pin
                     subviewTapped = pinTapped
                     let labels = subviewTapped.subviews.compactMap { $0 as? UILabel }
@@ -204,62 +204,20 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     // FIXME: for ipad when shape is small outside the image is  not be able to drawn. If you add layer to scrollView it's possible but you need to adjust coordinates
                     imageView.layer.addSublayer(selectedShapeLayer)
                 }
-               } else {
-                // check drag point inside the pin
-                    switch dragPoint {
-                case .noResizing: //moving
-                    handImageView.image = UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right")
-                 case .isResizingLeftEdge:
-                     handImageView.image = #imageLiteral(resourceName: "arrowLeftRightSides")
-                    let handPoint = CGPoint(x: startPoint!.x-50, y: startPoint!.y)
-                    handImageView.frame.origin = handPoint
-                 case .isResizingRightEdge:
-                    handImageView.image = #imageLiteral(resourceName: "arrowLeftRightSides")
-                    let handPoint = CGPoint(x: startPoint!.x+20, y: startPoint!.y)
-                    handImageView.frame.origin = handPoint
-                case .isResizingBottomEdge:
-                    handImageView.image = #imageLiteral(resourceName: "arrowTopBottomSides")
-                    let handPoint = CGPoint(x: startPoint!.x, y: startPoint!.y+20)
-                    handImageView.frame.origin = handPoint
-                case .isResizingTopEdge:
-                    handImageView.image = #imageLiteral(resourceName: "arrowTopBottomSides")
-                    let handPoint = CGPoint(x: startPoint!.x, y: startPoint!.y-50)
-                    handImageView.frame.origin = handPoint
-                // corner cases
-                case .isResizingLeftCorner:
-                    handImageView.image = #imageLiteral(resourceName: "arrowLeftCorner")
-                    let handPoint = CGPoint(x: startPoint!.x-50, y: startPoint!.y-50)
-                    handImageView.frame.origin = handPoint
-                case .isResizingRightCorner:
-                    handImageView.image = #imageLiteral(resourceName: "arrowRightCorner")
-                    let handPoint = CGPoint(x: startPoint!.x+25, y: startPoint!.y-50)
-                    handImageView.frame.origin = handPoint
-                case .isResizingBottomLeftCorner:
-                    handImageView.image = #imageLiteral(resourceName: "arrowRightCorner")
-                    let handPoint = CGPoint(x: startPoint!.x-50, y: startPoint!.y+25)
-                    handImageView.frame.origin = handPoint
-                case .isResizingBottomRightCorner:
-                    handImageView.image = #imageLiteral(resourceName: "arrowLeftCorner")
-                    let handPoint = CGPoint(x: startPoint!.x+25, y: startPoint!.y+25)
-                    handImageView.frame.origin = handPoint
-                case .none:
-                    break
-                }
-            
                }
                 touchedPoint = startPoint // offset reference
                // After start condition while keeping touch:
              } else if gesture.state == UIGestureRecognizer.State.changed {
                 
                 let currentPoint = longPressRecognizer.location(in: imageView)
-                let xOffset = currentPoint.x - touchedPoint!.x
-                let yOffset = currentPoint.y - touchedPoint!.y
+                let xOffset = currentPoint.x - touchedPoint.x
+                let yOffset = currentPoint.y - touchedPoint.y
                 
                  // insede shape conditon
                 if insideExistingShape && !insideExistingPin {
                  
                 imageView.layer.sublayers?.forEach { layer in
-                    let layer = layer as? SkewLayer
+                    let layer = layer as? CAShapeLayer
                         if let path = layer?.path, path.contains(currentPoint) {
                             if (selectedLayer == nil) {
                                 selectedLayer = layer!
@@ -267,55 +225,12 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                             }
                         }
                    }
-                    var translation = CGAffineTransform()
-                    var translateBack = CGAffineTransform()
-
+                    
                     guard let pathBox = selectedLayer?.path?.boundingBox else {return}
                     let center = CGPoint(x: pathBox.midX, y: pathBox.midY)
                      // apply offset to out drawn path
                     // https://stackoverflow.com/a/20322817/8707120
-                 
-                    switch dragPoint {
-                    case .noResizing:
-                        translation = CGAffineTransform(translationX: xOffset,y: yOffset)
-                        translateBack = CGAffineTransform(translationX: 0, y: 0)
-                     case .isResizingLeftEdge:
-                        // xoffset negative
-                        translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1).translatedBy(x: -center.x, y: -center.y)
-                        translateBack = CGAffineTransform(translationX: xOffset/2 + center.x, y: center.y)
-                    case .isResizingRightEdge:
-                        translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1).translatedBy(x: -center.x, y: -center.y)
-                        translateBack = CGAffineTransform(translationX: xOffset/2 + center.x, y: center.y)
-                    case .isResizingBottomEdge:
-                        translation = CGAffineTransform(scaleX: 1, y: 1 + yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
-                        translateBack = CGAffineTransform(translationX: center.x, y: center.y + yOffset/2)
-                    case .isResizingTopEdge:
-                        translation = CGAffineTransform(scaleX: 1, y: 1 - yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
-                        translateBack = CGAffineTransform(translationX: center.x, y: center.y + yOffset/2)
-                    // corner cases
-                    case .isResizingLeftCorner:
-                        translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1 - yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
-                        translateBack = CGAffineTransform(translationX: center.x + xOffset/2, y: center.y + yOffset/2)
-                    case .isResizingRightCorner:
-                        translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1 - yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
-                        translateBack = CGAffineTransform(translationX: center.x + xOffset/2, y: center.y + yOffset/2)
-                    case .isResizingBottomLeftCorner:
-                        translation = CGAffineTransform(scaleX: 1 - xOffset/pathBox.size.width, y: 1 + yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
-                        translateBack = CGAffineTransform(translationX: center.x + xOffset/2, y: center.y + yOffset/2)
-                    case .isResizingBottomRightCorner:
-                        translation = CGAffineTransform(scaleX: 1 + xOffset/pathBox.size.width, y: 1 + yOffset/pathBox.size.height).translatedBy(x: -center.x, y: -center.y)
-                        translateBack = CGAffineTransform(translationX: center.x + xOffset/2, y: center.y + yOffset/2)
-                    case .none:
-                        print("no point")
-                        break
-                    }
-                     
-                    let path = selectedLayer?.path?.copy(using: &translation)
-                    selectedLayer?.path = path
-                     
-                    let pathBack = selectedLayer?.path?.copy(using: &translateBack)
-                    selectedLayer?.path = pathBack
-                    
+                  
                     // highlight moving/resizing rect
                     let color = UIColor(red: 0, green: 0, blue: 1, alpha: 0.2).cgColor
                     selectedLayer?.fillColor? = color
@@ -334,7 +249,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                    }
                 if !insideExistingShape && !insideExistingPin {
                     // draw rectangle, ellipse etc according to selection
-                    let path = drawShape(from: startPoint!, to: currentPoint, mode: drawingMode)
+                    let path = drawShape(from: startPoint, to: currentPoint, mode: drawingMode)
                     selectedShapeLayer.path = path.cgPath
                   }
                 
@@ -347,20 +262,39 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
              } else if gesture.state == UIGestureRecognizer.State.ended {
                  
                 let currentPoint = longPressRecognizer.location(in: imageView)
-                let middlePoint = CGPoint(x: (currentPoint.x + startPoint!.x)/2, y: (currentPoint.y + startPoint!.y)/2)
+                let middlePoint = CGPoint(x: (currentPoint.x + startPoint.x)/2, y: (currentPoint.y + startPoint.y)/2)
                 if !insideExistingShape && !insideExistingPin {
                     if let width = selectedShapeLayer.path?.boundingBox.size.width  {
                         // just pin if size too small
                         if width < 5 {
                             addTag(withLocation: middlePoint, toPhoto: imageView)
                         } else {
-                            let rectLayer = SkewLayer()
+                            let rectLayer = CAShapeLayer()
                             rectLayer.strokeColor = UIColor.black.cgColor
                             rectLayer.fillColor = UIColor.clear.cgColor
                             rectLayer.lineWidth = 4
                             rectLayer.path = selectedShapeLayer.path
                             imageView.layer.addSublayer(rectLayer)
+                             
+                            let minX = rectLayer.path!.boundingBox.minX
+                            let minY = rectLayer.path!.boundingBox.minY
+                            let maxX = rectLayer.path!.boundingBox.maxX
+                            let maxY = rectLayer.path!.boundingBox.maxY
+                            
+                            let lt = CGPoint(x: minX, y: minY)
+                            let lb = CGPoint(x: minX, y: maxY)
+                            let rb = CGPoint(x: maxX, y: maxY)
+                            let rt = CGPoint(x: maxX, y: minY)
+
+                            
+                            let corners  = [(corner: cornerPoint.leftTop,point: lt), (corner: cornerPoint.leftBottom,point: lb), (corner: cornerPoint.rightBottom,point: rb), (corner: cornerPoint.rightTop,point: rt)]
+                        
+                            let layer = shapeInfo(shape: rectLayer, cornersArray: corners)
+                            
+                            allShapes.append(layer)
+                            
                             addTag(withLocation: middlePoint, toPhoto: imageView)
+                     
                         }
                     } else {
                         // no rect drawn. Just add pin
@@ -372,7 +306,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                 selectedLayer?.fillColor = UIColor.clear.cgColor
                 insideExistingShape = false
                 insideExistingPin = false
-                dragPoint = SkewLayer.dragPoint.noResizing
+                dragPoint = CAShapeLayer.dragPoint.noResizing
                 selectedLayer = nil // ot chose new layers
                 subLabel = nil
                 handImageView.removeFromSuperview()
@@ -408,42 +342,95 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
          
     }
     
-    private func skewShape(_ rect: CGRect,_ corner: cornerPoint,_ withShift: CGFloat ) -> UIBezierPath {
+    func CGPointDistanceSquared(from: CGPoint, to: CGPoint) -> CGFloat {
+        return (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y)
+    }
+
+    func CGPointDistance(from: CGPoint, to: CGPoint) -> CGFloat {
+        return sqrt(CGPointDistanceSquared(from: from, to: to))
+    }
+    
+    private func skewShape(_ corner: cornerPoint,_ withShift: CGFloat ) -> UIBezierPath {
         
         let thePath = UIBezierPath()
         
-        switch corner {
+        guard let shape = selectedShapesInitial else { return thePath}
+        guard let leftTop = shape.cornersArray.filter({ $0.corner == .leftTop }).first?.point  else { return thePath}
+        guard let leftBottom = shape.cornersArray.filter({ $0.corner == .leftBottom }).first?.point else {return thePath}
+        guard let rightBottom = shape.cornersArray.filter({ $0.corner == .rightBottom }).first?.point else {return thePath}
+        guard let rightTop = shape.cornersArray.filter({ $0.corner == .rightTop }).first?.point else {return thePath}
 
-         case .rightBottom:
-            thePath.move(to: rect.origin)
-            thePath.addLine(to: CGPoint(x: (rect.origin.x), y: rect.maxY))
-            thePath.addLine(to: CGPoint(x: rect.maxX + withShift - rect.width, y: rect.maxY))
-            thePath.addLine(to: CGPoint(x: rect.maxX , y: rect.origin.y))
-           
+        var newCorners: [(cornerPoint,CGPoint)] = []
+        switch corner {
+            
+        case .leftTop:
+            let shiftedLeftTop = CGPoint(x: (leftTop.x + withShift), y: leftTop.y)
+            
+            thePath.move(to: shiftedLeftTop)
+            thePath.addLine(to: leftBottom)
+            thePath.addLine(to: rightBottom)
+            thePath.addLine(to: rightTop)
+             
+            // save points
+            newCorners.append((.leftTop, shiftedLeftTop))
+            newCorners.append((.leftBottom, leftBottom))
+            newCorners.append((.rightBottom, rightBottom))
+            newCorners.append((.rightTop, rightTop))
+            
          case .leftBottom:
-            thePath.move(to: rect.origin)
-            thePath.addLine(to: CGPoint(x: (rect.origin.x + withShift), y: rect.maxY))
-            thePath.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
-            thePath.addLine(to: CGPoint(x: rect.maxX , y: rect.origin.y))
+            let shiftedLeftBottom = CGPoint(x: (leftBottom.x + withShift), y: leftBottom.y)
+            
+            thePath.move(to: leftTop)
+            thePath.addLine(to: shiftedLeftBottom)
+            thePath.addLine(to: rightBottom)
+            thePath.addLine(to: rightTop)
+             
+            // save points
+            newCorners.append((.leftTop, leftTop))
+            newCorners.append((.leftBottom, shiftedLeftBottom))
+            newCorners.append((.rightBottom, rightBottom))
+            newCorners.append((.rightTop, rightTop))
+        
+         case .rightBottom:
+            let distance = CGPointDistance(from: leftBottom, to: rightBottom)
+            let shiftedRightBottom = CGPoint(x: rightBottom.x - distance + withShift, y: rightBottom.y)
+             
+            thePath.move(to: leftTop)
+            thePath.addLine(to: leftBottom)
+            thePath.addLine(to: shiftedRightBottom)
+            thePath.addLine(to: rightTop)
+           
+            // save points
+            newCorners.append((.leftTop, leftTop))
+            newCorners.append((.leftBottom, leftBottom))
+            newCorners.append((.rightBottom, shiftedRightBottom))
+            newCorners.append((.rightTop, rightTop))
+         
          case .rightTop:
-            thePath.move(to: rect.origin)
-            thePath.addLine(to: CGPoint(x: (rect.origin.x), y: rect.maxY))
-            thePath.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
-            thePath.addLine(to: CGPoint(x: rect.maxX + withShift - rect.width, y: rect.origin.y))
-             
-         case .leftTop:
-            thePath.move(to: CGPoint(x: (rect.origin.x + withShift), y: rect.origin.y))
-            thePath.addLine(to: CGPoint(x: (rect.origin.x), y: rect.maxY))
-            thePath.addLine(to: CGPoint(x: rect.maxX, y: rect.maxY))
-            thePath.addLine(to: CGPoint(x: rect.maxX, y: rect.origin.y))
-             
+            let distance = CGPointDistance(from: leftTop, to: rightTop)
+            let shiftedRightTop = CGPoint(x: (rightTop.x - distance + withShift), y: rightTop.y)
+
+            thePath.move(to: leftTop)
+            thePath.addLine(to: leftBottom)
+            thePath.addLine(to: rightBottom)
+            thePath.addLine(to: shiftedRightTop)
+            
+            // save points
+            newCorners.append((.leftTop, leftTop))
+            newCorners.append((.leftBottom, leftBottom))
+            newCorners.append((.rightBottom, rightBottom))
+            newCorners.append((.rightTop, shiftedRightTop))
+          
         case .noCornersSelected:
           
             print("NONE Selected")
         }
         
         thePath.close()
-         
+        
+        let shapeEdited = shapeInfo(shape: selectedShapeLayer, cornersArray: newCorners)
+        selectedShape = shapeEdited
+          
         return thePath
         
     }
@@ -481,7 +468,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
        
         // Highlighting rect
         imageView.layer.sublayers?.forEach { layer in
-            let layer = layer as? SkewLayer
+            let layer = layer as? CAShapeLayer
             if let path = layer?.path, path.contains(touchPoint) {
                 let color = UIColor(red: 0, green: 1, blue: 0, alpha: 0.2).cgColor
                 layer?.fillColor? = color
@@ -519,18 +506,34 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     
     enum cornerPoint {
     // corners selected
-    case rightBottom
-    case leftBottom
-    case rightTop
-    case leftTop
-    case noCornersSelected
+        case leftTop
+        case leftBottom
+        case rightBottom
+        case rightTop
+        case noCornersSelected
         init() {
             self = .noCornersSelected
             }
     }
  
+    // save shapes info in this struct
+    struct shapeInfo {
+        var shape: CAShapeLayer
+        var cornersArray : [(corner: cornerPoint,point: CGPoint)]
+        
+        init(shape: CAShapeLayer, cornersArray: [(cornerPoint,CGPoint)] ) {
+            self.shape = shape
+            self.cornersArray = cornersArray
+           }
+    }
+    
+    var selectedShape: shapeInfo?
+    var selectedShapesInitial: shapeInfo?
+    var allShapes: [shapeInfo] = []
     var corner = cornerPoint()
-    var rectOriginal = CGRect.zero
+    
+    
+    // FIXME: - CRASH WITHOUT RECTANGLE
     
     @objc func rotationTapped(gesture: UIPanGestureRecognizer) {
      
@@ -546,12 +549,14 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             
                 // TODO: - Refactor this point detection
             imageView.layer.sublayers?.forEach { layer in
-                let layer = layer as? SkewLayer
+                let layer = layer as? CAShapeLayer
                 if let path = layer?.path, path.contains(tl) || path.contains(bl) || path.contains(tr) || path.contains(br) {
                         if (selectedLayer == nil) {
                             selectedLayer = layer!
-                            rectOriginal = (selectedLayer?.path?.boundingBoxOfPath)!
-                            
+                            selectedShape =  allShapes.filter {
+                                $0.shape == selectedLayer
+                            }.first!
+                            selectedShapesInitial = selectedShape
                         }
                     }
                }
@@ -585,19 +590,18 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
              
         }
  
-        touchedPoint = startPoint // offset reference
+        touchedPoint = startPoint // to offset reference
         
         if gesture.state == UIGestureRecognizer.State.changed {
             
             scrollView.isScrollEnabled = false // disabled scroll
 
             let currentPoint = rotationPanRecognizer.location(in: imageView)
-            
-            
-            let xOffset = currentPoint.x - touchedPoint!.x
-            let yOffset = currentPoint.y - touchedPoint!.y
-              
-            selectedLayer?.path = skewShape(rectOriginal,corner,xOffset).cgPath
+           
+            let xOffset = currentPoint.x - touchedPoint.x
+            let yOffset = currentPoint.y - touchedPoint.y
+             
+            selectedLayer?.path = skewShape(corner,xOffset).cgPath
  
             // highlight moving/resizing rect
             let color = UIColor(red: 1, green: 0, blue: 0.3, alpha: 0.4).cgColor
@@ -613,7 +617,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
              // if clicked on rotation image cancel scrollView pangesture
             print("***** Touch Ended")
             scrollView.isScrollEnabled = true // enabled scroll
-            
+            // update the intial shape with edited edition
+            selectedShapesInitial = selectedShape
         }
          
 //        case .isRotating:
@@ -628,7 +633,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         
     }
      
-    func addRotationOverlay(_ layer: SkewLayer?) {
+    func addRotationOverlay(_ layer: CAShapeLayer?) {
         let pathBox = layer?.path?.boundingBox
         guard let x = pathBox?.maxX else {return}
         guard let y = pathBox?.maxY else {return}
@@ -640,7 +645,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         self.imageView.addSubview(overlayImageView)
       }
     
-    func addCornersOverlay(_ layer: SkewLayer?) {
+    func addCornersOverlay(_ layer: CAShapeLayer?) {
         // reset
         
         let pathBox = layer?.path?.boundingBox
@@ -768,10 +773,10 @@ extension ViewController: UIScrollViewDelegate {
 // TODO: - Resizing
 
 // touch on edges,corners
-extension SkewLayer {
+extension CAShapeLayer {
  
     static var kResizeThumbSize:CGFloat = 44.0
-    private typealias `Self` = SkewLayer
+    private typealias `Self` = CAShapeLayer
  
     enum dragPoint {
     // edges
@@ -793,7 +798,7 @@ extension SkewLayer {
         }
     }
  
-    func resizingStartPoint(_ touch: CGPoint?,in layer: SkewLayer) -> dragPoint {
+    func resizingStartPoint(_ touch: CGPoint?,in layer: CAShapeLayer) -> dragPoint {
         
         var dragP = dragPoint()
 
