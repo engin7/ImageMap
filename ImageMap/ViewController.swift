@@ -168,7 +168,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                 handImageView.frame.origin = handPoint
                 handImageView.frame.size = CGSize(width: 30, height: 30)
                 // careful! it can touch handView and use it as subview while checking with getSubViewTouched.
-                self.imageView.addSubview(handImageView)
+//                self.imageView.addSubview(handImageView)
                  
                 // check if inside rect
                 imageView.layer.sublayers?.forEach { layer in
@@ -360,7 +360,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         guard let rightBottom = shape.cornersArray.filter({ $0.corner == .rightBottom }).first?.point else {return thePath}
         guard let rightTop = shape.cornersArray.filter({ $0.corner == .rightTop }).first?.point else {return thePath}
 
-        var newCorners: [(cornerPoint,CGPoint)] = []
+        var newCorners: [(corner:cornerPoint,point:CGPoint)] = []
         switch corner {
             
         case .leftTop:
@@ -392,8 +392,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             newCorners.append((.rightTop, rightTop))
         
          case .rightBottom:
-            let distance = CGPointDistance(from: leftBottom, to: rightBottom)
-            let shiftedRightBottom = CGPoint(x: rightBottom.x - distance + withShift, y: rightBottom.y)
+             let shiftedRightBottom = CGPoint(x: rightBottom.x  + withShift, y: rightBottom.y)
              
             thePath.move(to: leftTop)
             thePath.addLine(to: leftBottom)
@@ -407,8 +406,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             newCorners.append((.rightTop, rightTop))
          
          case .rightTop:
-            let distance = CGPointDistance(from: leftTop, to: rightTop)
-            let shiftedRightTop = CGPoint(x: (rightTop.x - distance + withShift), y: rightTop.y)
+             let shiftedRightTop = CGPoint(x: (rightTop.x + withShift), y: rightTop.y)
 
             thePath.move(to: leftTop)
             thePath.addLine(to: leftBottom)
@@ -423,23 +421,32 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
           
         case .noCornersSelected:
           
-            print("NONE Selected")
+            print("Corner NOT Selected")
+            thePath.move(to: leftTop)
+            thePath.addLine(to: leftBottom)
+            thePath.addLine(to: rightBottom)
+            thePath.addLine(to: rightTop)
         }
         
         thePath.close()
         
-        let shapeEdited = shapeInfo(shape: selectedShapeLayer, cornersArray: newCorners)
-        selectedShape = shapeEdited
-          
+        if corner != .noCornersSelected {
+            let shapeEdited = shapeInfo(shape: selectedShapeLayer, cornersArray: newCorners)
+            selectedShape = shapeEdited
+              
+            var cornerArray: [CGPoint] = []
+            newCorners.forEach{cornerArray.append($0.point)}
+            moveCornerOverlay(corners:cornerArray)
+        }
+       
         return thePath
         
     }
     
-     
     // MARK: - Adding Tag
 
     func addTag(withLocation location: CGPoint, toPhoto photo: UIImageView) {
-        let frame = CGRect(x: location.x, y: location.y, width: 50, height: 50)
+        let frame = CGRect(x: location.x, y: location.y, width: 20, height: 20)
         let tempImageView = UIImageView(frame: frame)
         let tintableImage = UIImage(systemName: "pin.circle.fill")?.withRenderingMode(.alwaysTemplate)
         tempImageView.image = tintableImage
@@ -476,6 +483,14 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     layer?.fillColor? = UIColor.clear.cgColor
                 }
                 // add the rotation and 4 corners image
+                if (selectedLayer == nil) {
+                    selectedLayer = layer!
+                    selectedShape =  allShapes.filter {
+                        $0.shape == selectedLayer
+                    }.first!
+                    selectedShapesInitial = selectedShape
+                }
+                 
                 addRotationOverlay(layer)
                 addCornersOverlay(layer)
             }
@@ -531,7 +546,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var selectedShapesInitial: shapeInfo?
     var allShapes: [shapeInfo] = []
     var corner = cornerPoint()
-    
+    var panStartPoint = CGPoint.zero
     
     // FIXME: - CRASH WITHOUT RECTANGLE
     
@@ -540,12 +555,12 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         if gesture.state == UIGestureRecognizer.State.began {
             
             
-            let startPoint = rotationPanRecognizer.location(in: imageView)
+            panStartPoint = rotationPanRecognizer.location(in: imageView)
             // possiblePoints to detect rect
-            let tl = CGPoint(x: startPoint.x-50, y: startPoint.y+50)
-            let bl = CGPoint(x: startPoint.x+50, y: startPoint.y-50)
-            let tr = CGPoint(x: startPoint.x+50, y: startPoint.y+50)
-            let br = CGPoint(x: startPoint.x-50, y: startPoint.y-50)
+            let tl = CGPoint(x: panStartPoint.x-50, y: panStartPoint.y+50)
+            let bl = CGPoint(x: panStartPoint.x+50, y: panStartPoint.y-50)
+            let tr = CGPoint(x: panStartPoint.x+50, y: panStartPoint.y+50)
+            let br = CGPoint(x: panStartPoint.x-50, y: panStartPoint.y-50)
             
                 // TODO: - Refactor this point detection
             imageView.layer.sublayers?.forEach { layer in
@@ -561,36 +576,39 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     }
                }
             
-            if let subviewTapped = getSubViewTouched(touchPoint: startPoint) {
+            if let subviewTapped = getSubViewTouched(touchPoint: panStartPoint) {
 
                 scrollView.isScrollEnabled = false // disabled scroll
 
                 if subviewTapped == overlayImageView {
                     // rotating button
                     print("INSIDE rot overlay")
+                    corner = .noCornersSelected
                 } else {
                     print("INSIDE CORNERS")
                     // corners or pin
                     if cornersImageView.count > 0 {
                         if subviewTapped == cornersImageView[0] {
-                            corner = .rightBottom
+                            corner = .leftTop
                         } else if subviewTapped == cornersImageView[1] {
                             corner = .leftBottom
                         } else if subviewTapped == cornersImageView[2] {
-                            corner = .rightTop
+                            corner = .rightBottom
                         } else if subviewTapped == cornersImageView[3] {
-                            corner = .leftTop
+                            corner = .rightTop
                         }
                     }
-                        
+                        print(corner)
                         print("***** Touch started")
                 }
                 
+            } else {
+                corner = .noCornersSelected
             }
              
         }
  
-        touchedPoint = startPoint // to offset reference
+        touchedPoint = panStartPoint // to offset reference
         
         if gesture.state == UIGestureRecognizer.State.changed {
             
@@ -619,6 +637,12 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             scrollView.isScrollEnabled = true // enabled scroll
             // update the intial shape with edited edition
             selectedShapesInitial = selectedShape
+            corner = .noCornersSelected
+            touchedPoint = CGPoint.zero
+            panStartPoint = CGPoint.zero
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
+                self.selectedLayer?.fillColor? = UIColor.clear.cgColor
+            }
         }
          
 //        case .isRotating:
@@ -647,19 +671,44 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     
     func addCornersOverlay(_ layer: CAShapeLayer?) {
         // reset
+         
+        guard let shape = selectedShapesInitial else { return }
+        guard let leftTop = shape.cornersArray.filter({ $0.corner == .leftTop }).first?.point  else { return }
+        guard let leftBottom = shape.cornersArray.filter({ $0.corner == .leftBottom }).first?.point else {return }
+        guard let rightBottom = shape.cornersArray.filter({ $0.corner == .rightBottom }).first?.point else {return }
+        guard let rightTop = shape.cornersArray.filter({ $0.corner == .rightTop }).first?.point else {return }
         
-        let pathBox = layer?.path?.boundingBox
-        guard let xMax = pathBox?.maxX else {return}
-        guard let yMax = pathBox?.maxY else {return}
-        guard let xMin = pathBox?.minX else {return}
-        guard let yMin = pathBox?.minY else {return}
         
-        let rightBottomOrigin = CGPoint(x: xMax-15, y: yMax-15)
-        let leftBottomOrigin = CGPoint(x: xMin-15, y: yMax-15)
-        let rightTopOrigin = CGPoint(x: xMax-15, y: yMin-15)
-        let leftTopOrigin = CGPoint(x: xMin-15, y: yMin-15)
+        let corners = [leftTop,leftBottom,rightBottom,rightTop]
         
-        let corners = [rightBottomOrigin, leftBottomOrigin, rightTopOrigin, leftTopOrigin]
+        removeCornerOverlays()
+          
+        for i in 0...3 {
+            
+            let imageView = UIImageView(image: UIImage(systemName: "largecircle.fill.circle"))
+            imageView.frame.origin = CGPoint(x: corners[i].x-15, y: corners[i].y-15)
+            imageView.frame.size = CGSize(width: 30, height: 30)
+            self.imageView.addSubview(imageView)
+            cornersImageView.append(imageView)
+             
+        }
+          
+      }
+    
+    func moveCornerOverlay(corners:[CGPoint]) {
+//        let corners = [leftTopOrigin,leftBottomOrigin,rightBottomOrigin,rightTopOrigin]
+
+        if cornersImageView.count != 0 {
+            for i in 0...3 {
+                cornersImageView[i].frame.origin = CGPoint(x: corners[i].x-15, y: corners[i].y-15)
+                
+            }
+             
+        }
+        
+    }
+    
+    func removeCornerOverlays() {
         
         if cornersImageView.count != 0 {
             for i in 0...3 {
@@ -668,19 +717,9 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             }
             cornersImageView = [] // reset
         }
-         
-        
-        for i in 0...3 {
-            
-            let imageView = UIImageView(image: UIImage(systemName: "largecircle.fill.circle"))
-            imageView.frame.origin = corners[i]
-            imageView.frame.size = CGSize(width: 30, height: 30)
-            self.imageView.addSubview(imageView)
-            cornersImageView.append(imageView)
-             
-        }
-          
-      }
+    }
+    
+    
     
     // MARK: - Get Subviews from clicked area
 
@@ -695,8 +734,13 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     
     func getSubViewTouched(touchPoint: CGPoint) -> UIView? {
         
+        let leftTopTolerance = CGPoint(x: touchPoint.x-20,y: touchPoint.y-20)
+        let leftBottomTolerance = CGPoint(x: touchPoint.x-20,y: touchPoint.y+20)
+        let rightBottomTolerance = CGPoint(x: touchPoint.x+20,y: touchPoint.y+20)
+        let rightTopTolerance = CGPoint(x: touchPoint.x+20,y: touchPoint.y-20)
+
         let filteredSubviews = imageView.subviews.filter { subView -> Bool in
-            return subView.frame.contains(touchPoint)
+            return subView.frame.contains(touchPoint) || subView.frame.contains(leftTopTolerance) || subView.frame.contains(leftBottomTolerance) || subView.frame.contains(rightBottomTolerance) || subView.frame.contains(rightTopTolerance)
           }
         guard let subviewTapped = filteredSubviews.first else {
             return nil
