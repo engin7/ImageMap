@@ -450,22 +450,18 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         let tempImageView = UIImageView(frame: frame)
         let tintableImage = UIImage(systemName: "pin.circle.fill")?.withRenderingMode(.alwaysTemplate)
         tempImageView.image = tintableImage
-        tempImageView.tintColor = .cyan //will be options
+        tempImageView.tintColor = .red //will be options
         tempImageView.isUserInteractionEnabled = true
         
-        let label = UILabel(frame: CGRect(x: 50, y: 0, width: 250, height: 30))
-        label.textColor = UIColor.cyan
+        let label = UILabel(frame: CGRect(x:30, y: 0, width: 250, height: 30))
+        label.textColor = UIColor.red
         label.text = "(\(Double(round(1000*location.x)/1000)), \(Double(round(1000*location.y)/1000)))"
         tempImageView.addSubview(label)
         
-        let textField = UITextField(frame: CGRect(x: 50, y: -25, width: 250, height: 150))
-        tempImageView.addSubview(textField)
-        textField.delegate = self
-        textField.isUserInteractionEnabled = true
-        textField.textColor = .cyan
-         
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+            label.isHidden = true
+        }
         photo.addSubview(tempImageView)
-        textField.becomeFirstResponder()
     }
     
     // MARK: - Tapping Tag
@@ -734,10 +730,10 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     
     func getSubViewTouched(touchPoint: CGPoint) -> UIView? {
         
-        let leftTopTolerance = CGPoint(x: touchPoint.x-20,y: touchPoint.y-20)
-        let leftBottomTolerance = CGPoint(x: touchPoint.x-20,y: touchPoint.y+20)
-        let rightBottomTolerance = CGPoint(x: touchPoint.x+20,y: touchPoint.y+20)
-        let rightTopTolerance = CGPoint(x: touchPoint.x+20,y: touchPoint.y-20)
+        let leftTopTolerance = CGPoint(x: touchPoint.x-10,y: touchPoint.y-10)
+        let leftBottomTolerance = CGPoint(x: touchPoint.x-10,y: touchPoint.y+10)
+        let rightBottomTolerance = CGPoint(x: touchPoint.x+10,y: touchPoint.y+10)
+        let rightTopTolerance = CGPoint(x: touchPoint.x+10,y: touchPoint.y-10)
 
         let filteredSubviews = imageView.subviews.filter { subView -> Bool in
             return subView.frame.contains(touchPoint) || subView.frame.contains(leftTopTolerance) || subView.frame.contains(leftBottomTolerance) || subView.frame.contains(rightBottomTolerance) || subView.frame.contains(rightTopTolerance)
