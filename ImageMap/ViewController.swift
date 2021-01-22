@@ -431,7 +431,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         thePath.close()
         
         if corner != .noCornersSelected {
-            let shapeEdited = shapeInfo(shape: selectedShapeLayer, cornersArray: newCorners)
+            let shapeEdited = shapeInfo(shape: selectedLayer!, cornersArray: newCorners)
             selectedShape = shapeEdited
               
             var cornerArray: [CGPoint] = []
@@ -606,10 +606,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
  
         touchedPoint = panStartPoint // to offset reference
         
-        if gesture.state == UIGestureRecognizer.State.changed {
-            
+        if gesture.state == UIGestureRecognizer.State.changed && selectedShape != nil {
+            // we're inside selection
+            print("&&&&&&&  TOUCHING")
             scrollView.isScrollEnabled = false // disabled scroll
-
+           
             let currentPoint = rotationPanRecognizer.location(in: imageView)
            
             let xOffset = currentPoint.x - touchedPoint.x
@@ -622,7 +623,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             selectedLayer?.fillColor? = color
             
             touchedPoint = currentPoint
-
+            
         }
          
         
@@ -633,12 +634,27 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             scrollView.isScrollEnabled = true // enabled scroll
             // update the intial shape with edited edition
             selectedShapesInitial = selectedShape
+            if selectedShape != nil {
+               
+                // updating operation
+                var newAllShapes = allShapes.filter {  $0.shape != selectedLayer }
+                newAllShapes.append(selectedShape!)
+                allShapes = newAllShapes
+                
+            }
+         
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [self] in
+                 selectedLayer?.fillColor? = UIColor.clear.cgColor
+                selectedLayer = nil
+            }
+            
+            selectedShape = nil
             corner = .noCornersSelected
             touchedPoint = CGPoint.zero
             panStartPoint = CGPoint.zero
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-                self.selectedLayer?.fillColor? = UIColor.clear.cgColor
-            }
+          
+           
+            
         }
          
 //        case .isRotating:
