@@ -342,15 +342,15 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
          
     }
     
-    func CGPointDistanceSquared(from: CGPoint, to: CGPoint) -> CGFloat {
-        return (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y)
-    }
-
-    func CGPointDistance(from: CGPoint, to: CGPoint) -> CGFloat {
-        return sqrt(CGPointDistanceSquared(from: from, to: to))
-    }
+//    func CGPointDistanceSquared(from: CGPoint, to: CGPoint) -> CGFloat {
+//        return (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y)
+//    }
+//
+//    func CGPointDistance(from: CGPoint, to: CGPoint) -> CGFloat {
+//        return sqrt(CGPointDistanceSquared(from: from, to: to))
+//    }
     
-    private func skewShape(_ corner: cornerPoint,_ withShift: CGFloat ) -> UIBezierPath {
+    private func skewShape(_ corner: cornerPoint,_ withShift: (x: CGFloat,y: CGFloat) ) -> UIBezierPath {
         
         let thePath = UIBezierPath()
         
@@ -364,7 +364,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         switch corner {
             
         case .leftTop:
-            let shiftedLeftTop = CGPoint(x: (leftTop.x + withShift), y: leftTop.y)
+            let shiftedLeftTop = CGPoint(x: (leftTop.x + withShift.x), y: (leftTop.y + withShift.y))
             
             thePath.move(to: shiftedLeftTop)
             thePath.addLine(to: leftBottom)
@@ -378,7 +378,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             newCorners.append((.rightTop, rightTop))
             
          case .leftBottom:
-            let shiftedLeftBottom = CGPoint(x: (leftBottom.x + withShift), y: leftBottom.y)
+            let shiftedLeftBottom = CGPoint(x: (leftBottom.x + withShift.x), y: (leftBottom.y + withShift.y))
             
             thePath.move(to: leftTop)
             thePath.addLine(to: shiftedLeftBottom)
@@ -392,7 +392,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             newCorners.append((.rightTop, rightTop))
         
          case .rightBottom:
-             let shiftedRightBottom = CGPoint(x: rightBottom.x  + withShift, y: rightBottom.y)
+            let shiftedRightBottom = CGPoint(x: (rightBottom.x + withShift.x), y: (rightBottom.y + withShift.y))
              
             thePath.move(to: leftTop)
             thePath.addLine(to: leftBottom)
@@ -406,7 +406,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             newCorners.append((.rightTop, rightTop))
          
          case .rightTop:
-             let shiftedRightTop = CGPoint(x: (rightTop.x + withShift), y: rightTop.y)
+            let shiftedRightTop = CGPoint(x: (rightTop.x + withShift.x), y: (rightTop.y + withShift.y))
 
             thePath.move(to: leftTop)
             thePath.addLine(to: leftBottom)
@@ -613,10 +613,9 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
            
             let currentPoint = rotationPanRecognizer.location(in: imageView)
            
-            let xOffset = currentPoint.x - touchedPoint.x
-            let yOffset = currentPoint.y - touchedPoint.y
-             
-            selectedLayer?.path = skewShape(corner,xOffset).cgPath
+            let offset = (x: (currentPoint.x - touchedPoint.x), y: (currentPoint.y - touchedPoint.y))
+  
+            selectedLayer?.path = skewShape(corner,offset).cgPath
  
             // highlight moving/resizing rect
             let color = UIColor(red: 1, green: 0, blue: 0.3, alpha: 0.4).cgColor
@@ -645,16 +644,20 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
          
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [self] in
                  selectedLayer?.fillColor? = UIColor.clear.cgColor
-                selectedLayer = nil
+                 selectedLayer = nil
             }
             
             selectedShape = nil
             corner = .noCornersSelected
             touchedPoint = CGPoint.zero
             panStartPoint = CGPoint.zero
-          
-           
-            
+            // fix continious action dont remove
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [self] in
+                if selectedLayer == nil {
+                    removeCornerOverlays()
+                }
+                 
+            }
         }
          
 //        case .isRotating:
