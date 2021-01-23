@@ -435,7 +435,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         newCorners.forEach{cornerArray.append($0.point)}
         moveCornerOverlay(corners:cornerArray)
         overlayImageView.frame.origin = CGPoint(x: cornerArray[2].x+20, y: cornerArray[2].y+20) // right Corner
-
+        guard let point = cornerArray.centroid() else { return thePath}
+        subviewTapped.frame.origin = point
         
         return thePath
         
@@ -471,21 +472,21 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         imageView.layer.sublayers?.forEach { layer in
             let layer = layer as? CAShapeLayer
             if let path = layer?.path, path.contains(touchPoint) {
-                let color = UIColor(red: 0, green: 1, blue: 0, alpha: 0.2).cgColor
-                layer?.fillColor? = color
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    layer?.fillColor? = UIColor.clear.cgColor
+               
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {    [self] in
+                     // show hide corner and rotate control
+                    overlayImageView.isHidden = !overlayImageView.isHidden
+                    cornersImageView.forEach({ $0.isHidden = !$0.isHidden })
                 }
-                // add the rotation and 4 corners image
-                if (selectedLayer == nil) {
+                 if (selectedLayer == nil) {
                     selectedLayer = layer!
                     selectedShape =  allShapes.filter {
                         $0.shape == selectedLayer
                     }.first!
                     selectedShapesInitial = selectedShape
+                   
                 }
-                 
-                
+                  
             }
         }
         // subViews: pin, rotating overlay,
@@ -493,8 +494,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         if let subviewTapped = getSubViewTouched(touchPoint: touchPoint) {
             // hide label etc
         subviewTapped.subviews.forEach({ $0.isHidden = !$0.isHidden })
-            overlayImageView.isHidden = !overlayImageView.isHidden
-            cornersImageView.forEach({ $0.isHidden = !$0.isHidden })
+           
             if subviewTapped == overlayImageView {
                  
                 // rotating button
@@ -570,11 +570,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     }
                }
             
-            if let subviewTapped = getSubViewTouched(touchPoint: panStartPoint) {
+            if let subviewTouched = getSubViewTouched(touchPoint: panStartPoint) {
 
                 scrollView.isScrollEnabled = false // disabled scroll
 
-                if subviewTapped == overlayImageView {
+                if subviewTouched == overlayImageView {
                     // rotating button
                     print("INSIDE rot overlay")
                     corner = .noCornersSelected
@@ -582,13 +582,13 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     print("INSIDE CORNERS")
                     // corners or pin
                     if cornersImageView.count > 0 {
-                        if subviewTapped == cornersImageView[0] {
+                        if subviewTouched == cornersImageView[0] {
                             corner = .leftTop
-                        } else if subviewTapped == cornersImageView[1] {
+                        } else if subviewTouched == cornersImageView[1] {
                             corner = .leftBottom
-                        } else if subviewTapped == cornersImageView[2] {
+                        } else if subviewTouched == cornersImageView[2] {
                             corner = .rightBottom
-                        } else if subviewTapped == cornersImageView[3] {
+                        } else if subviewTouched == cornersImageView[3] {
                             corner = .rightTop
                         }
                     }
@@ -819,4 +819,87 @@ extension ViewController: UIScrollViewDelegate {
         scrollView.zoom(to: rectToZoomTo, animated: true)
     }
         
+}
+
+extension Array where Element == CGPoint {
+    /// Calculate signed area.
+    ///
+    /// See https://en.wikipedia.org/wiki/Centroid#Of_a_polygon
+    ///
+    /// - Returns: The signed area
+
+    func signedArea() -> CGFloat {
+        if isEmpty { return .zero }
+
+        var sum: CGFloat = 0
+        for (index, point) in enumerated() {
+            let nextPoint: CGPoint
+            if index < count-1 {
+                nextPoint = self[index+1]
+            } else {
+                nextPoint = self[0]
+            }
+
+            sum += point.x * nextPoint.y - nextPoint.x * point.y
+        }
+
+        return sum / 2
+    }
+
+    /// Calculate centroid
+    ///
+    /// See https://en.wikipedia.org/wiki/Centroid#Of_a_polygon
+    ///
+    /// - Note: If the area of the polygon is zero (e.g. the points are collinear), this returns `nil`.
+    ///
+    /// - Parameter points: Unclosed points of polygon.
+    /// - Returns: Centroid point.
+
+    func centroid() -> CGPoint? {
+        if isEmpty { return nil }
+
+        let area = signedArea()
+        if area == 0 { return nil }
+
+        var sumPoint: CGPoint = .zero
+
+        for (index, point) in enumerated() {
+            let nextPoint: CGPoint
+            if index < count-1 {
+                nextPoint = self[index+1]
+            } else {
+                nextPoint = self[0]
+            }
+
+            let factor = point.x * nextPoint.y - nextPoint.x * point.y
+            sumPoint.x += (point.x + nextPoint.x) * factor
+            sumPoint.y += (point.y + nextPoint.y) * factor
+        }
+
+        return sumPoint / 6 / area
+    }
+
+    func mean() -> CGPoint? {
+        if isEmpty { return nil }
+
+        return reduce(.zero, +) / CGFloat(count)
+    }
+}
+
+extension CGPoint {
+    static func + (lhs: CGPoint, rhs: CGPoint) -> CGPoint {
+        CGPoint(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
+    }
+
+    static func - (lhs: CGPoint, rhs: CGPoint) -> CGPoint {
+        CGPoint(x: lhs.x - rhs.x, y: lhs.y - rhs.y)
+    }
+
+    static func / (lhs: CGPoint, rhs: CGFloat) -> CGPoint {
+        CGPoint(x: lhs.x / rhs, y: lhs.y / rhs)
+    }
+
+    static func * (lhs: CGPoint, rhs: CGFloat) -> CGPoint {
+        CGPoint(x: lhs.x * rhs, y: lhs.y * rhs)
+    }
 }
