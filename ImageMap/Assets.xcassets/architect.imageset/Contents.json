@@ -1,11 +1,11 @@
 {
   "images" : [
     {
+      "filename" : "architect.png",
       "idiom" : "universal",
       "scale" : "1x"
     },
     {
-      "filename" : "architect.png",
       "idiom" : "universal",
       "scale" : "2x"
     },
