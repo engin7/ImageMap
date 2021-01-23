@@ -78,7 +78,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var rotationPanRecognizer : UIPanGestureRecognizer!
     let notificationCenter = NotificationCenter.default
  
-    var dragPoint: CAShapeLayer.dragPoint?
     var selectedLayer: CAShapeLayer?
     var insideExistingShape = false
     var insideExistingPin = false
@@ -183,10 +182,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                         }
                          
                         let labels = subviewTapped.subviews.compactMap { $0 as? UILabel }
-                        subLabel = labels.first
-                        dragPoint = layer?.resizingStartPoint(startPoint, in: layer!)
-                        print(dragPoint) // detect edge/corners
-                        insideExistingShape = true
+                         subLabel = labels.first
+                         insideExistingShape = true
                     }
                 }
                  
@@ -201,7 +198,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     handImageView.image = UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right")
                 } else {
                     // add shape layer
-                    // FIXME: for ipad when shape is small outside the image is  not be able to drawn. If you add layer to scrollView it's possible but you need to adjust coordinates
+                     
                     imageView.layer.addSublayer(selectedShapeLayer)
                 }
                }
@@ -290,6 +287,9 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                             let corners  = [(corner: cornerPoint.leftTop,point: lt), (corner: cornerPoint.leftBottom,point: lb), (corner: cornerPoint.rightBottom,point: rb), (corner: cornerPoint.rightTop,point: rt)]
                         
                             let layer = shapeInfo(shape: rectLayer, cornersArray: corners)
+ 
+                            addRotationOverlay(layer)
+                            addCornersOverlay(layer)
                             
                             allShapes.append(layer)
                             
@@ -306,7 +306,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                 selectedLayer?.fillColor = UIColor.clear.cgColor
                 insideExistingShape = false
                 insideExistingPin = false
-                dragPoint = CAShapeLayer.dragPoint.noResizing
                 selectedLayer = nil // ot chose new layers
                 subLabel = nil
                 handImageView.removeFromSuperview()
@@ -341,15 +340,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         }
          
     }
-    
-//    func CGPointDistanceSquared(from: CGPoint, to: CGPoint) -> CGFloat {
-//        return (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y)
-//    }
-//
-//    func CGPointDistance(from: CGPoint, to: CGPoint) -> CGFloat {
-//        return sqrt(CGPointDistanceSquared(from: from, to: to))
-//    }
-    
+     
     private func skewShape(_ corner: cornerPoint,_ withShift: (x: CGFloat,y: CGFloat) ) -> UIBezierPath {
         
         let thePath = UIBezierPath()
@@ -359,13 +350,17 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         guard let leftBottom = shape.cornersArray.filter({ $0.corner == .leftBottom }).first?.point else {return thePath}
         guard let rightBottom = shape.cornersArray.filter({ $0.corner == .rightBottom }).first?.point else {return thePath}
         guard let rightTop = shape.cornersArray.filter({ $0.corner == .rightTop }).first?.point else {return thePath}
-
+        
+        let shiftedLeftTop = CGPoint(x: (leftTop.x + withShift.x), y: (leftTop.y + withShift.y))
+        let shiftedLeftBottom = CGPoint(x: (leftBottom.x + withShift.x), y: (leftBottom.y + withShift.y))
+        let shiftedRightBottom = CGPoint(x: (rightBottom.x + withShift.x), y: (rightBottom.y + withShift.y))
+        let shiftedRightTop = CGPoint(x: (rightTop.x + withShift.x), y: (rightTop.y + withShift.y))
+ 
         var newCorners: [(corner:cornerPoint,point:CGPoint)] = []
         switch corner {
             
         case .leftTop:
-            let shiftedLeftTop = CGPoint(x: (leftTop.x + withShift.x), y: (leftTop.y + withShift.y))
-            
+           
             thePath.move(to: shiftedLeftTop)
             thePath.addLine(to: leftBottom)
             thePath.addLine(to: rightBottom)
@@ -378,8 +373,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             newCorners.append((.rightTop, rightTop))
             
          case .leftBottom:
-            let shiftedLeftBottom = CGPoint(x: (leftBottom.x + withShift.x), y: (leftBottom.y + withShift.y))
-            
+           
             thePath.move(to: leftTop)
             thePath.addLine(to: shiftedLeftBottom)
             thePath.addLine(to: rightBottom)
@@ -392,8 +386,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             newCorners.append((.rightTop, rightTop))
         
          case .rightBottom:
-            let shiftedRightBottom = CGPoint(x: (rightBottom.x + withShift.x), y: (rightBottom.y + withShift.y))
-             
+            
             thePath.move(to: leftTop)
             thePath.addLine(to: leftBottom)
             thePath.addLine(to: shiftedRightBottom)
@@ -406,7 +399,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             newCorners.append((.rightTop, rightTop))
          
          case .rightTop:
-            let shiftedRightTop = CGPoint(x: (rightTop.x + withShift.x), y: (rightTop.y + withShift.y))
 
             thePath.move(to: leftTop)
             thePath.addLine(to: leftBottom)
@@ -422,23 +414,29 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         case .noCornersSelected:
           
             print("Corner NOT Selected")
-            thePath.move(to: leftTop)
-            thePath.addLine(to: leftBottom)
-            thePath.addLine(to: rightBottom)
-            thePath.addLine(to: rightTop)
+            thePath.move(to: shiftedLeftTop)
+            thePath.addLine(to: shiftedLeftBottom)
+            thePath.addLine(to: shiftedRightBottom)
+            thePath.addLine(to: shiftedRightTop)
+            
+            // save points
+            newCorners.append((.leftTop, shiftedLeftTop))
+            newCorners.append((.leftBottom, shiftedLeftBottom))
+            newCorners.append((.rightBottom, shiftedRightBottom))
+            newCorners.append((.rightTop, shiftedRightTop))
         }
         
         thePath.close()
+   
+        let shapeEdited = shapeInfo(shape: selectedLayer!, cornersArray: newCorners)
+        selectedShape = shapeEdited
+          
+        var cornerArray: [CGPoint] = []
+        newCorners.forEach{cornerArray.append($0.point)}
+        moveCornerOverlay(corners:cornerArray)
+        overlayImageView.frame.origin = CGPoint(x: cornerArray[2].x+20, y: cornerArray[2].y+20) // right Corner
+
         
-        if corner != .noCornersSelected {
-            let shapeEdited = shapeInfo(shape: selectedLayer!, cornersArray: newCorners)
-            selectedShape = shapeEdited
-              
-            var cornerArray: [CGPoint] = []
-            newCorners.forEach{cornerArray.append($0.point)}
-            moveCornerOverlay(corners:cornerArray)
-        }
-       
         return thePath
         
     }
@@ -487,8 +485,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     selectedShapesInitial = selectedShape
                 }
                  
-                addRotationOverlay(layer)
-                addCornersOverlay(layer)
+                
             }
         }
         // subViews: pin, rotating overlay,
@@ -496,7 +493,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         if let subviewTapped = getSubViewTouched(touchPoint: touchPoint) {
             // hide label etc
         subviewTapped.subviews.forEach({ $0.isHidden = !$0.isHidden })
-           
+            overlayImageView.isHidden = !overlayImageView.isHidden
+            cornersImageView.forEach({ $0.isHidden = !$0.isHidden })
             if subviewTapped == overlayImageView {
                  
                 // rotating button
@@ -651,13 +649,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             corner = .noCornersSelected
             touchedPoint = CGPoint.zero
             panStartPoint = CGPoint.zero
-            // fix continious action dont remove
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) { [self] in
-                if selectedLayer == nil {
-                    removeCornerOverlays()
-                }
-                 
-            }
+  
         }
          
 //        case .isRotating:
@@ -672,11 +664,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         
     }
      
-    func addRotationOverlay(_ layer: CAShapeLayer?) {
-        let pathBox = layer?.path?.boundingBox
-        guard let x = pathBox?.maxX else {return}
-        guard let y = pathBox?.maxY else {return}
-        let overlayOrigin = CGPoint(x: x+20, y: y+20) // right Corner
+    func addRotationOverlay(_ shape: shapeInfo?) {
+ 
+       guard let shape = shape else { return }
+       guard let rightBottom = shape.cornersArray.filter({ $0.corner == .rightBottom }).first?.point else {return }
+        let overlayOrigin = CGPoint(x: rightBottom.x+20, y: rightBottom.y+20) // right Corner
   
         overlayImageView.image = UIImage(systemName: "arrow.counterclockwise")
         overlayImageView.frame.origin = overlayOrigin
@@ -684,10 +676,10 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         self.imageView.addSubview(overlayImageView)
       }
     
-    func addCornersOverlay(_ layer: CAShapeLayer?) {
+    func addCornersOverlay(_ shape: shapeInfo?) {
         // reset
          
-        guard let shape = selectedShapesInitial else { return }
+        guard let shape = shape else { return }
         guard let leftTop = shape.cornersArray.filter({ $0.corner == .leftTop }).first?.point  else { return }
         guard let leftBottom = shape.cornersArray.filter({ $0.corner == .leftBottom }).first?.point else {return }
         guard let rightBottom = shape.cornersArray.filter({ $0.corner == .rightBottom }).first?.point else {return }
@@ -828,62 +820,3 @@ extension ViewController: UIScrollViewDelegate {
     }
         
 }
-
-// TODO: - Resizing
-
-// touch on edges,corners
-extension CAShapeLayer {
- 
-    static var kResizeThumbSize:CGFloat = 44.0
-    private typealias `Self` = CAShapeLayer
- 
-    enum dragPoint {
-    // edges
-    case isResizingLeftEdge
-    case isResizingRightEdge
-    case isResizingTopEdge
-    case isResizingBottomEdge
-    // corners
-    case isResizingBottomRightCorner
-    case isResizingLeftCorner
-    case isResizingRightCorner
-    case isResizingBottomLeftCorner
-    
-    // rotation logic is inside pangesture not longpress
-    case noResizing
-        
-    init() {
-        self = .noResizing
-        }
-    }
- 
-    func resizingStartPoint(_ touch: CGPoint?,in layer: CAShapeLayer) -> dragPoint {
-        
-        var dragP = dragPoint()
-
-        if let touch = touch {
-            
-            if ((layer.path?.boundingBox.maxY)! - touch.y < Self.kResizeThumbSize) && ((layer.path?.boundingBox.maxX)! - touch.x < Self.kResizeThumbSize) {
-                dragP = dragPoint.isResizingBottomRightCorner
-            } else if (touch.x - (layer.path?.boundingBox.minX)! < Self.kResizeThumbSize) && (touch.y - (layer.path?.boundingBox.minY)! < Self.kResizeThumbSize) {
-                dragP = dragPoint.isResizingLeftCorner
-            } else if ((layer.path?.boundingBox.maxX)! - touch.x < Self.kResizeThumbSize) && (touch.y - (layer.path?.boundingBox.minY)! < Self.kResizeThumbSize) {
-               dragP = dragPoint.isResizingRightCorner
-           } else if (touch.x - (layer.path?.boundingBox.minX)! < Self.kResizeThumbSize) && ((layer.path?.boundingBox.maxY)! - touch.y < Self.kResizeThumbSize) {
-               dragP = dragPoint.isResizingBottomLeftCorner
-           } else if (touch.x - (layer.path?.boundingBox.minX)! < Self.kResizeThumbSize) {
-                dragP = dragPoint.isResizingLeftEdge
-            } else if (touch.y - (layer.path?.boundingBox.minY)! < Self.kResizeThumbSize) {
-                dragP = dragPoint.isResizingTopEdge
-            } else if ((layer.path?.boundingBox.maxX)! - touch.x < Self.kResizeThumbSize) {
-               dragP = dragPoint.isResizingRightEdge
-           } else if ((layer.path?.boundingBox.maxY)! - touch.y < Self.kResizeThumbSize) {
-               dragP = dragPoint.isResizingBottomEdge
-           }
-             
-        }
-        return dragP
-    }
-   
-}
- 
