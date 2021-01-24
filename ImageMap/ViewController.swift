@@ -425,10 +425,10 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
              
             panStartPoint = rotationPanRecognizer.location(in: imageView)
             // possiblePoints to detect rect
-            let tl = CGPoint(x: panStartPoint.x-50, y: panStartPoint.y+50)
-            let bl = CGPoint(x: panStartPoint.x+50, y: panStartPoint.y-50)
-            let tr = CGPoint(x: panStartPoint.x+50, y: panStartPoint.y+50)
-            let br = CGPoint(x: panStartPoint.x-50, y: panStartPoint.y-50)
+            let tl = CGPoint(x: panStartPoint.x+20, y: panStartPoint.y-20)
+            let bl = CGPoint(x: panStartPoint.x+20, y: panStartPoint.y+20)
+            let tr = CGPoint(x: panStartPoint.x-20, y: panStartPoint.y-20)
+            let br = CGPoint(x: panStartPoint.x-20, y: panStartPoint.y+20)
             
                 // TODO: - Refactor this point detection
             imageView.layer.sublayers?.forEach { layer in
