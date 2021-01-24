@@ -318,6 +318,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     var corners: [CGPoint] = []
                     selectedShapesInitial?.cornersArray.forEach{corners.append($0.point)}
                     moveCornerOverlay(corners:corners)
+                    moveRotationOverlay(selectedShapesInitial)
                 }
                   
             }
@@ -531,6 +532,13 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         overlayImageView.frame.size = CGSize(width: 50, height: 50)
         self.imageView.addSubview(overlayImageView)
       }
+    
+    func moveRotationOverlay(_ shape: shapeInfo?) {
+        guard let shape = shape else { return }
+        guard let rightBottom = shape.cornersArray.filter({ $0.corner == .rightBottom }).first?.point else {return }
+         let overlayOrigin = CGPoint(x: rightBottom.x+20, y: rightBottom.y+20) // right Corner
+          overlayImageView.frame.origin = overlayOrigin
+    }
     
     func addCornersOverlay(_ shape: shapeInfo?) {
         // reset
