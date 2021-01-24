@@ -163,10 +163,9 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         default:
             return UIBezierPath()
         }
-         
     }
-     
-    private func skewShape(_ corner: cornerPoint,_ withShift: (x: CGFloat,y: CGFloat) ) -> UIBezierPath {
+    
+    private func modifyShape(_ corner: cornerPoint,_ withShift: (x: CGFloat,y: CGFloat) ) -> UIBezierPath {
         
         let thePath = UIBezierPath()
         
@@ -175,6 +174,10 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         guard let leftBottom = shape.cornersArray.filter({ $0.corner == .leftBottom }).first?.point else {return thePath}
         guard let rightBottom = shape.cornersArray.filter({ $0.corner == .rightBottom }).first?.point else {return thePath}
         guard let rightTop = shape.cornersArray.filter({ $0.corner == .rightTop }).first?.point else {return thePath}
+        let corners = [leftTop, leftBottom, rightBottom, rightTop]
+        guard let center = corners.centroid() else { return thePath }
+        
+        // left top center, .
         
         let shiftedLeftTop = CGPoint(x: (leftTop.x + withShift.x), y: (leftTop.y + withShift.y))
         let shiftedLeftBottom = CGPoint(x: (leftBottom.x + withShift.x), y: (leftBottom.y + withShift.y))
@@ -182,6 +185,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         let shiftedRightTop = CGPoint(x: (rightTop.x + withShift.x), y: (rightTop.y + withShift.y))
  
         var newCorners: [(corner:cornerPoint,point:CGPoint)] = []
+        
+        switch drawingMode {
+        
+        case .drawRect:
+        
         switch corner {
             
         case .leftTop:
@@ -250,6 +258,36 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             newCorners.append((.rightBottom, shiftedRightBottom))
             newCorners.append((.rightTop, shiftedRightTop))
         }
+        
+        case .drawPolygon:
+            print("Polygon")
+        case .drawEllipse:
+            print("Ellipse")
+            
+            switch corner {
+                
+            case .leftTop:
+               
+                thePath.move(to: shiftedLeftTop)
+                thePath.addArc(withCenter: center, radius: 55, startAngle: .pi/2, endAngle: -.pi/2, clockwise: true)
+                // -FIXME:
+            
+                // save points
+                newCorners.append((.leftTop, shiftedLeftTop))
+                newCorners.append((.leftBottom, leftBottom))
+                newCorners.append((.rightBottom, rightBottom))
+                newCorners.append((.rightTop, rightTop))
+            
+            default:
+                print("will do")
+            }
+            
+        case .noShape:
+            print("noShape")
+            
+        }
+        
+        
         
         thePath.close()
     
@@ -457,7 +495,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
  
                          }
                     }
-               }
+                             // -TODO:  Detect PIN if
+                            if panStartPoint.getSubViewTouched != nil {
+                                // move PIN???
+                            }
+                 }
                     touchedPoint = panStartPoint // to offset reference
 
         if gesture.state == UIGestureRecognizer.State.changed && selectedShape != nil {
@@ -470,7 +512,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
            
             let offset = (x: (currentPoint.x - touchedPoint.x), y: (currentPoint.y - touchedPoint.y))
   
-             selectedLayer?.path = skewShape(corner,offset).cgPath
+             selectedLayer?.path = modifyShape(corner,offset).cgPath
  
             // highlight moving/resizing rect
             let color = UIColor(red: 1, green: 0, blue: 0.3, alpha: 0.4).cgColor
