@@ -307,6 +307,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {    [self] in
                      // show hide corner and rotate control
                     overlayImageView.isHidden = !overlayImageView.isHidden
+                    cornersImageView.forEach{$0.isHidden = !$0.isHidden}
                 }
                  if (selectedLayer == nil) {
                     selectedLayer = layer
