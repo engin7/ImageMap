@@ -150,9 +150,10 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         let shapeSize = min(imageView.bounds.width, imageView.bounds.height)/10
         let size = CGSize(width: shapeSize, height: shapeSize)
         let frame = CGRect(origin: touch, size: size)
-         
+ 
         switch mode {
         case .drawRect:
+         
             return UIBezierPath(rect: frame)
         case .drawPolygon:
             // TODO: make polygon possible
@@ -418,19 +419,19 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var panStartPoint = CGPoint.zero
     var touchedPoint = CGPoint.zero
 
-    
+  
     @objc func dragging(gesture: UIPanGestureRecognizer) {
      
         if gesture.state == UIGestureRecognizer.State.began {
              
             panStartPoint = rotationPanRecognizer.location(in: imageView)
             // possiblePoints to detect rect
-            let tl = CGPoint(x: panStartPoint.x+20, y: panStartPoint.y-20)
-            let bl = CGPoint(x: panStartPoint.x+20, y: panStartPoint.y+20)
-            let tr = CGPoint(x: panStartPoint.x-20, y: panStartPoint.y-20)
-            let br = CGPoint(x: panStartPoint.x-20, y: panStartPoint.y+20)
+            let tl = CGPoint(x: panStartPoint.x+30, y: panStartPoint.y-30)
+            let bl = CGPoint(x: panStartPoint.x+30, y: panStartPoint.y+30)
+            let tr = CGPoint(x: panStartPoint.x-30, y: panStartPoint.y-30)
+            let br = CGPoint(x: panStartPoint.x-30, y: panStartPoint.y+30)
             
-                // TODO: - Refactor this point detection
+                 // TODO: - Refactor this point detection
             imageView.layer.sublayers?.forEach { layer in
                 let layer = layer as? CAShapeLayer
                 if let path = layer?.path, path.contains(tl) || path.contains(bl) || path.contains(tr) || path.contains(br) {
@@ -440,47 +441,27 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                                 $0.shape == selectedLayer
                             }.first!
                             selectedShapesInitial = selectedShape
+                            let corners = getCorners(shape: selectedShape!)
+                            let positions = [cornerPoint.leftTop,cornerPoint.leftBottom,cornerPoint.rightBottom,cornerPoint.rightTop]
+                            // define in which corner we are: (default is no corners)
+                         
+                            for i in 0...3 {
+                                 if corners[i].distance(to: panStartPoint) < 40 {
+                                    corner = positions[i]
+                                }
+                            }
+                                
+                            }
+ 
                          }
                     }
                }
-            
-            if let subviewTouched =  panStartPoint.getSubViewTouched(imageView: imageView) {
+                    touchedPoint = panStartPoint // to offset reference
 
-                scrollView.isScrollEnabled = false // disabled scroll
-
-                if subviewTouched == overlayImageView {
-                    // rotating button
-                    print("INSIDE rot overlay")
-                    corner = .noCornersSelected
-                } else {
-                    print("INSIDE CORNERS")
-                    // corners or pin
-                    if cornersImageView.count > 0 {
-                        if subviewTouched == cornersImageView[0] {
-                            corner = .leftTop
-                        } else if subviewTouched == cornersImageView[1] {
-                            corner = .leftBottom
-                        } else if subviewTouched == cornersImageView[2] {
-                            corner = .rightBottom
-                        } else if subviewTouched == cornersImageView[3] {
-                            corner = .rightTop
-                        }
-                    }
-                        print(corner)
-                        print("***** Touch started")
-                }
-                
-            } else {
-                corner = .noCornersSelected
-            }
-             
-        }
- 
-        touchedPoint = panStartPoint // to offset reference
-        
         if gesture.state == UIGestureRecognizer.State.changed && selectedShape != nil {
             // we're inside selection
             print("&&&&&&&  TOUCHING")
+            print(corner)
             scrollView.isScrollEnabled = false // disabled scroll
            
             let currentPoint = rotationPanRecognizer.location(in: imageView)
@@ -554,14 +535,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         // reset
          
         guard let shape = shape else { return }
-        guard let leftTop = shape.cornersArray.filter({ $0.corner == .leftTop }).first?.point  else { return }
-        guard let leftBottom = shape.cornersArray.filter({ $0.corner == .leftBottom }).first?.point else {return }
-        guard let rightBottom = shape.cornersArray.filter({ $0.corner == .rightBottom }).first?.point else {return }
-        guard let rightTop = shape.cornersArray.filter({ $0.corner == .rightTop }).first?.point else {return }
-        
-        
-        let corners = [leftTop,leftBottom,rightBottom,rightTop]
-        
+        let corners = getCorners(shape: shape)
+       
         removeCornerOverlays()
           
         for i in 0...3 {
@@ -605,6 +580,20 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         textField.resignFirstResponder()
         return true
     }
+    
+    func getCorners(shape: shapeInfo) -> [CGPoint] {
+        
+        guard let leftTop = shape.cornersArray.filter({ $0.corner == .leftTop }).first?.point  else { return [] }
+        guard let leftBottom = shape.cornersArray.filter({ $0.corner == .leftBottom }).first?.point else { return [] }
+        guard let rightBottom = shape.cornersArray.filter({ $0.corner == .rightBottom }).first?.point else {return [] }
+        guard let rightTop = shape.cornersArray.filter({ $0.corner == .rightTop }).first?.point else {return [] }
+        
+        
+        let corners = [leftTop,leftBottom,rightBottom,rightTop]
+        return corners
+    }
+    
+    
     // MARK: - ScrollView zoom, drag etc
 
     override func viewWillLayoutSubviews() {
