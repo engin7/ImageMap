@@ -81,7 +81,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var selectedLayer: CAShapeLayer?
     var insideExistingShape = false
     var insideExistingPin = false
-    var subviewTapped = UIView()
+    var pinViewTapped = UIView()
     var subLabel: UILabel?
     var handImageView = UIImageView()
     var overlayImageView = UIImageView()
@@ -160,14 +160,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
              if gesture.state == UIGestureRecognizer.State.began {
                 
                   startPoint = longPressRecognizer.location(in: imageView)
-                
-                let handImg = UIImage(systemName: "hand.tap.fill")
-                handImageView = UIImageView(image: handImg)
-                let handPoint = CGPoint(x: startPoint.x-30, y: startPoint.y-30)
-                handImageView.frame.origin = handPoint
-                handImageView.frame.size = CGSize(width: 30, height: 30)
-                // careful! it can touch handView and use it as subview while checking with getSubViewTouched.
-//                self.imageView.addSubview(handImageView)
+             
                  
                 // check if inside rect
                 imageView.layer.sublayers?.forEach { layer in
@@ -177,11 +170,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                         
                         if let box =  layer?.path?.boundingBox {
                             if let subView = getSubViewSelected(bounds: box).first {
-                                subviewTapped = subView
+                                pinViewTapped = subView
                             }
                         }
                          
-                        let labels = subviewTapped.subviews.compactMap { $0 as? UILabel }
+                        let labels = pinViewTapped.subviews.compactMap { $0 as? UILabel }
                          subLabel = labels.first
                          insideExistingShape = true
                     }
@@ -190,13 +183,12 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                if !insideExistingShape {
                 if let pinTapped = getSubViewTouched(touchPoint: startPoint), pinTapped != overlayImageView {
                     // inside a pin
-                    subviewTapped = pinTapped
-                    let labels = subviewTapped.subviews.compactMap { $0 as? UILabel }
+                    pinViewTapped = pinTapped
+                    let labels = pinViewTapped.subviews.compactMap { $0 as? UILabel }
                     subLabel = labels.first
                     print("INSIDE A PIN *****")
                     insideExistingPin = true
-                    handImageView.image = UIImage(systemName: "arrow.up.and.down.and.arrow.left.and.right")
-                } else {
+                 } else {
                     // add shape layer
                      
                     imageView.layer.addSublayer(selectedShapeLayer)
@@ -235,7 +227,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     guard let midX = selectedLayer?.path?.boundingBox.midX else { return }
                     guard let midY = selectedLayer?.path?.boundingBox.midY else { return }
                     let midPoint = CGPoint(x: midX, y: midY)
-                    subviewTapped.center = midPoint
+                    pinViewTapped.center = midPoint
                     subLabel?.text = "(\(Double(round(1000*midX)/1000)), \(Double(round(1000*midY)/1000)))"
                      
                     guard let maxY = selectedLayer?.path?.boundingBox.maxY else { return }
@@ -251,7 +243,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                   }
                 
                 if insideExistingPin {
-                    subviewTapped.center = currentPoint
+                    pinViewTapped.center = currentPoint
                     subLabel?.text = "(\(Double(round(1000*currentPoint.x)/1000)), \(Double(round(1000*currentPoint.y)/1000)))"
                 }
                     handImageView.frame = (handImageView.frame.offsetBy(dx: xOffset, dy: yOffset))
@@ -266,6 +258,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                         if width < 5 {
                             addTag(withLocation: middlePoint, toPhoto: imageView)
                         } else {
+                            addTag(withLocation: middlePoint, toPhoto: imageView)
+
                             let rectLayer = CAShapeLayer()
                             rectLayer.strokeColor = UIColor.black.cgColor
                             rectLayer.fillColor = UIColor.clear.cgColor
@@ -286,14 +280,13 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                             
                             let corners  = [(corner: cornerPoint.leftTop,point: lt), (corner: cornerPoint.leftBottom,point: lb), (corner: cornerPoint.rightBottom,point: rb), (corner: cornerPoint.rightTop,point: rt)]
                         
-                            let layer = shapeInfo(shape: rectLayer, cornersArray: corners)
+                            let layer = shapeInfo(pin: pinViewTapped, shape: rectLayer, cornersArray: corners)
  
                             addRotationOverlay(layer)
                             addCornersOverlay(layer)
                             
                             allShapes.append(layer)
                             
-                            addTag(withLocation: middlePoint, toPhoto: imageView)
                      
                         }
                     } else {
@@ -427,16 +420,17 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         }
         
         thePath.close()
-   
-        let shapeEdited = shapeInfo(shape: selectedLayer!, cornersArray: newCorners)
-        selectedShape = shapeEdited
-          
+    
         var cornerArray: [CGPoint] = []
         newCorners.forEach{cornerArray.append($0.point)}
         moveCornerOverlay(corners:cornerArray)
         overlayImageView.frame.origin = CGPoint(x: cornerArray[2].x+20, y: cornerArray[2].y+20) // right Corner
         guard let point = cornerArray.centroid() else { return thePath}
-        subviewTapped.frame.origin = point
+        selectedShape?.pin.frame.origin = point
+        guard let pin = selectedShape?.pin else {return thePath}
+        
+        let shapeEdited = shapeInfo(pin: pin, shape: selectedLayer!, cornersArray: newCorners)
+        selectedShape = shapeEdited
         
         return thePath
         
@@ -460,6 +454,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             label.isHidden = true
         }
+        pinViewTapped = tempImageView
         photo.addSubview(tempImageView)
     }
     
@@ -529,8 +524,10 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     struct shapeInfo {
         var shape: CAShapeLayer
         var cornersArray : [(corner: cornerPoint,point: CGPoint)]
+        var pin: UIView
         
-        init(shape: CAShapeLayer, cornersArray: [(cornerPoint,CGPoint)] ) {
+        init(pin: UIView, shape: CAShapeLayer, cornersArray: [(cornerPoint,CGPoint)] ) {
+            self.pin = pin
             self.shape = shape
             self.cornersArray = cornersArray
            }
@@ -566,7 +563,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                                 $0.shape == selectedLayer
                             }.first!
                             selectedShapesInitial = selectedShape
-                        }
+                         }
                     }
                }
             
@@ -613,7 +610,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
            
             let offset = (x: (currentPoint.x - touchedPoint.x), y: (currentPoint.y - touchedPoint.y))
   
-            selectedLayer?.path = skewShape(corner,offset).cgPath
+             selectedLayer?.path = skewShape(corner,offset).cgPath
  
             // highlight moving/resizing rect
             let color = UIColor(red: 1, green: 0, blue: 0.3, alpha: 0.4).cgColor
