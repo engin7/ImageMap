@@ -148,13 +148,13 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
    
     var startPoint = CGPoint.zero
     var touchedPoint = CGPoint.zero
-
-   
+ 
     // MARK: - Helper method for drawing Shapes
     
     private func drawShape(touch: CGPoint, mode: drawMode) -> UIBezierPath {
     
-        let size = CGSize(width: 200, height: 200)
+        let shapeSize = min(imageView.bounds.width, imageView.bounds.height)/10
+        let size = CGSize(width: shapeSize, height: shapeSize)
         let frame = CGRect(origin: touch, size: size)
          
         switch mode {
@@ -164,7 +164,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             // TODO: make polygon possible
             return UIBezierPath(rect: frame)
         case .drawEllipse:
-            return UIBezierPath(roundedRect: frame, cornerRadius: 200)
+            return UIBezierPath(roundedRect: frame, cornerRadius: shapeSize)
         default:
             return UIBezierPath()
         }
