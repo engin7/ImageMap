@@ -72,14 +72,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         }
     }
     
-    var longPressRecognizer: UILongPressGestureRecognizer!
     var singleTapRecognizer: UITapGestureRecognizer!
     var rotationPanRecognizer : UIPanGestureRecognizer!
     let notificationCenter = NotificationCenter.default
  
     var selectedLayer: CAShapeLayer?
-    var insideExistingShape = false
-    var insideExistingPin = false
     var pinViewTapped = UIView()
     var handImageView = UIImageView()
     var overlayImageView = UIImageView()
@@ -113,7 +110,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(singleTap))
         scrollView.addGestureRecognizer(singleTapRecognizer)
         
-        rotationPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(rotationTapped))
+        rotationPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(dragging))
         rotationPanRecognizer.delegate = self
         imageView.isUserInteractionEnabled = true
         imageView.addGestureRecognizer(rotationPanRecognizer) // pan tutup surmek
@@ -145,9 +142,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         scrollView.scrollIndicatorInsets = scrollView.contentInset
         
     }
-   
-    var startPoint = CGPoint.zero
-    var touchedPoint = CGPoint.zero
  
     // MARK: - Helper method for drawing Shapes
     
@@ -421,14 +415,13 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var allShapes: [shapeInfo] = []
     var corner = cornerPoint()
     var panStartPoint = CGPoint.zero
+    var touchedPoint = CGPoint.zero
+
     
-    // FIXME: - CRASH WITHOUT RECTANGLE
-    
-    @objc func rotationTapped(gesture: UIPanGestureRecognizer) {
+    @objc func dragging(gesture: UIPanGestureRecognizer) {
      
         if gesture.state == UIGestureRecognizer.State.began {
-            
-            
+             
             panStartPoint = rotationPanRecognizer.location(in: imageView)
             // possiblePoints to detect rect
             let tl = CGPoint(x: panStartPoint.x-50, y: panStartPoint.y+50)
@@ -450,7 +443,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     }
                }
             
-            if let subviewTouched = getSubViewTouched(touchPoint: panStartPoint) {
+            if let subviewTouched =  panStartPoint.getSubViewTouched(imageView: imageView) {
 
                 scrollView.isScrollEnabled = false // disabled scroll
 
@@ -606,35 +599,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         }
     }
     
-    
-    
-    // MARK: - Get Subviews from clicked area
-
-    func getSubViewSelected(bounds: CGRect) -> [UIView] {
-        
-        let filteredSubviews = imageView.subviews.filter { subView -> Bool in
-            return bounds.contains(subView.frame)
-          }
-         
-        return filteredSubviews
-    }
-    
-    func getSubViewTouched(touchPoint: CGPoint) -> UIView? {
-        
-        let leftTopTolerance = CGPoint(x: touchPoint.x-10,y: touchPoint.y-10)
-        let leftBottomTolerance = CGPoint(x: touchPoint.x-10,y: touchPoint.y+10)
-        let rightBottomTolerance = CGPoint(x: touchPoint.x+10,y: touchPoint.y+10)
-        let rightTopTolerance = CGPoint(x: touchPoint.x+10,y: touchPoint.y-10)
-
-        let filteredSubviews = imageView.subviews.filter { subView -> Bool in
-            return subView.frame.contains(touchPoint) || subView.frame.contains(leftTopTolerance) || subView.frame.contains(leftBottomTolerance) || subView.frame.contains(rightBottomTolerance) || subView.frame.contains(rightTopTolerance)
-          }
-        guard let subviewTapped = filteredSubviews.first else {
-            return nil
-        }
-        return subviewTapped
-    }
-   
+  
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
@@ -699,87 +664,4 @@ extension ViewController: UIScrollViewDelegate {
         scrollView.zoom(to: rectToZoomTo, animated: true)
     }
         
-}
-
-extension Array where Element == CGPoint {
-    /// Calculate signed area.
-    ///
-    /// See https://en.wikipedia.org/wiki/Centroid#Of_a_polygon
-    ///
-    /// - Returns: The signed area
-
-    func signedArea() -> CGFloat {
-        if isEmpty { return .zero }
-
-        var sum: CGFloat = 0
-        for (index, point) in enumerated() {
-            let nextPoint: CGPoint
-            if index < count-1 {
-                nextPoint = self[index+1]
-            } else {
-                nextPoint = self[0]
-            }
-
-            sum += point.x * nextPoint.y - nextPoint.x * point.y
-        }
-
-        return sum / 2
-    }
-
-    /// Calculate centroid
-    ///
-    /// See https://en.wikipedia.org/wiki/Centroid#Of_a_polygon
-    ///
-    /// - Note: If the area of the polygon is zero (e.g. the points are collinear), this returns `nil`.
-    ///
-    /// - Parameter points: Unclosed points of polygon.
-    /// - Returns: Centroid point.
-
-    func centroid() -> CGPoint? {
-        if isEmpty { return nil }
-
-        let area = signedArea()
-        if area == 0 { return nil }
-
-        var sumPoint: CGPoint = .zero
-
-        for (index, point) in enumerated() {
-            let nextPoint: CGPoint
-            if index < count-1 {
-                nextPoint = self[index+1]
-            } else {
-                nextPoint = self[0]
-            }
-
-            let factor = point.x * nextPoint.y - nextPoint.x * point.y
-            sumPoint.x += (point.x + nextPoint.x) * factor
-            sumPoint.y += (point.y + nextPoint.y) * factor
-        }
-
-        return sumPoint / 6 / area
-    }
-
-    func mean() -> CGPoint? {
-        if isEmpty { return nil }
-
-        return reduce(.zero, +) / CGFloat(count)
-    }
-}
-
-extension CGPoint {
-    static func + (lhs: CGPoint, rhs: CGPoint) -> CGPoint {
-        CGPoint(x: lhs.x + rhs.x, y: lhs.y + rhs.y)
-    }
-
-    static func - (lhs: CGPoint, rhs: CGPoint) -> CGPoint {
-        CGPoint(x: lhs.x - rhs.x, y: lhs.y - rhs.y)
-    }
-
-    static func / (lhs: CGPoint, rhs: CGFloat) -> CGPoint {
-        CGPoint(x: lhs.x / rhs, y: lhs.y / rhs)
-    }
-
-    static func * (lhs: CGPoint, rhs: CGFloat) -> CGPoint {
-        CGPoint(x: lhs.x * rhs, y: lhs.y * rhs)
-    }
 }
