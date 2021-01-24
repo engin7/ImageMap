@@ -27,8 +27,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     @IBAction func clearPressed(_ sender: Any) {
         imageView.subviews.forEach({ $0.removeFromSuperview() })
         imageView.layer.sublayers?.removeAll()
-        longPressRecognizer.isEnabled = true
-    }
+     }
      
     @IBOutlet weak var rectButton: UIBarButtonItem!
     @IBAction func rectButtonPressed(_ sender: Any) {
@@ -82,7 +81,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var insideExistingShape = false
     var insideExistingPin = false
     var pinViewTapped = UIView()
-    var subLabel: UILabel?
     var handImageView = UIImageView()
     var overlayImageView = UIImageView()
     var cornersImageView: [UIImageView] = []
@@ -111,11 +109,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(scrollViewDoubleTapped))
         doubleTapRecognizer.numberOfTapsRequired = 2
         scrollView.addGestureRecognizer(doubleTapRecognizer)
-        
-        longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(longPressed))
-        scrollView.addGestureRecognizer(longPressRecognizer)
-        
-        singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(tagTapped))
+       
+        singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(singleTap))
         scrollView.addGestureRecognizer(singleTapRecognizer)
         
         rotationPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(rotationTapped))
@@ -154,172 +149,14 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var startPoint = CGPoint.zero
     var touchedPoint = CGPoint.zero
 
-    // MARK: - Long Press Gesture Logic
-    @objc func longPressed(gesture: UILongPressGestureRecognizer) {
-             
-             if gesture.state == UIGestureRecognizer.State.began {
-                
-                  startPoint = longPressRecognizer.location(in: imageView)
-             
-                 
-                // check if inside rect
-                imageView.layer.sublayers?.forEach { layer in
-                    let layer = layer as? CAShapeLayer
-                    if let path = layer?.path, path.contains(startPoint) {
-                        // if path contains startPoint or rotationPoint we're sure we're in a shape
-                        
-                        if let box =  layer?.path?.boundingBox {
-                            if let subView = getSubViewSelected(bounds: box).first {
-                                pinViewTapped = subView
-                            }
-                        }
-                         
-                        let labels = pinViewTapped.subviews.compactMap { $0 as? UILabel }
-                         subLabel = labels.first
-                         insideExistingShape = true
-                    }
-                }
-                 
-               if !insideExistingShape {
-                if let pinTapped = getSubViewTouched(touchPoint: startPoint), pinTapped != overlayImageView {
-                    // inside a pin
-                    pinViewTapped = pinTapped
-                    let labels = pinViewTapped.subviews.compactMap { $0 as? UILabel }
-                    subLabel = labels.first
-                    print("INSIDE A PIN *****")
-                    insideExistingPin = true
-                 } else {
-                    // add shape layer
-                     
-                    imageView.layer.addSublayer(selectedShapeLayer)
-                }
-               }
-                touchedPoint = startPoint // offset reference
-               // After start condition while keeping touch:
-             } else if gesture.state == UIGestureRecognizer.State.changed {
-                
-                let currentPoint = longPressRecognizer.location(in: imageView)
-                let xOffset = currentPoint.x - touchedPoint.x
-                let yOffset = currentPoint.y - touchedPoint.y
-                
-                 // insede shape conditon
-                if insideExistingShape && !insideExistingPin {
-                 
-                imageView.layer.sublayers?.forEach { layer in
-                    let layer = layer as? CAShapeLayer
-                        if let path = layer?.path, path.contains(currentPoint) {
-                            if (selectedLayer == nil) {
-                                selectedLayer = layer!
-                                  
-                            }
-                        }
-                   }
-                    
-                    guard let pathBox = selectedLayer?.path?.boundingBox else {return}
-                    let center = CGPoint(x: pathBox.midX, y: pathBox.midY)
-                     // apply offset to out drawn path
-                    // https://stackoverflow.com/a/20322817/8707120
-                  
-                    // highlight moving/resizing rect
-                    let color = UIColor(red: 0, green: 0, blue: 1, alpha: 0.2).cgColor
-                    selectedLayer?.fillColor? = color
-                    // update tag
-                    guard let midX = selectedLayer?.path?.boundingBox.midX else { return }
-                    guard let midY = selectedLayer?.path?.boundingBox.midY else { return }
-                    let midPoint = CGPoint(x: midX, y: midY)
-                    pinViewTapped.center = midPoint
-                    subLabel?.text = "(\(Double(round(1000*midX)/1000)), \(Double(round(1000*midY)/1000)))"
-                     
-                    guard let maxY = selectedLayer?.path?.boundingBox.maxY else { return }
-                    guard let maxX = selectedLayer?.path?.boundingBox.maxX else { return }
-                    // TODO: - Make rotation overlay image look nice while rotating. Right now it's getting bottom right values of all path points
-                    overlayImageView.frame.origin = CGPoint(x: maxX, y: maxY)
-                    
-                   }
-                if !insideExistingShape && !insideExistingPin {
-                    // draw rectangle, ellipse etc according to selection
-                    let path = drawShape(from: startPoint, to: currentPoint, mode: drawingMode)
-                    selectedShapeLayer.path = path.cgPath
-                  }
-                
-                if insideExistingPin {
-                    pinViewTapped.center = currentPoint
-                    subLabel?.text = "(\(Double(round(1000*currentPoint.x)/1000)), \(Double(round(1000*currentPoint.y)/1000)))"
-                }
-                    handImageView.frame = (handImageView.frame.offsetBy(dx: xOffset, dy: yOffset))
-                    touchedPoint = currentPoint
-             } else if gesture.state == UIGestureRecognizer.State.ended {
-                 
-                let currentPoint = longPressRecognizer.location(in: imageView)
-                let middlePoint = CGPoint(x: (currentPoint.x + startPoint.x)/2, y: (currentPoint.y + startPoint.y)/2)
-                if !insideExistingShape && !insideExistingPin {
-                    if let width = selectedShapeLayer.path?.boundingBox.size.width  {
-                        // just pin if size too small
-                        if width < 5 {
-                            addTag(withLocation: middlePoint, toPhoto: imageView)
-                        } else {
-                            addTag(withLocation: middlePoint, toPhoto: imageView)
-
-                            let rectLayer = CAShapeLayer()
-                            rectLayer.strokeColor = UIColor.black.cgColor
-                            rectLayer.fillColor = UIColor.clear.cgColor
-                            rectLayer.lineWidth = 4
-                            rectLayer.path = selectedShapeLayer.path
-                            imageView.layer.addSublayer(rectLayer)
-                             
-                            let minX = rectLayer.path!.boundingBox.minX
-                            let minY = rectLayer.path!.boundingBox.minY
-                            let maxX = rectLayer.path!.boundingBox.maxX
-                            let maxY = rectLayer.path!.boundingBox.maxY
-                            
-                            let lt = CGPoint(x: minX, y: minY)
-                            let lb = CGPoint(x: minX, y: maxY)
-                            let rb = CGPoint(x: maxX, y: maxY)
-                            let rt = CGPoint(x: maxX, y: minY)
-
-                            
-                            let corners  = [(corner: cornerPoint.leftTop,point: lt), (corner: cornerPoint.leftBottom,point: lb), (corner: cornerPoint.rightBottom,point: rb), (corner: cornerPoint.rightTop,point: rt)]
-                        
-                            let layer = shapeInfo(pin: pinViewTapped, shape: rectLayer, cornersArray: corners)
- 
-                            addRotationOverlay(layer)
-                            addCornersOverlay(layer)
-                            
-                            allShapes.append(layer)
-                            
-                     
-                        }
-                    } else {
-                        // no rect drawn. Just add pin
-                        addTag(withLocation: middlePoint, toPhoto: imageView)
-                    }
-                      selectedShapeLayer.path = nil
-                    
-                 }
-                selectedLayer?.fillColor = UIColor.clear.cgColor
-                insideExistingShape = false
-                insideExistingPin = false
-                selectedLayer = nil // ot chose new layers
-                subLabel = nil
-                handImageView.removeFromSuperview()
-                longPressRecognizer.isEnabled = false // remove later: to test PAN
-
-             }
-    }
-    
+   
     // MARK: - Helper method for drawing Shapes
     
-    private func drawShape(from: CGPoint, to: CGPoint, mode: drawMode) -> UIBezierPath {
+    private func drawShape(touch: CGPoint, mode: drawMode) -> UIBezierPath {
     
-        let width = abs(to.x - from.x)
-        let height = abs(to.y - from.y)
-        let frame = CGRect(x: min(from.x, to.x),
-                          y: min(from.y, to.y),
-                          width: width,
-                          height: height)
-        
-        let radius = sqrt(width * width + height * height)
-        
+        let size = CGSize(width: 200, height: 200)
+        let frame = CGRect(origin: touch, size: size)
+         
         switch mode {
         case .drawRect:
             return UIBezierPath(rect: frame)
@@ -327,7 +164,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             // TODO: make polygon possible
             return UIBezierPath(rect: frame)
         case .drawEllipse:
-            return UIBezierPath(roundedRect: frame, cornerRadius: radius)
+            return UIBezierPath(roundedRect: frame, cornerRadius: 200)
         default:
             return UIBezierPath()
         }
@@ -428,6 +265,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         guard let point = cornerArray.centroid() else { return thePath}
         selectedShape?.pin.frame.origin = point
         guard let pin = selectedShape?.pin else {return thePath}
+        let label = pin.subviews.compactMap { $0 as? UILabel }.first
+        label?.text = "(\(Double(round(1000*point.x)/1000)), \(Double(round(1000*point.y)/1000)))"
         
         let shapeEdited = shapeInfo(pin: pin, shape: selectedLayer!, cornersArray: newCorners)
         selectedShape = shapeEdited
@@ -460,9 +299,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     
     // MARK: - Tapping Tag
 
-    @objc func tagTapped(gesture: UIRotationGestureRecognizer) {
+    @objc func singleTap(gesture: UIRotationGestureRecognizer) {
         let touchPoint = singleTapRecognizer.location(in: imageView)
        
+        // add Rect with single tap
+         
         // Highlighting rect
         imageView.layer.sublayers?.forEach { layer in
             let layer = layer as? CAShapeLayer
@@ -474,9 +315,9 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     cornersImageView.forEach({ $0.isHidden = !$0.isHidden })
                 }
                  if (selectedLayer == nil) {
-                    selectedLayer = layer!
+                    selectedLayer = layer
                     selectedShape =  allShapes.filter {
-                        $0.shape == selectedLayer
+                        $0.shape == selectedLayer!
                     }.first!
                     selectedShapesInitial = selectedShape
                    
@@ -484,26 +325,68 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                   
             }
         }
-        // subViews: pin, rotating overlay,
-        
-        if let subviewTapped = getSubViewTouched(touchPoint: touchPoint) {
-            // hide label etc
-        subviewTapped.subviews.forEach({ $0.isHidden = !$0.isHidden })
-           
-            if subviewTapped == overlayImageView {
-                 
-                // rotating button
+ 
+             // hide label, highlight pin etc
+        if let pin = selectedShape?.pin {
+            pin.subviews.forEach({ $0.isHidden = !$0.isHidden })
+            if pin.tintColor == .red {
+                pin.tintColor = .systemBlue
             } else {
-                // TODO - add tint color selection
-                if subviewTapped.tintColor == .red {
-                    subviewTapped.tintColor = .systemBlue
-                } else {
-                    subviewTapped.tintColor = .red
-                }
+                pin.tintColor = .red
             }
-            
         }
-      
+        
+        // just add pin
+        if selectedLayer == nil && drawingMode == .noShape  {
+            addTag(withLocation: touchPoint, toPhoto: imageView)
+        }
+        
+        // No shape selected so add new one
+        if selectedLayer == nil && drawingMode != .noShape {
+            //add shape
+            // draw rectangle, ellipse etc according to selection
+            imageView.layer.addSublayer(selectedShapeLayer)
+            let path = drawShape(touch: touchPoint, mode: drawingMode)
+            selectedShapeLayer.path = path.cgPath
+            
+            let rectLayer = CAShapeLayer()
+            rectLayer.strokeColor = UIColor.black.cgColor
+            rectLayer.fillColor = UIColor.clear.cgColor
+            rectLayer.lineWidth = 4
+            rectLayer.path = selectedShapeLayer.path
+            imageView.layer.addSublayer(rectLayer)
+              
+            let minX = rectLayer.path!.boundingBox.minX
+            let minY = rectLayer.path!.boundingBox.minY
+            let maxX = rectLayer.path!.boundingBox.maxX
+            let maxY = rectLayer.path!.boundingBox.maxY
+             
+            let lt = CGPoint(x: minX, y: minY)
+            let lb = CGPoint(x: minX, y: maxY)
+            let rb = CGPoint(x: maxX, y: maxY)
+            let rt = CGPoint(x: maxX, y: minY)
+     
+            let corners  = [(corner: cornerPoint.leftTop,point: lt), (corner: cornerPoint.leftBottom,point: lb), (corner: cornerPoint.rightBottom,point: rb), (corner: cornerPoint.rightTop,point: rt)]
+            
+            var cornerPoints: [CGPoint] = []
+            corners.forEach{cornerPoints.append($0.point)}
+            
+            guard let center = cornerPoints.centroid() else { return }
+            
+            addTag(withLocation: center, toPhoto: imageView)
+
+            let layer = shapeInfo(pin: pinViewTapped, shape: rectLayer, cornersArray: corners)
+            
+            addRotationOverlay(layer)
+            addCornersOverlay(layer)
+            
+            allShapes.append(layer)
+             
+        }
+       
+        selectedLayer = nil
+        selectedShapeLayer.path = nil
+
     }
     
     // MARK: - Rotation logic
