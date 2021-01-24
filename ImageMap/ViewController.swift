@@ -80,7 +80,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var pinViewTapped = UIView()
     var handImageView = UIImageView()
     var overlayImageView = UIImageView()
-    var cornersImageView: [UIImageView] = []
+    var cornersImageView: [UIImageView] = [] // FIXME:
     var drawingMode = drawMode.noShape
     
     enum drawMode {
@@ -306,7 +306,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {    [self] in
                      // show hide corner and rotate control
                     overlayImageView.isHidden = !overlayImageView.isHidden
-                    cornersImageView.forEach({ $0.isHidden = !$0.isHidden })
                 }
                  if (selectedLayer == nil) {
                     selectedLayer = layer
@@ -314,7 +313,9 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                         $0.shape == selectedLayer!
                     }.first!
                     selectedShapesInitial = selectedShape
-                   
+                    var corners: [CGPoint] = []
+                    selectedShapesInitial?.cornersArray.forEach{corners.append($0.point)}
+                    moveCornerOverlay(corners:corners)
                 }
                   
             }
@@ -377,7 +378,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             allShapes.append(layer)
              
         }
-       
+        
         selectedLayer = nil
         selectedShapeLayer.path = nil
 
