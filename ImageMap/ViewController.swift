@@ -357,7 +357,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             label.isHidden = true
         }
-        tempImageView.tag = 0
+        tempImageView.tag = 2
         pinViewTapped = tempImageView
         photo.addSubview(tempImageView)
     }
@@ -417,7 +417,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         //  Detect PIN to drag it !!
         if let pin = touchPoint.getSubViewTouched(imageView: imageView)  {
                      // detect PIN
-                    if pin.tag == 0 {
+                    if pin.tag == 2 {
                         pinViewTapped = pin
                         pin.subviews.forEach({ $0.isHidden = !$0.isHidden })
                         // add menu to select image
@@ -556,7 +556,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             // detect PIN to drag it
             if let pin = panStartPoint.getSubViewTouched(imageView: imageView)  {
                          // detect PIN
-                        if pin.tag == 0 {
+                        if pin.tag == 2 {
                             pinViewTapped = pin
                         }
                     }
