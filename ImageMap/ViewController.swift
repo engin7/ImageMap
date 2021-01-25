@@ -300,8 +300,17 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             let w = rb.distance(to: lb)
             let h = lb.distance(to: lt)
             
-            
-            let frame = CGRect(x: lt.x, y: lt.y, width: w, height: h)
+            var frame = CGRect()
+            if lt.x < rt.x &&  lt.y < lb.y {
+                frame = CGRect(x: lt.x, y: lt.y, width: w, height: h)
+            }  else if lt.y > lb.y && lt.x > rt.x {
+                frame = CGRect(x: rb.x, y: rb.y, width: w, height: h)
+            }  else if lt.x > rt.x {
+                frame = CGRect(x: rt.x, y: rt.y, width: w, height: h)
+            }  else if lt.y > lb.y {
+                frame = CGRect(x: lb.x, y: lb.y, width: w, height: h)
+            }
+             
             let radii = min(frame.height, frame.width)
             ellipsePath = UIBezierPath(roundedRect: frame, cornerRadius: radii)
             newCorners = []
