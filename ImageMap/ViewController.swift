@@ -262,7 +262,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
          
         if drawingMode == .drawEllipse {
             
-            let frame = thePath.cgPath.boundingBox
+            let frame = thePath.cgPath.boundingBoxOfPath
             let radii = min(frame.height, frame.width)
             ellipsePath = UIBezierPath(roundedRect: frame, cornerRadius: radii)
             newCorners = []
@@ -460,21 +460,23 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     corner = positions[i]
                 }
             }
-            var cornersArray: [CGPoint] = []
-            cornersImageView.forEach{cornersArray.append($0.frame.origin)}
-            let cornersCenter = cornersArray.centroid()
- 
+            var cornersCenter = CGPoint(x: -100, y: -100) // outside the screen
+            if corner != .noCornersSelected {
+                var cornersArray: [CGPoint] = []
+                cornersImageView.forEach{cornersArray.append($0.frame.origin)}
+                cornersCenter = cornersArray.centroid() ?? CGPoint(x: -100, y: -100)
+            }
+            
                  // TODO: - Refactor this point detection
             imageView.layer.sublayers?.forEach { layer in
                 let layer = layer as? CAShapeLayer
-                if let path = layer?.path, path.contains(cornersCenter ?? panStartPoint) {
+                if let path = layer?.path, path.contains(cornersCenter) ||  path.contains(panStartPoint) {
                         if (selectedLayer == nil) {
                             selectedLayer = layer!
                             selectedShape =  allShapes.filter {
                                 $0.shape == selectedLayer
                             }.first!
                             selectedShapesInitial = selectedShape
-                           
                                 
                             }
  
