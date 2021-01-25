@@ -9,7 +9,7 @@ import UIKit
 
 // TODO:  remove @available(iOS 13.0, *) after changing system Images (also in extension)
 @available(iOS 13.0, *)
-class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizerDelegate {
+class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
  
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
                               shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
@@ -367,11 +367,23 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         photo.addSubview(tempImageView)
     }
     
+    // MARK: - Image Picker
+    
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        guard let image = info[.editedImage] as? UIImage else { return }
+
+        dismiss(animated: true)
+        let pin = pinViewTapped as! UIImageView
+        pin.image = image
+        pinViewTapped = nil
+    }
+    
     // MARK: - Tapping Tag
 
     @objc func singleTap(gesture: UIRotationGestureRecognizer) {
         let touchPoint = singleTapRecognizer.location(in: imageView)
-       
+        var choosingIcon = false
         // add Rect with single tap
          
         // Highlighting rect
@@ -409,12 +421,18 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             }
         }
         
-        // -TODO:  Detect PIN to drag it !!
+        //  Detect PIN to drag it !!
         if let pin = touchPoint.getSubViewTouched(imageView: imageView)  {
                      // detect PIN
                     if pin.tag == 0 {
                         pinViewTapped = pin
                         pin.subviews.forEach({ $0.isHidden = !$0.isHidden })
+                        // add menu to select image
+                            choosingIcon = true
+                        let picker = UIImagePickerController()
+                            picker.allowsEditing = true
+                            picker.delegate = self
+                            present(picker, animated: true)
                         
                     }
                 }
@@ -466,7 +484,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             allShapes.append(layer)
              
         }
-        pinViewTapped = nil
+        
+        if !choosingIcon {
+            pinViewTapped = nil
+        }
+        
         selectedLayer = nil
         selectedShapeLayer.path = nil
 
