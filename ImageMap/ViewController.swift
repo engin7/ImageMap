@@ -77,7 +77,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     let notificationCenter = NotificationCenter.default
  
     var selectedLayer: CAShapeLayer?
-    var pinViewTapped: UIView?
+    var pinViewTapped: UIImageView?
     var handImageView = UIImageView()
     var cornersImageView: [UIImageView] = [] // FIXME:
     var drawingMode = drawMode.noShape
@@ -369,8 +369,20 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         guard let image = info[.editedImage] as? UIImage else { return }
 
         dismiss(animated: true)
-        let pin = pinViewTapped as! UIImageView
+        guard let pin = pinViewTapped  else {return}
         pin.image = image
+        pin.layer.masksToBounds = false
+        pin.layer.cornerRadius = pin.frame.height/2
+        pin.layer.borderWidth = 2
+        pin.layer.borderColor = UIColor.systemBlue.cgColor
+        pin.clipsToBounds = true
+        pin.tag = 2
+        
+        let frame =  CGRect(x: pin.frame.minX+1, y:  pin.frame.minY+20, width: 38, height: 50)
+        let cone = UIImageView(frame: frame)
+        cone.image = UIImage(systemName: "arrowtriangle.down.fill")
+        imageView.insertSubview(cone, belowSubview: pin)
+         
         pinViewTapped = nil
     }
     
