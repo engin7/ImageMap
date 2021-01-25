@@ -186,9 +186,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
  
         var newCorners: [(corner:cornerPoint,point:CGPoint)] = []
         
-        switch drawingMode {
-        
-        case .drawRect:
         
         switch corner {
             
@@ -258,39 +255,26 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             newCorners.append((.rightBottom, shiftedRightBottom))
             newCorners.append((.rightTop, shiftedRightTop))
         }
+         
+        thePath.close()
         
-        case .drawPolygon:
-            print("Polygon")
-        case .drawEllipse:
-            print("Ellipse")
+        var ellipsePath = UIBezierPath()
+         
+        if drawingMode == .drawEllipse {
             
-            switch corner {
-                
-            case .leftTop:
-               
-                thePath.move(to: shiftedLeftTop)
-                thePath.addArc(withCenter: center, radius: 55, startAngle: .pi/2, endAngle: -.pi/2, clockwise: true)
-                // -FIXME:
+            let frame = thePath.cgPath.boundingBox
+            let radii = min(frame.height, frame.width)
+            ellipsePath = UIBezierPath(roundedRect: frame, cornerRadius: radii)
+            newCorners = []
             
-                // save points
-                newCorners.append((.leftTop, shiftedLeftTop))
-                newCorners.append((.leftBottom, leftBottom))
-                newCorners.append((.rightBottom, rightBottom))
-                newCorners.append((.rightTop, rightTop))
-            
-            default:
-                print("will do")
-            }
-            
-        case .noShape:
-            print("noShape")
+            // save points
+            newCorners.append((.leftTop, CGPoint(x: frame.minX, y: frame.minY)))
+            newCorners.append((.leftBottom, CGPoint(x: frame.minX, y: frame.maxY)))
+            newCorners.append((.rightBottom, CGPoint(x: frame.maxX, y: frame.maxY)))
+            newCorners.append((.rightTop, CGPoint(x: frame.maxX, y: frame.minY)))
             
         }
         
-        
-        
-        thePath.close()
-    
         var cornerArray: [CGPoint] = []
         newCorners.forEach{cornerArray.append($0.point)}
         moveCornerOverlay(corners:cornerArray)
@@ -304,6 +288,10 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         let shapeEdited = shapeInfo(pin: pin, shape: selectedLayer!, cornersArray: newCorners)
         selectedShape = shapeEdited
         
+       
+        if drawingMode == .drawEllipse {
+            return ellipsePath
+        }
         return thePath
         
     }
