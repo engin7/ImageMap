@@ -77,7 +77,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     let notificationCenter = NotificationCenter.default
  
     var selectedLayer: CAShapeLayer?
-    var pinViewTapped = UIView()
+    var pinViewTapped: UIView?
     var handImageView = UIImageView()
     var overlayImageView = UIImageView()
     var cornersImageView: [UIImageView] = [] // FIXME:
@@ -362,6 +362,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             label.isHidden = true
         }
+        tempImageView.tag = 0
         pinViewTapped = tempImageView
         photo.addSubview(tempImageView)
     }
@@ -447,7 +448,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             
             addTag(withLocation: center, toPhoto: imageView)
 
-            let layer = shapeInfo(pin: pinViewTapped, shape: rectLayer, cornersArray: corners)
+            let layer = shapeInfo(pin: pinViewTapped!, shape: rectLayer, cornersArray: corners)
             
             addRotationOverlay(layer)
             addCornersOverlay(layer)
@@ -533,20 +534,23 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                          }
                     }
                              // -TODO:  Detect PIN to drag it !!
-                            if panStartPoint.getSubViewTouched != nil {
-                                // move PIN???
-                            }
+            if let pin = panStartPoint.getSubViewTouched(imageView: imageView)  {
+                         // detect PIN
+                        if pin.tag == 0 {
+                            pinViewTapped = pin
+                        }
+                    }
                  }
                     touchedPoint = panStartPoint // to offset reference
 
-        if gesture.state == UIGestureRecognizer.State.changed && selectedShape != nil {
+        if gesture.state == UIGestureRecognizer.State.changed && selectedShape != nil || pinViewTapped != nil{
             // we're inside selection
             print("&&&&&&&  TOUCHING")
             print(corner)
             scrollView.isScrollEnabled = false // disabled scroll
            
             let currentPoint = rotationPanRecognizer.location(in: imageView)
-           
+            
             let offset = (x: (currentPoint.x - touchedPoint.x), y: (currentPoint.y - touchedPoint.y))
   
              selectedLayer?.path = modifyShape(corner,offset).cgPath
@@ -554,6 +558,10 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             // highlight moving/resizing rect
             let color = UIColor(red: 1, green: 0, blue: 0.3, alpha: 0.4).cgColor
             selectedLayer?.fillColor? = color
+            
+            if selectedShape == nil {
+                pinViewTapped?.frame.origin = currentPoint
+            }
             
             touchedPoint = currentPoint
             
@@ -585,7 +593,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             corner = .noCornersSelected
             touchedPoint = CGPoint.zero
             panStartPoint = CGPoint.zero
-  
+            pinViewTapped = nil
         }
          
 //        case .isRotating:
@@ -609,6 +617,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         overlayImageView.image = UIImage(systemName: "arrow.counterclockwise")
         overlayImageView.frame.origin = overlayOrigin
         overlayImageView.frame.size = CGSize(width: 50, height: 50)
+        overlayImageView.tag = 1
         self.imageView.addSubview(overlayImageView)
       }
     
