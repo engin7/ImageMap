@@ -16,7 +16,7 @@ extension CGPoint {
     }
   
     
-    func getSubViewTouched(imageView: UIImageView) -> UIImageView? {
+    func getSubViewTouched(imageView: UIImageView) -> UIView? {
         
         let leftTopTolerance = CGPoint(x: self.x-10,y: self.y-10)
         let leftBottomTolerance = CGPoint(x: self.x-10,y: self.y+10)
@@ -26,7 +26,7 @@ extension CGPoint {
         let filteredSubviews = imageView.subviews.filter { subView -> Bool in
             return subView.frame.contains(self) || subView.frame.contains(leftTopTolerance) || subView.frame.contains(leftBottomTolerance) || subView.frame.contains(rightBottomTolerance) || subView.frame.contains(rightTopTolerance)
           }
-        guard let subviewTapped = filteredSubviews.first as? UIImageView else {
+        guard let subviewTapped = filteredSubviews.first else {
             return nil
         }
         return subviewTapped

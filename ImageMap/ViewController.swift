@@ -77,7 +77,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     let notificationCenter = NotificationCenter.default
  
     var selectedLayer: CAShapeLayer?
-    var pinViewTapped: UIImageView?
+    var pinViewTapped: UIView?
     var handImageView = UIImageView()
     var cornersImageView: [UIImageView] = [] // FIXME:
     var drawingMode = drawMode.noShape
@@ -345,15 +345,19 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
 
     func addTag(withLocation location: CGPoint, toPhoto photo: UIImageView) {
         let frame = CGRect(x: location.x-20, y: location.y-20, width: 40, height: 40)
-        let tempImageView = UIImageView(frame: frame)
-        let tintableImage = UIImage(systemName: "pin.circle.fill")?.withRenderingMode(.alwaysTemplate)
-        tempImageView.image = tintableImage
-        tempImageView.tintColor = .red //will be options
+        let tempImageView = UIView(frame: frame)
         tempImageView.isUserInteractionEnabled = true
+        let pinImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: 40, height: 40))
+        let tintableImage = UIImage(systemName: "pin.circle.fill")?.withRenderingMode(.alwaysTemplate)
+        pinImageView.image = tintableImage
+        pinImageView.tintColor = .red //will be options
+        pinImageView.tag = 4
+        tempImageView.addSubview(pinImageView)
         
         let label = UILabel(frame: CGRect(x:40, y: 0, width: 250, height: 30))
         label.textColor = UIColor.red
         label.text = "(\(Double(round(1000*location.x)/1000)), \(Double(round(1000*location.y)/1000)))"
+        label.tag = 5
         tempImageView.addSubview(label)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
@@ -372,20 +376,29 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
 
         dismiss(animated: true)
         guard let pin = pinViewTapped  else {return}
-        pin.image = image
-        pin.layer.masksToBounds = false
-        pin.layer.cornerRadius = pin.frame.height/2
-        pin.layer.borderWidth = 2
-        pin.layer.borderColor = UIColor.systemBlue.cgColor
-        pin.clipsToBounds = true
+        // remove old pin
+        pin.subviews.forEach({ if $0.tag == 4 {$0.removeFromSuperview() }})
         pin.tag = 2
         
-        let frame =  CGRect(x: pin.frame.minX+1, y:  pin.frame.minY+20, width: 38, height: 50)
+        let frame =  CGRect(x: 1, y: 20, width: 38, height: 50)
         let cone = UIImageView(frame: frame)
         cone.image = UIImage(systemName: "arrowtriangle.down.fill")
+        cone.tag = 3
         pin.addSubview(cone)
-        imageView.insertSubview(cone, belowSubview: pin)
-         // NEED TO CHECK AS YOU ARE NOT ADDING AS SUBVIEW HERE 
+        
+        let circleImage = UIImageView(frame: CGRect(x: 0, y: 0, width: 40, height: 40))
+        circleImage.image = image
+        circleImage.layer.masksToBounds = false
+        circleImage.layer.cornerRadius = pin.frame.height/2
+        circleImage.layer.borderWidth = 2
+        circleImage.layer.borderColor = UIColor.systemBlue.cgColor
+        circleImage.clipsToBounds = true
+        circleImage.tag = 4
+        pin.addSubview(circleImage)
+        
+      
+        
+        imageView.bringSubviewToFront(pin)
         pinViewTapped = nil
     }
     
@@ -421,7 +434,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
  
              // hide label, highlight pin etc
         if let pin = selectedShape?.pin {
-            pin.subviews.forEach({ $0.isHidden = !$0.isHidden })
+            pin.subviews.forEach({ if $0.tag == 5 {$0.isHidden = !$0.isHidden }}) // hide show label
             if pin.tintColor == .red {
                 pin.tintColor = .systemBlue
             } else {
@@ -434,7 +447,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                      // detect PIN
                     if pin.tag == 2 {
                         pinViewTapped = pin
-                        pin.subviews.forEach({ $0.isHidden = !$0.isHidden })
+                        pin.subviews.forEach({ if $0.tag == 5 {$0.isHidden = !$0.isHidden }})
                         // add menu to select image
                             choosingIcon = true
                         let picker = UIImagePickerController()
@@ -572,7 +585,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             if let pin = panStartPoint.getSubViewTouched(imageView: imageView)  {
                          // detect PIN
                         if pin.tag == 2 {
-                            pinViewTapped = pin
+                              pinViewTapped = pin
                         }
                     }
                  }
@@ -595,9 +608,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             selectedLayer?.fillColor? = color
             
             if selectedShape == nil {
-                pinViewTapped?.frame.origin = CGPoint(x: currentPoint.x-20, y: currentPoint.y-20)
-                let cone = pinViewTapped?.subviews.compactMap { $0 as? UIImageView }.first
-                cone?.frame.origin = CGPoint(x: (pinViewTapped?.frame.minX)!+1, y:  (pinViewTapped?.frame.minY)!+20 )
+                pinViewTapped?.frame.origin = CGPoint(x: currentPoint.x-20, y: currentPoint.y-20)                 
             }
             
             touchedPoint = currentPoint
