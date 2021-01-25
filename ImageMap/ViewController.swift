@@ -325,14 +325,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         newCorners.forEach{cornerArray.append($0.point)}
         moveCornerOverlay(corners:cornerArray)
         guard let point = cornerArray.centroid() else { return thePath}
-        selectedShape?.pin.frame.origin =  CGPoint(x: point.x-20, y: point.y-20)
-        guard let pin = selectedShape?.pin else {return thePath}
-        let label = pin.subviews.compactMap { $0 as? UILabel }.first
-        label?.text = "(\(Double(round(1000*point.x)/1000)), \(Double(round(1000*point.y)/1000)))"
-        let cone = pin.subviews.compactMap { $0 as? UIImageView }.first
-        cone?.frame.origin = CGPoint(x: pin.frame.minX+1, y:  pin.frame.minY+20 )
-        
-        let shapeEdited = shapeInfo(pin: pin, shape: selectedLayer!, cornersArray: newCorners)
+        pinViewTapped?.frame.origin = CGPoint(x:  point.x-20, y: point.y-20)
+        let shapeEdited = shapeInfo(shape: selectedLayer!, cornersArray: newCorners)
         selectedShape = shapeEdited
         
         if drawingMode == .drawEllipse {
@@ -431,17 +425,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                   
             }
         }
- 
-             // hide label, highlight pin etc
-        if let pin = selectedShape?.pin {
-            pin.subviews.forEach({ if $0.tag == 5 {$0.isHidden = !$0.isHidden }}) // hide show label
-            if pin.tintColor == .red {
-                pin.tintColor = .systemBlue
-            } else {
-                pin.tintColor = .red
-            }
-        }
-        
+  
         //  Detect PIN to drag it !!
         if let pin = touchPoint.getSubViewTouched(imageView: imageView)  {
                      // detect PIN
@@ -497,7 +481,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             
             addTag(withLocation: center, toPhoto: imageView)
 
-            let layer = shapeInfo(pin: pinViewTapped!, shape: rectLayer, cornersArray: corners)
+            let layer = shapeInfo(shape: rectLayer, cornersArray: corners)
            
             addCornersOverlay(layer)
             
@@ -532,10 +516,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     struct shapeInfo {
         var shape: CAShapeLayer
         var cornersArray : [(corner: cornerPoint,point: CGPoint)]
-        var pin: UIView
-        
-        init(pin: UIView, shape: CAShapeLayer, cornersArray: [(cornerPoint,CGPoint)] ) {
-            self.pin = pin
+ 
+        init(shape: CAShapeLayer, cornersArray: [(cornerPoint,CGPoint)] ) {
             self.shape = shape
             self.cornersArray = cornersArray
            }
@@ -578,17 +560,27 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                                 $0.shape == selectedLayer
                             }.first!
                             selectedShapesInitial = selectedShape
+                            if let center = getCorners(shape: selectedShape!).centroid()    {
+                             if let pin = center.getSubViewTouched(imageView: imageView)  {
+                                         // detect PIN
+                                        if pin.tag == 2 {
+                                              pinViewTapped = pin
+                                        }
+                                    }
+                                }
                             }
                          }
                     }
-            // detect PIN to drag it
+            if selectedShape == nil  {
+            // detect PIN to drag it (no shape condition)
             if let pin = panStartPoint.getSubViewTouched(imageView: imageView)  {
                          // detect PIN
                         if pin.tag == 2 {
                               pinViewTapped = pin
                         }
                     }
-                 }
+               }
+       }
                     touchedPoint = panStartPoint // to offset reference
 
         if gesture.state == UIGestureRecognizer.State.changed && selectedShape != nil || pinViewTapped != nil{
@@ -608,14 +600,14 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             selectedLayer?.fillColor? = color
             
             if selectedShape == nil {
-                pinViewTapped?.frame.origin = CGPoint(x: currentPoint.x-20, y: currentPoint.y-20)                 
+                pinViewTapped?.frame.origin = CGPoint(x: currentPoint.x-20, y: currentPoint.y-20)
+                
             }
             
             touchedPoint = currentPoint
             
         }
-         
-        
+          
         if gesture.state == UIGestureRecognizer.State.ended {
             
              // if clicked on rotation image cancel scrollView pangesture
