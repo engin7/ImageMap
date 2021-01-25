@@ -329,6 +329,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         guard let pin = selectedShape?.pin else {return thePath}
         let label = pin.subviews.compactMap { $0 as? UILabel }.first
         label?.text = "(\(Double(round(1000*point.x)/1000)), \(Double(round(1000*point.y)/1000)))"
+        let cone = pin.subviews.compactMap { $0 as? UIImageView }.first
+        cone?.frame.origin = CGPoint(x: pin.frame.minX+1, y:  pin.frame.minY+20 )
         
         let shapeEdited = shapeInfo(pin: pin, shape: selectedLayer!, cornersArray: newCorners)
         selectedShape = shapeEdited
@@ -381,13 +383,14 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         let frame =  CGRect(x: pin.frame.minX+1, y:  pin.frame.minY+20, width: 38, height: 50)
         let cone = UIImageView(frame: frame)
         cone.image = UIImage(systemName: "arrowtriangle.down.fill")
+        pin.addSubview(cone)
         imageView.insertSubview(cone, belowSubview: pin)
-         
+         // NEED TO CHECK AS YOU ARE NOT ADDING AS SUBVIEW HERE 
         pinViewTapped = nil
     }
     
     // MARK: - Tapping Tag
-
+ 
     @objc func singleTap(gesture: UIRotationGestureRecognizer) {
         let touchPoint = singleTapRecognizer.location(in: imageView)
         var choosingIcon = false
@@ -593,6 +596,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             
             if selectedShape == nil {
                 pinViewTapped?.frame.origin = CGPoint(x: currentPoint.x-20, y: currentPoint.y-20)
+                let cone = pinViewTapped?.subviews.compactMap { $0 as? UIImageView }.first
+                cone?.frame.origin = CGPoint(x: (pinViewTapped?.frame.minX)!+1, y:  (pinViewTapped?.frame.minY)!+20 )
             }
             
             touchedPoint = currentPoint
