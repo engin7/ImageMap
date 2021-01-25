@@ -299,7 +299,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     // MARK: - Adding Tag
 
     func addTag(withLocation location: CGPoint, toPhoto photo: UIImageView) {
-        let frame = CGRect(x: location.x, y: location.y, width: 20, height: 20)
+        let frame = CGRect(x: location.x, y: location.y, width: 40, height: 40)
         let tempImageView = UIImageView(frame: frame)
         let tintableImage = UIImage(systemName: "pin.circle.fill")?.withRenderingMode(.alwaysTemplate)
         tempImageView.image = tintableImage
@@ -453,31 +453,28 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         if gesture.state == UIGestureRecognizer.State.began {
              
             panStartPoint = rotationPanRecognizer.location(in: imageView)
-            // possiblePoints to detect rect
-            let tl = CGPoint(x: panStartPoint.x+30, y: panStartPoint.y-30)
-            let bl = CGPoint(x: panStartPoint.x+30, y: panStartPoint.y+30)
-            let tr = CGPoint(x: panStartPoint.x-30, y: panStartPoint.y-30)
-            let br = CGPoint(x: panStartPoint.x-30, y: panStartPoint.y+30)
-            
+            // define in which corner we are: (default is no corners)
+            let positions = [cornerPoint.leftTop,cornerPoint.leftBottom,cornerPoint.rightBottom,cornerPoint.rightTop]
+            for i in 0...3 {
+                if cornersImageView[i].frame.origin.distance(to: panStartPoint) < 44 {
+                    corner = positions[i]
+                }
+            }
+            var cornersArray: [CGPoint] = []
+            cornersImageView.forEach{cornersArray.append($0.frame.origin)}
+            let cornersCenter = cornersArray.centroid()
+ 
                  // TODO: - Refactor this point detection
             imageView.layer.sublayers?.forEach { layer in
                 let layer = layer as? CAShapeLayer
-                if let path = layer?.path, path.contains(tl) || path.contains(bl) || path.contains(tr) || path.contains(br) {
+                if let path = layer?.path, path.contains(cornersCenter ?? panStartPoint) {
                         if (selectedLayer == nil) {
                             selectedLayer = layer!
                             selectedShape =  allShapes.filter {
                                 $0.shape == selectedLayer
                             }.first!
                             selectedShapesInitial = selectedShape
-                            let corners = getCorners(shape: selectedShape!)
-                            let positions = [cornerPoint.leftTop,cornerPoint.leftBottom,cornerPoint.rightBottom,cornerPoint.rightTop]
-                            // define in which corner we are: (default is no corners)
-                         
-                            for i in 0...3 {
-                                 if corners[i].distance(to: panStartPoint) < 40 {
-                                    corner = positions[i]
-                                }
-                            }
+                           
                                 
                             }
  
