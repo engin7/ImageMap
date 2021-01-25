@@ -79,7 +79,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var selectedLayer: CAShapeLayer?
     var pinViewTapped: UIView?
     var handImageView = UIImageView()
-    var overlayImageView = UIImageView()
     var cornersImageView: [UIImageView] = [] // FIXME:
     var drawingMode = drawMode.noShape
     
@@ -181,7 +180,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         let shiftedRightTop = CGPoint(x: (rightTop.x + withShift.x), y: (rightTop.y + withShift.y))
  
         var newCorners: [(corner:cornerPoint,point:CGPoint)] = []
-        
         
         switch corner {
             
@@ -326,9 +324,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         var cornerArray: [CGPoint] = []
         newCorners.forEach{cornerArray.append($0.point)}
         moveCornerOverlay(corners:cornerArray)
-        overlayImageView.frame.origin = CGPoint(x: cornerArray[2].x+20, y: cornerArray[2].y+20) // right Corner
         guard let point = cornerArray.centroid() else { return thePath}
-        selectedShape?.pin.frame.origin = point
+        selectedShape?.pin.frame.origin =  CGPoint(x: point.x-20, y: point.y-20)
         guard let pin = selectedShape?.pin else {return thePath}
         let label = pin.subviews.compactMap { $0 as? UILabel }.first
         label?.text = "(\(Double(round(1000*point.x)/1000)), \(Double(round(1000*point.y)/1000)))"
@@ -336,18 +333,16 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         let shapeEdited = shapeInfo(pin: pin, shape: selectedLayer!, cornersArray: newCorners)
         selectedShape = shapeEdited
         
-       
         if drawingMode == .drawEllipse {
             return ellipsePath
         }
         return thePath
-        
     }
     
     // MARK: - Adding Tag
 
     func addTag(withLocation location: CGPoint, toPhoto photo: UIImageView) {
-        let frame = CGRect(x: location.x, y: location.y, width: 40, height: 40)
+        let frame = CGRect(x: location.x-20, y: location.y-20, width: 40, height: 40)
         let tempImageView = UIImageView(frame: frame)
         let tintableImage = UIImage(systemName: "pin.circle.fill")?.withRenderingMode(.alwaysTemplate)
         tempImageView.image = tintableImage
@@ -393,7 +388,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {    [self] in
                      // show hide corner and rotate control
-                    overlayImageView.isHidden = !overlayImageView.isHidden
                     cornersImageView.forEach{$0.isHidden = !$0.isHidden}
                 }
                  if (selectedLayer == nil) {
@@ -405,7 +399,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     var corners: [CGPoint] = []
                     selectedShapesInitial?.cornersArray.forEach{corners.append($0.point)}
                     moveCornerOverlay(corners:corners)
-                    moveRotationOverlay(selectedShapesInitial)
                 }
                   
             }
@@ -477,8 +470,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             addTag(withLocation: center, toPhoto: imageView)
 
             let layer = shapeInfo(pin: pinViewTapped!, shape: rectLayer, cornersArray: corners)
-            
-            addRotationOverlay(layer)
+           
             addCornersOverlay(layer)
             
             allShapes.append(layer)
@@ -528,7 +520,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var panStartPoint = CGPoint.zero
     var touchedPoint = CGPoint.zero
 
-  
     @objc func dragging(gesture: UIPanGestureRecognizer) {
      
         if gesture.state == UIGestureRecognizer.State.began {
@@ -624,42 +615,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             panStartPoint = CGPoint.zero
             pinViewTapped = nil
         }
-         
-//        case .isRotating:
-//            print("ROTATING")
-//            if yOffset < 0 {
-//                translation = CGAffineTransform(rotationAngle: 0.99*CGFloat.pi).translatedBy(x: -center.x, y: -center.y)
-//            } else {
-//                translation = CGAffineTransform(rotationAngle: -0.99*CGFloat.pi).translatedBy(x: -center.x, y: -center.y)
-//            }
-//            translateBack = CGAffineTransform(translationX: center.x, y: center.y)
-//
-        
-    }
-     
-    func addRotationOverlay(_ shape: shapeInfo?) {
- 
-       guard let shape = shape else { return }
-       guard let rightBottom = shape.cornersArray.filter({ $0.corner == .rightBottom }).first?.point else {return }
-        let overlayOrigin = CGPoint(x: rightBottom.x+20, y: rightBottom.y+20) // right Corner
   
-        overlayImageView.image = UIImage(systemName: "arrow.counterclockwise")
-        overlayImageView.frame.origin = overlayOrigin
-        overlayImageView.frame.size = CGSize(width: 50, height: 50)
-        overlayImageView.tag = 1
-        self.imageView.addSubview(overlayImageView)
-      }
-    
-    func moveRotationOverlay(_ shape: shapeInfo?) {
-        guard let shape = shape else { return }
-        guard let rightBottom = shape.cornersArray.filter({ $0.corner == .rightBottom }).first?.point else {return }
-         let overlayOrigin = CGPoint(x: rightBottom.x+20, y: rightBottom.y+20) // right Corner
-          overlayImageView.frame.origin = overlayOrigin
     }
     
     func addCornersOverlay(_ shape: shapeInfo?) {
         // reset
-         
         guard let shape = shape else { return }
         let corners = getCorners(shape: shape)
        
