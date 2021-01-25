@@ -174,10 +174,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         guard let leftBottom = shape.cornersArray.filter({ $0.corner == .leftBottom }).first?.point else {return thePath}
         guard let rightBottom = shape.cornersArray.filter({ $0.corner == .rightBottom }).first?.point else {return thePath}
         guard let rightTop = shape.cornersArray.filter({ $0.corner == .rightTop }).first?.point else {return thePath}
-        let corners = [leftTop, leftBottom, rightBottom, rightTop]
-        guard let center = corners.centroid() else { return thePath }
-        
-        // left top center, .
         
         let shiftedLeftTop = CGPoint(x: (leftTop.x + withShift.x), y: (leftTop.y + withShift.y))
         let shiftedLeftBottom = CGPoint(x: (leftBottom.x + withShift.x), y: (leftBottom.y + withShift.y))
@@ -261,17 +257,60 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         var ellipsePath = UIBezierPath()
          
         if drawingMode == .drawEllipse {
+             
+            guard let leftTop = newCorners.filter({ $0.corner == .leftTop }).first?.point  else { return thePath}
+            guard let leftBottom = newCorners.filter({ $0.corner == .leftBottom }).first?.point else {return thePath}
+            guard let rightBottom = newCorners.filter({ $0.corner == .rightBottom }).first?.point else {return thePath}
+            guard let rightTop = newCorners.filter({ $0.corner == .rightTop }).first?.point else {return thePath}
             
-            let frame = thePath.cgPath.boundingBoxOfPath
+            var lt = CGPoint.zero
+            var lb = CGPoint.zero
+            var rb = CGPoint.zero
+            var rt = CGPoint.zero
+             
+            switch corner {
+            
+            case .leftTop:
+                lt = leftTop
+                lb = CGPoint(x: leftTop.x, y:  leftBottom.y)
+                rb = rightBottom
+                rt = CGPoint(x: rightTop.x, y: leftTop.y)
+            case .leftBottom:
+                lt = CGPoint(x: leftBottom.x, y:  leftTop.y)
+                lb = leftBottom
+                rb = CGPoint(x: rightBottom.x, y: leftBottom.y)
+                rt = rightTop
+            case .rightBottom:
+                lt = leftTop
+                lb = CGPoint(x: leftBottom.x, y: rightBottom.y)
+                rb = rightBottom
+                rt = CGPoint(x: rightBottom.x, y: rightTop.y)
+            case .rightTop:
+                lt = CGPoint(x: leftTop.x, y:  rightTop.y)
+                lb = leftBottom
+                rb = CGPoint(x: rightTop.x, y: rightBottom.y)
+                rt = rightTop
+            case .noCornersSelected:
+                lt = leftTop
+                lb = leftBottom
+                rb = rightBottom
+                rt = rightTop
+            }
+          
+            let w = rb.distance(to: lb)
+            let h = lb.distance(to: lt)
+            
+            
+            let frame = CGRect(x: lt.x, y: lt.y, width: w, height: h)
             let radii = min(frame.height, frame.width)
             ellipsePath = UIBezierPath(roundedRect: frame, cornerRadius: radii)
             newCorners = []
             
             // save points
-            newCorners.append((.leftTop, CGPoint(x: frame.minX, y: frame.minY)))
-            newCorners.append((.leftBottom, CGPoint(x: frame.minX, y: frame.maxY)))
-            newCorners.append((.rightBottom, CGPoint(x: frame.maxX, y: frame.maxY)))
-            newCorners.append((.rightTop, CGPoint(x: frame.maxX, y: frame.minY)))
+            newCorners.append((.leftTop, lt))
+            newCorners.append((.leftBottom, lb))
+            newCorners.append((.rightBottom, rb))
+            newCorners.append((.rightTop, rt))
             
         }
         
@@ -455,10 +494,12 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             panStartPoint = rotationPanRecognizer.location(in: imageView)
             // define in which corner we are: (default is no corners)
             let positions = [cornerPoint.leftTop,cornerPoint.leftBottom,cornerPoint.rightBottom,cornerPoint.rightTop]
+            if !cornersImageView.isEmpty {
             for i in 0...3 {
                 if cornersImageView[i].frame.origin.distance(to: panStartPoint) < 44 {
                     corner = positions[i]
                 }
+            }
             }
             var cornersCenter = CGPoint(x: -100, y: -100) // outside the screen
             if corner != .noCornersSelected {
@@ -482,7 +523,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
  
                          }
                     }
-                             // -TODO:  Detect PIN if
+                             // -TODO:  Detect PIN to drag it !!
                             if panStartPoint.getSubViewTouched != nil {
                                 // move PIN???
                             }
