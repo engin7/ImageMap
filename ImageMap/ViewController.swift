@@ -354,7 +354,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         tempImageView.tintColor = .red //will be options
         tempImageView.isUserInteractionEnabled = true
         
-        let label = UILabel(frame: CGRect(x:30, y: 0, width: 250, height: 30))
+        let label = UILabel(frame: CGRect(x:40, y: 0, width: 250, height: 30))
         label.textColor = UIColor.red
         label.text = "(\(Double(round(1000*location.x)/1000)), \(Double(round(1000*location.y)/1000)))"
         tempImageView.addSubview(label)
@@ -409,8 +409,18 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             }
         }
         
+        // -TODO:  Detect PIN to drag it !!
+        if let pin = touchPoint.getSubViewTouched(imageView: imageView)  {
+                     // detect PIN
+                    if pin.tag == 0 {
+                        pinViewTapped = pin
+                        pin.subviews.forEach({ $0.isHidden = !$0.isHidden })
+                        
+                    }
+                }
+        
         // just add pin
-        if selectedLayer == nil && drawingMode == .noShape  {
+        if selectedLayer == nil && drawingMode == .noShape && pinViewTapped == nil  {
             addTag(withLocation: touchPoint, toPhoto: imageView)
         }
         
@@ -456,7 +466,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             allShapes.append(layer)
              
         }
-        
+        pinViewTapped = nil
         selectedLayer = nil
         selectedShapeLayer.path = nil
 
@@ -517,7 +527,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                 cornersImageView.forEach{cornersArray.append($0.frame.origin)}
                 cornersCenter = cornersArray.centroid() ?? CGPoint(x: -100, y: -100)
             }
-            
                  // TODO: - Refactor this point detection
             imageView.layer.sublayers?.forEach { layer in
                 let layer = layer as? CAShapeLayer
@@ -528,12 +537,10 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                                 $0.shape == selectedLayer
                             }.first!
                             selectedShapesInitial = selectedShape
-                                
                             }
- 
                          }
                     }
-                             // -TODO:  Detect PIN to drag it !!
+            // detect PIN to drag it
             if let pin = panStartPoint.getSubViewTouched(imageView: imageView)  {
                          // detect PIN
                         if pin.tag == 0 {
@@ -560,7 +567,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             selectedLayer?.fillColor? = color
             
             if selectedShape == nil {
-                pinViewTapped?.frame.origin = currentPoint
+                pinViewTapped?.frame.origin = CGPoint(x: currentPoint.x-20, y: currentPoint.y-20)
             }
             
             touchedPoint = currentPoint
