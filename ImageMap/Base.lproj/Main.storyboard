@@ -101,7 +101,7 @@
                                 <rect key="frame" x="10" y="164" width="394" height="572"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="cell" id="vrB-Zv-wgB" customClass="MainTableViewCell" customModule="ImageMap" customModuleProvider="target">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" accessoryType="disclosureIndicator" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" id="vrB-Zv-wgB">
                                         <rect key="frame" x="20" y="55.333332061767578" width="354" height="43.666667938232422"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="vrB-Zv-wgB" id="wX9-uY-bwz">
@@ -116,6 +116,16 @@
                                     <outlet property="delegate" destination="sCE-ca-Nek" id="YpB-Jk-rAx"/>
                                 </connections>
                             </tableView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="juN-zH-qlv">
+                                <rect key="frame" x="184" y="662" width="200" height="44"/>
+                                <color key="backgroundColor" systemColor="systemRedColor"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="200" id="F61-yn-DvD"/>
+                                    <constraint firstAttribute="height" constant="44" id="kxZ-DB-JV4"/>
+                                </constraints>
+                                <color key="tintColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <state key="normal" title="+ Add New Equipment"/>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="pgp-Cj-TMB"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -123,10 +133,15 @@
                             <constraint firstItem="TQw-7q-pgf" firstAttribute="top" secondItem="pgp-Cj-TMB" secondAttribute="top" constant="120" id="Gie-Uf-NWM"/>
                             <constraint firstItem="pgp-Cj-TMB" firstAttribute="trailing" secondItem="TQw-7q-pgf" secondAttribute="trailing" constant="10" id="NSJ-Qd-ZKA"/>
                             <constraint firstItem="TQw-7q-pgf" firstAttribute="leading" secondItem="pgp-Cj-TMB" secondAttribute="leading" constant="10" id="eLE-aI-E6g"/>
+                            <constraint firstItem="pgp-Cj-TMB" firstAttribute="trailing" secondItem="juN-zH-qlv" secondAttribute="trailing" constant="30" id="fJs-tL-pFb"/>
+                            <constraint firstItem="pgp-Cj-TMB" firstAttribute="bottom" secondItem="juN-zH-qlv" secondAttribute="bottom" constant="30" id="jWY-2b-dn0"/>
                             <constraint firstItem="pgp-Cj-TMB" firstAttribute="bottom" secondItem="TQw-7q-pgf" secondAttribute="bottom" id="p7T-VR-63Z"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Safety Assure" id="Pih-aY-xf4"/>
+                    <connections>
+                        <outlet property="newEquipmentButton" destination="juN-zH-qlv" id="6Bk-L8-npf"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="YS2-uv-Ljp" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>

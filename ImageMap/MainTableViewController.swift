@@ -8,10 +8,12 @@
 import UIKit
 
 class MainTableViewController: UIViewController, UITabBarControllerDelegate, UITableViewDataSource {
-
+ 
+    @IBOutlet weak var newEquipmentButton: UIButton!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-       
+        newEquipmentButton.layer.cornerRadius = 20
     }
 
     // MARK: - Table view data source
@@ -30,7 +32,7 @@ class MainTableViewController: UIViewController, UITabBarControllerDelegate, UIT
       
         let cell: UITableViewCell = {
 
-            guard let cell = tableView.dequeueReusableCell(withIdentifier: "cell") as? MainTableViewCell else {
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "cell")  else {
 
                     return UITableViewCell(style: .default, reuseIdentifier: "cell")
 
@@ -57,15 +59,18 @@ class MainTableViewController: UIViewController, UITabBarControllerDelegate, UIT
         cell.textLabel?.font = UIFont.systemFont(ofSize: 28)
         cell.textLabel?.textAlignment = .left
         
-        
-          cell.layer.cornerRadius = 8
-            cell.layer.borderColor = UIColor.gray.cgColor
-            cell.layer.borderWidth = 1
-        
-        
+        cell.layer.cornerRadius = 8
+        cell.layer.borderColor = UIColor.gray.cgColor
+        cell.layer.borderWidth = 1
+       
+        cell.layer.shadowColor = UIColor.black.cgColor
+        cell.layer.shadowOpacity = 0.5
+        cell.layer.shadowRadius = 2.0
+        cell.layer.shadowOffset = CGSize(width: 13.0, height: 12.0)
+  
         return cell
     }
-      
+ 
      
 
 }
