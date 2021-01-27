@@ -193,7 +193,7 @@
         <!--Add Equipment-->
         <scene sceneID="C0n-aB-QDN">
             <objects>
-                <viewController id="QV3-73-XBM" sceneMemberID="viewController">
+                <viewController id="QV3-73-XBM" customClass="AddEquipmentViewController" customModule="ImageMap" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="J6o-SL-J4q">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -232,19 +232,25 @@
                                 <color key="textColor" name="AccentColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hza-ZK-hgH">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" adjustsImageWhenHighlighted="NO" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hza-ZK-hgH">
                                 <rect key="frame" x="20" y="299" width="374" height="120"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="120" id="NPP-fT-RXz"/>
                                 </constraints>
                                 <state key="normal" backgroundImage="addLocation"/>
+                                <connections>
+                                    <action selector="addLocationButtonTapped:" destination="QV3-73-XBM" eventType="touchUpInside" id="wBH-m3-ApV"/>
+                                </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ZuP-m1-eV6">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" adjustsImageWhenHighlighted="NO" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="ZuP-m1-eV6">
                                 <rect key="frame" x="20" y="456" width="374" height="120"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="120" id="Dwv-Aw-MBW"/>
                                 </constraints>
                                 <state key="normal" backgroundImage="addPhoto"/>
+                                <connections>
+                                    <action selector="addPhotoButtonTapped:" destination="QV3-73-XBM" eventType="touchUpInside" id="YyM-jE-eHL"/>
+                                </connections>
                             </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="BHp-qY-cDd"/>
@@ -275,6 +281,12 @@
                     <navigationItem key="navigationItem" title="Add Equipment" id="h8s-LH-58m">
                         <barButtonItem key="backBarButtonItem" title="Back" id="0nB-2s-lOV"/>
                     </navigationItem>
+                    <connections>
+                        <outlet property="addLocationButton" destination="hza-ZK-hgH" id="wS4-T6-IJk"/>
+                        <outlet property="addPhotoButton" destination="ZuP-m1-eV6" id="Ucq-dy-nO2"/>
+                        <outlet property="equipmentCodeTextField" destination="k4t-DF-VPe" id="ZlM-hl-J8u"/>
+                        <outlet property="equipmentTypeTextField" destination="BpM-g8-hA2" id="Tk0-gd-fPw"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="UI5-oa-W4k" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
