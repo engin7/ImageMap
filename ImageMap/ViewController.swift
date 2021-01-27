@@ -12,6 +12,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
  
     
     // TODO: integrate models Arman asked.
+    
 //    var inputBundle: InputBundle
 //
 //    public init(url: String, mode: EnumLayoutMapActivity, data: [LayoutMapData]) {
@@ -42,47 +43,31 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         imageView.layer.sublayers?.removeAll()
      }
      
-    @IBOutlet weak var rectButton: UIBarButtonItem!
-    @IBAction func rectButtonPressed(_ sender: Any) {
-        switch drawingMode {
-        case .drawRect:
-            rectButton.tintColor = .systemBlue
-            drawingMode = drawMode.noShape
-        default:
-            rectButton.tintColor = .red
-            ellipseButton.tintColor = .systemBlue
-            polygonButton.tintColor = .systemBlue
-            drawingMode = drawMode.drawRect
-        }
+    @IBOutlet weak var pinButton: UIButton!
+    @IBAction func pinButtonPressed(_ sender: UIButton) {
+        drawingMode = drawMode.dropPin
+        sender.setImage(#imageLiteral(resourceName: "pinSelected"), for: UIControl.State.selected)
+        pinButton.isSelected = true
+        rectButton.isSelected = false
+        ellipseButton.isSelected = false
     }
     
-    @IBOutlet weak var polygonButton: UIBarButtonItem!
-    
-    @IBAction func polygonButtonPressed(_ sender: Any) {
-        switch drawingMode {
-        case .drawPolygon:
-            polygonButton.tintColor = .systemBlue
-            drawingMode = drawMode.noShape
-        default:
-            polygonButton.tintColor = .red
-            rectButton.tintColor = .systemBlue
-            ellipseButton.tintColor = .systemBlue
-            drawingMode = drawMode.drawPolygon
-        }
+    @IBOutlet weak var rectButton: UIButton!
+    @IBAction func rectButtonPressed(_ sender: UIButton) {
+        drawingMode = drawMode.drawRect
+        sender.setImage(#imageLiteral(resourceName: "rectangleShapeSelected"), for: UIControl.State.selected)
+        pinButton.isSelected = false
+        rectButton.isSelected = true
+        ellipseButton.isSelected = false
     }
-    
-    @IBOutlet weak var ellipseButton: UIBarButtonItem!
-    @IBAction func ellipseButtonPressed(_ sender: Any) {
-        switch drawingMode {
-        case .drawEllipse:
-            ellipseButton.tintColor = .systemBlue
-            drawingMode = drawMode.noShape
-        default:
-            ellipseButton.tintColor = .red
-            rectButton.tintColor = .systemBlue
-            polygonButton.tintColor = .systemBlue
-            drawingMode = drawMode.drawEllipse
-        }
+     
+    @IBOutlet weak var ellipseButton: UIButton!
+    @IBAction func ellipseButtonPressed(_ sender: UIButton) {
+        drawingMode = drawMode.drawEllipse
+        sender.setImage(#imageLiteral(resourceName: "ellipseShapeSelected"), for: UIControl.State.selected)
+        pinButton.isSelected = false
+        rectButton.isSelected = false
+        ellipseButton.isSelected = true
     }
     
     var singleTapRecognizer: UITapGestureRecognizer!
@@ -93,13 +78,13 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var pinViewTapped: UIView?
     var handImageView = UIImageView()
     var cornersImageView: [UIImageView] = [] // FIXME:
-    var drawingMode = drawMode.noShape
+    var drawingMode = drawMode.dropPin
     
     enum drawMode {
+        case dropPin
         case drawRect
-        case drawPolygon
         case drawEllipse
-        case noShape
+        case dropPoly
     }
     
     let selectedShapeLayer: CAShapeLayer = {
@@ -115,8 +100,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         controlView.layer.cornerRadius = 22
-        controlView.layer.borderColor = UIColor.gray.cgColor
-        controlView.layer.borderWidth = 1
+        controlView.layer.borderColor = UIColor.lightGray.cgColor
+        controlView.layer.borderWidth = 0.3
         
         let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(scrollViewDoubleTapped))
         doubleTapRecognizer.numberOfTapsRequired = 2
@@ -169,7 +154,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         switch mode {
         case .drawRect:
             return UIBezierPath(rect: frame)
-        case .drawPolygon:
+        case .dropPin:
             // TODO: make polygon possible
             return UIBezierPath(rect: frame)
         case .drawEllipse:
@@ -458,12 +443,12 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                 }
         
         // just add pin
-        if selectedLayer == nil && drawingMode == .noShape && pinViewTapped == nil  {
+        if selectedLayer == nil && drawingMode == .dropPin && pinViewTapped == nil  {
             addTag(withLocation: touchPoint, toPhoto: imageView)
         }
         
         // No shape selected so add new one
-        if selectedLayer == nil && drawingMode != .noShape {
+        if selectedLayer == nil && drawingMode != .dropPin {
             //add shape
             // draw rectangle, ellipse etc according to selection
             imageView.layer.addSublayer(selectedShapeLayer)

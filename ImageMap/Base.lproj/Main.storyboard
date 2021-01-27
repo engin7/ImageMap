@@ -28,38 +28,49 @@
                                         </constraints>
                                     </imageView>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yVy-UI-V41">
-                                        <rect key="frame" x="340" y="55" width="44" height="136"/>
+                                        <rect key="frame" x="594" y="30" width="44" height="128"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iLy-mV-PBE">
-                                                <rect key="frame" x="6" y="92" width="32" height="32"/>
+                                                <rect key="frame" x="6" y="88" width="32" height="32"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="32" id="hUN-Sh-Mkc"/>
                                                 </constraints>
-                                                <state key="normal" title="Button" image="pin.circle.fill"/>
+                                                <state key="normal" title="Button" image="ellipseShape"/>
+                                                <connections>
+                                                    <action selector="ellipseButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Z4v-Cd-bfv"/>
+                                                </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ua6-Jn-Tzu">
-                                                <rect key="frame" x="6" y="52" width="32" height="32"/>
+                                                <rect key="frame" x="6" y="48" width="32" height="32"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="32" id="Vrg-tw-Iil"/>
                                                 </constraints>
-                                                <state key="normal" title="Button" image="pin.circle.fill"/>
+                                                <state key="normal" title="Button" image="rectangleShape">
+                                                    <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
+                                                </state>
+                                                <connections>
+                                                    <action selector="rectButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="dWy-d8-Z6C"/>
+                                                </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0AN-m4-VZm">
-                                                <rect key="frame" x="6" y="12" width="32" height="32"/>
+                                                <rect key="frame" x="6" y="8" width="32" height="32"/>
                                                 <constraints>
                                                     <constraint firstAttribute="height" constant="32" id="GFZ-o3-0pg"/>
                                                 </constraints>
-                                                <state key="normal" title="Button" image="pin.circle.fill"/>
+                                                <state key="normal" title="Button" image="pin"/>
+                                                <connections>
+                                                    <action selector="pinButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Py7-f1-dNN"/>
+                                                </connections>
                                             </button>
                                         </subviews>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                         <constraints>
-                                            <constraint firstAttribute="height" constant="136" id="1hs-QV-v8P"/>
+                                            <constraint firstAttribute="height" constant="128" id="1hs-QV-v8P"/>
                                             <constraint firstItem="iLy-mV-PBE" firstAttribute="leading" secondItem="0AN-m4-VZm" secondAttribute="leading" id="2lh-fO-M5J"/>
                                             <constraint firstItem="Ua6-Jn-Tzu" firstAttribute="trailing" secondItem="0AN-m4-VZm" secondAttribute="trailing" id="8iK-bo-0xI"/>
                                             <constraint firstItem="Ua6-Jn-Tzu" firstAttribute="leading" secondItem="0AN-m4-VZm" secondAttribute="leading" id="91K-Qu-BHC"/>
                                             <constraint firstAttribute="trailing" secondItem="0AN-m4-VZm" secondAttribute="trailing" constant="6" id="9u8-p0-rEi"/>
-                                            <constraint firstItem="0AN-m4-VZm" firstAttribute="top" secondItem="yVy-UI-V41" secondAttribute="top" constant="12" id="DSP-BU-0h2"/>
+                                            <constraint firstItem="0AN-m4-VZm" firstAttribute="top" secondItem="yVy-UI-V41" secondAttribute="top" constant="8" id="DSP-BU-0h2"/>
                                             <constraint firstItem="iLy-mV-PBE" firstAttribute="trailing" secondItem="0AN-m4-VZm" secondAttribute="trailing" id="JsM-ha-eOU"/>
                                             <constraint firstItem="Ua6-Jn-Tzu" firstAttribute="top" secondItem="0AN-m4-VZm" secondAttribute="bottom" constant="8" symbolic="YES" id="RoD-Co-JuH"/>
                                             <constraint firstItem="iLy-mV-PBE" firstAttribute="top" secondItem="Ua6-Jn-Tzu" secondAttribute="bottom" constant="8" symbolic="YES" id="S9N-BY-WZo"/>
@@ -71,10 +82,10 @@
                                 </subviews>
                                 <constraints>
                                     <constraint firstAttribute="trailing" secondItem="fh2-mv-i26" secondAttribute="trailing" id="DFO-ek-Oqe"/>
-                                    <constraint firstItem="yVy-UI-V41" firstAttribute="top" secondItem="cig-Dv-Y9H" secondAttribute="top" constant="45" id="GFg-YU-dWr"/>
+                                    <constraint firstItem="yVy-UI-V41" firstAttribute="top" secondItem="cig-Dv-Y9H" secondAttribute="top" constant="30" id="GFg-YU-dWr"/>
                                     <constraint firstItem="fh2-mv-i26" firstAttribute="top" secondItem="Y00-Kb-PAN" secondAttribute="top" id="XdW-20-noS"/>
                                     <constraint firstAttribute="bottom" secondItem="fh2-mv-i26" secondAttribute="bottom" id="aA8-TG-hoD"/>
-                                    <constraint firstItem="cig-Dv-Y9H" firstAttribute="trailing" secondItem="yVy-UI-V41" secondAttribute="trailing" constant="10" id="bmM-Rt-Wtt"/>
+                                    <constraint firstItem="cig-Dv-Y9H" firstAttribute="trailing" secondItem="yVy-UI-V41" secondAttribute="trailing" id="bmM-Rt-Wtt"/>
                                     <constraint firstItem="fh2-mv-i26" firstAttribute="leading" secondItem="Y00-Kb-PAN" secondAttribute="leading" id="xfZ-T5-T1r"/>
                                 </constraints>
                                 <viewLayoutGuide key="contentLayoutGuide" id="QSf-GL-p0M"/>
@@ -94,23 +105,6 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Image Map" id="90G-tu-d3f">
-                        <leftBarButtonItems>
-                            <barButtonItem title="Item" image="rectangle.dashed" catalog="system" id="VDr-6v-EFH">
-                                <connections>
-                                    <action selector="rectButtonPressed:" destination="BYZ-38-t0r" id="WRb-rj-vaW"/>
-                                </connections>
-                            </barButtonItem>
-                            <barButtonItem title="Item" image="hexagon" catalog="system" id="cgH-ME-z5B">
-                                <connections>
-                                    <action selector="polygonButtonPressed:" destination="BYZ-38-t0r" id="LFa-Zp-bQD"/>
-                                </connections>
-                            </barButtonItem>
-                            <barButtonItem title="Item" image="circle.dashed" catalog="system" id="rJY-G5-o7L">
-                                <connections>
-                                    <action selector="ellipseButtonPressed:" destination="BYZ-38-t0r" id="3QU-nG-cVT"/>
-                                </connections>
-                            </barButtonItem>
-                        </leftBarButtonItems>
                         <barButtonItem key="rightBarButtonItem" title="Item" image="trash.fill" catalog="system" id="iKS-ma-C9t">
                             <connections>
                                 <action selector="clearPressed:" destination="BYZ-38-t0r" id="kMZ-CL-VEF"/>
@@ -119,14 +113,14 @@
                     </navigationItem>
                     <connections>
                         <outlet property="controlView" destination="yVy-UI-V41" id="UMp-QD-MVE"/>
-                        <outlet property="ellipseButton" destination="rJY-G5-o7L" id="Ulm-xM-ZYB"/>
+                        <outlet property="ellipseButton" destination="iLy-mV-PBE" id="3tr-9C-h5q"/>
                         <outlet property="imageView" destination="fh2-mv-i26" id="kVv-ED-tpT"/>
                         <outlet property="imageViewBottomConstraint" destination="aA8-TG-hoD" id="1ys-zY-bsu"/>
                         <outlet property="imageViewLeadingConstraint" destination="xfZ-T5-T1r" id="ZFo-Bu-cIS"/>
                         <outlet property="imageViewTopConstraint" destination="XdW-20-noS" id="GGZ-sl-rKK"/>
                         <outlet property="imageViewTrailingConstraint" destination="DFO-ek-Oqe" id="PwO-TR-IQ5"/>
-                        <outlet property="polygonButton" destination="cgH-ME-z5B" id="VqT-a7-8bz"/>
-                        <outlet property="rectButton" destination="VDr-6v-EFH" id="Bcl-de-jwx"/>
+                        <outlet property="pinButton" destination="0AN-m4-VZm" id="Uwo-ky-SxC"/>
+                        <outlet property="rectButton" destination="Ua6-Jn-Tzu" id="nLb-DO-ghe"/>
                         <outlet property="scrollView" destination="Y00-Kb-PAN" id="Yam-Ej-YhX"/>
                     </connections>
                 </viewController>
@@ -341,10 +335,9 @@
         <image name="addLocation" width="161.5" height="56.5"/>
         <image name="addPhoto" width="325" height="115"/>
         <image name="architect" width="1600" height="932"/>
-        <image name="circle.dashed" catalog="system" width="128" height="121"/>
-        <image name="hexagon" catalog="system" width="128" height="124"/>
-        <image name="pin.circle.fill" width="100" height="101"/>
-        <image name="rectangle.dashed" catalog="system" width="128" height="93"/>
+        <image name="ellipseShape" width="44" height="44"/>
+        <image name="pin" width="44" height="44"/>
+        <image name="rectangleShape" width="44" height="44"/>
         <image name="trash.fill" catalog="system" width="121" height="128"/>
         <namedColor name="AccentColor">
             <color red="0.0" green="0.46000000000000002" blue="0.89000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
