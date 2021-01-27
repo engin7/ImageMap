@@ -157,7 +157,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
  
         switch mode {
         case .drawRect:
-         
             return UIBezierPath(rect: frame)
         case .drawPolygon:
             // TODO: make polygon possible
