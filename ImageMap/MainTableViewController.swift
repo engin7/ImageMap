@@ -51,7 +51,7 @@ class MainTableViewController: UIViewController, UITabBarControllerDelegate, UIT
         case 2:
             cell.textLabel?.text = "  Equipments"
         case 3:
-            cell.textLabel?.text = "  Buildings&Floor Plans"
+            cell.textLabel?.text = "  Buildings & Floor Plans"
          
         default:
             print("sth wrong")
@@ -62,12 +62,9 @@ class MainTableViewController: UIViewController, UITabBarControllerDelegate, UIT
         cell.layer.cornerRadius = 8
         cell.layer.borderColor = UIColor.gray.cgColor
         cell.layer.borderWidth = 1
-       
-        cell.layer.shadowColor = UIColor.black.cgColor
-        cell.layer.shadowOpacity = 0.5
-        cell.layer.shadowRadius = 2.0
-        cell.layer.shadowOffset = CGSize(width: 13.0, height: 12.0)
-  
+        
+        cell.accessoryType = UITableViewCell.AccessoryType.disclosureIndicator
+
         return cell
     }
  
