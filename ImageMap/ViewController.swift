@@ -7,10 +7,15 @@
 
 import UIKit
 
-// TODO:  remove @available(iOS 13.0, *) after changing system Images (also in extension)
-@available(iOS 13.0, *)
+ 
 class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
  
+    var mapActivity: EnumLayoutMapActivity?
+    // TODO: integrate models Arman asked.
+    
+    
+    
+    
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
                               shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
            return true
@@ -342,7 +347,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         let tempImageView = UIView(frame: frame)
         tempImageView.isUserInteractionEnabled = true
         let pinImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: 40, height: 40))
-        let tintableImage = UIImage(systemName: "pin.circle.fill")?.withRenderingMode(.alwaysTemplate)
+        let tintableImage = #imageLiteral(resourceName: "pin.circle.fill")
         pinImageView.image = tintableImage
         pinImageView.tintColor = .red //will be options
         pinImageView.tag = 4
@@ -376,7 +381,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         
         let frame =  CGRect(x: 1, y: 20, width: 38, height: 50)
         let cone = UIImageView(frame: frame)
-        cone.image = UIImage(systemName: "arrowtriangle.down.fill")
+        cone.image = #imageLiteral(resourceName: "arrowtriangle.down.fill")
         cone.tag = 3
         pin.addSubview(cone)
         
@@ -646,13 +651,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         removeCornerOverlays()
           
         for i in 0...3 {
-            
-            let imageView = UIImageView(image: UIImage(systemName: "largecircle.fill.circle"))
+            let imageView = UIImageView(image: #imageLiteral(resourceName: "largecircle.fill.circle"))
             imageView.frame.origin = CGPoint(x: corners[i].x-15, y: corners[i].y-15)
             imageView.frame.size = CGSize(width: 30, height: 30)
             self.imageView.addSubview(imageView)
             cornersImageView.append(imageView)
-             
         }
           
       }
@@ -732,7 +735,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
   
 }
 
-@available(iOS 13.0, *)
+
 extension ViewController: UIScrollViewDelegate {
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return imageView
