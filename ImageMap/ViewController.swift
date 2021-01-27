@@ -10,17 +10,25 @@ import UIKit
  
 class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
  
-    var mapActivity: EnumLayoutMapActivity?
+    
     // TODO: integrate models Arman asked.
-    
-    
-    
+//    var inputBundle: InputBundle
+//
+//    public init(url: String, mode: EnumLayoutMapActivity, data: [LayoutMapData]) {
+//            self.inputBundle = InputBundle(layoutUrl: url, mode: mode, layoutData: data)
+//            super.init(nibName: nil, bundle: nil)
+//        }
+//
+//    required init?(coder: NSCoder) {
+//        fatalError("init(coder:) has not been implemented")
+//    }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
                               shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
            return true
        }
     
+    @IBOutlet weak var controlView: UIView!
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var imageViewBottomConstraint: NSLayoutConstraint!
     @IBOutlet weak var imageViewLeadingConstraint: NSLayoutConstraint!
@@ -106,6 +114,9 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        controlView.layer.cornerRadius = 22
+        controlView.layer.borderColor = UIColor.gray.cgColor
+        controlView.layer.borderWidth = 1
         
         let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(scrollViewDoubleTapped))
         doubleTapRecognizer.numberOfTapsRequired = 2
@@ -128,8 +139,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     override func viewDidLayoutSubviews()
            {
            // don't forget to do this....is critical.
-        selectedLayer?.anchorPoint = CGPoint(x: 0, y: 0)
-           }
+            selectedLayer?.anchorPoint = CGPoint(x: 0, y: 0)
+       }
        
     
     @objc func adjustForKeyboard(notification: Notification) {

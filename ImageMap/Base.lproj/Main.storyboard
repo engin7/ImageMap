@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="3it-Iw-J2N">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="aQf-Lc-V3H">
     <device id="retina5_5" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
@@ -27,11 +27,54 @@
                                             <constraint firstAttribute="width" secondItem="fh2-mv-i26" secondAttribute="height" multiplier="9:16" id="5U4-Li-Dt7"/>
                                         </constraints>
                                     </imageView>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yVy-UI-V41">
+                                        <rect key="frame" x="340" y="55" width="44" height="136"/>
+                                        <subviews>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iLy-mV-PBE">
+                                                <rect key="frame" x="6" y="92" width="32" height="32"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="32" id="hUN-Sh-Mkc"/>
+                                                </constraints>
+                                                <state key="normal" title="Button" image="pin.circle.fill"/>
+                                            </button>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ua6-Jn-Tzu">
+                                                <rect key="frame" x="6" y="52" width="32" height="32"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="32" id="Vrg-tw-Iil"/>
+                                                </constraints>
+                                                <state key="normal" title="Button" image="pin.circle.fill"/>
+                                            </button>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="0AN-m4-VZm">
+                                                <rect key="frame" x="6" y="12" width="32" height="32"/>
+                                                <constraints>
+                                                    <constraint firstAttribute="height" constant="32" id="GFZ-o3-0pg"/>
+                                                </constraints>
+                                                <state key="normal" title="Button" image="pin.circle.fill"/>
+                                            </button>
+                                        </subviews>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <constraints>
+                                            <constraint firstAttribute="height" constant="136" id="1hs-QV-v8P"/>
+                                            <constraint firstItem="iLy-mV-PBE" firstAttribute="leading" secondItem="0AN-m4-VZm" secondAttribute="leading" id="2lh-fO-M5J"/>
+                                            <constraint firstItem="Ua6-Jn-Tzu" firstAttribute="trailing" secondItem="0AN-m4-VZm" secondAttribute="trailing" id="8iK-bo-0xI"/>
+                                            <constraint firstItem="Ua6-Jn-Tzu" firstAttribute="leading" secondItem="0AN-m4-VZm" secondAttribute="leading" id="91K-Qu-BHC"/>
+                                            <constraint firstAttribute="trailing" secondItem="0AN-m4-VZm" secondAttribute="trailing" constant="6" id="9u8-p0-rEi"/>
+                                            <constraint firstItem="0AN-m4-VZm" firstAttribute="top" secondItem="yVy-UI-V41" secondAttribute="top" constant="12" id="DSP-BU-0h2"/>
+                                            <constraint firstItem="iLy-mV-PBE" firstAttribute="trailing" secondItem="0AN-m4-VZm" secondAttribute="trailing" id="JsM-ha-eOU"/>
+                                            <constraint firstItem="Ua6-Jn-Tzu" firstAttribute="top" secondItem="0AN-m4-VZm" secondAttribute="bottom" constant="8" symbolic="YES" id="RoD-Co-JuH"/>
+                                            <constraint firstItem="iLy-mV-PBE" firstAttribute="top" secondItem="Ua6-Jn-Tzu" secondAttribute="bottom" constant="8" symbolic="YES" id="S9N-BY-WZo"/>
+                                            <constraint firstItem="0AN-m4-VZm" firstAttribute="leading" secondItem="yVy-UI-V41" secondAttribute="leading" constant="6" id="bx8-Rc-yK5"/>
+                                            <constraint firstItem="Ua6-Jn-Tzu" firstAttribute="top" secondItem="0AN-m4-VZm" secondAttribute="bottom" constant="8" symbolic="YES" id="ice-rL-oi0"/>
+                                            <constraint firstAttribute="width" constant="44" id="yQk-ou-VeJ"/>
+                                        </constraints>
+                                    </view>
                                 </subviews>
                                 <constraints>
                                     <constraint firstAttribute="trailing" secondItem="fh2-mv-i26" secondAttribute="trailing" id="DFO-ek-Oqe"/>
+                                    <constraint firstItem="yVy-UI-V41" firstAttribute="top" secondItem="cig-Dv-Y9H" secondAttribute="top" constant="45" id="GFg-YU-dWr"/>
                                     <constraint firstItem="fh2-mv-i26" firstAttribute="top" secondItem="Y00-Kb-PAN" secondAttribute="top" id="XdW-20-noS"/>
                                     <constraint firstAttribute="bottom" secondItem="fh2-mv-i26" secondAttribute="bottom" id="aA8-TG-hoD"/>
+                                    <constraint firstItem="cig-Dv-Y9H" firstAttribute="trailing" secondItem="yVy-UI-V41" secondAttribute="trailing" constant="10" id="bmM-Rt-Wtt"/>
                                     <constraint firstItem="fh2-mv-i26" firstAttribute="leading" secondItem="Y00-Kb-PAN" secondAttribute="leading" id="xfZ-T5-T1r"/>
                                 </constraints>
                                 <viewLayoutGuide key="contentLayoutGuide" id="QSf-GL-p0M"/>
@@ -75,6 +118,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="controlView" destination="yVy-UI-V41" id="UMp-QD-MVE"/>
                         <outlet property="ellipseButton" destination="rJY-G5-o7L" id="Ulm-xM-ZYB"/>
                         <outlet property="imageView" destination="fh2-mv-i26" id="kVv-ED-tpT"/>
                         <outlet property="imageViewBottomConstraint" destination="aA8-TG-hoD" id="1ys-zY-bsu"/>
@@ -88,7 +132,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="5883" y="153"/>
+            <point key="canvasLocation" x="5881.1594202898559" y="152.44565217391306"/>
         </scene>
         <!--Safety Assure-->
         <scene sceneID="dZl-8h-cZx">
@@ -299,6 +343,7 @@
         <image name="architect" width="1600" height="932"/>
         <image name="circle.dashed" catalog="system" width="128" height="121"/>
         <image name="hexagon" catalog="system" width="128" height="124"/>
+        <image name="pin.circle.fill" width="100" height="101"/>
         <image name="rectangle.dashed" catalog="system" width="128" height="93"/>
         <image name="trash.fill" catalog="system" width="121" height="128"/>
         <namedColor name="AccentColor">
