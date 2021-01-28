@@ -36,39 +36,41 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     @IBOutlet weak var imageViewTrailingConstraint: NSLayoutConstraint!
     
     @IBOutlet weak var imageView: UIImageView!
-    
-    @IBAction func clearPressed(_ sender: Any) {
-        imageView.subviews.forEach({ $0.removeFromSuperview() })
-        imageView.layer.sublayers?.removeAll()
-         
-        addedObject = nil
-     }
-     
     @IBOutlet weak var pinButton: UIButton!
+    
     @IBAction func pinButtonPressed(_ sender: UIButton) {
-        drawingMode = drawMode.dropPin
-        sender.setImage(#imageLiteral(resourceName: "pinSelected"), for: UIControl.State.selected)
-        pinButton.isSelected = true
-        rectButton.isSelected = false
-        ellipseButton.isSelected = false
+        if drawingMode != drawMode.dropPin {
+            drawingMode = drawMode.dropPin
+            sender.setImage(#imageLiteral(resourceName: "pinSelected"), for: UIControl.State.selected)
+            pinButton.isSelected = true
+            rectButton.isSelected = false
+            ellipseButton.isSelected = false
+            resetUI()
+        }
     }
     
     @IBOutlet weak var rectButton: UIButton!
     @IBAction func rectButtonPressed(_ sender: UIButton) {
+        if drawingMode != drawMode.drawRect {
         drawingMode = drawMode.drawRect
         sender.setImage(#imageLiteral(resourceName: "rectangleShapeSelected"), for: UIControl.State.selected)
         pinButton.isSelected = false
         rectButton.isSelected = true
         ellipseButton.isSelected = false
+        resetUI()
+        }
     }
      
     @IBOutlet weak var ellipseButton: UIButton!
     @IBAction func ellipseButtonPressed(_ sender: UIButton) {
+        if drawingMode != drawMode.drawEllipse {
         drawingMode = drawMode.drawEllipse
         sender.setImage(#imageLiteral(resourceName: "ellipseShapeSelected"), for: UIControl.State.selected)
         pinButton.isSelected = false
         rectButton.isSelected = false
         ellipseButton.isSelected = true
+        resetUI()
+        }
     }
     
     var singleTapRecognizer: UITapGestureRecognizer!
@@ -78,6 +80,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var currentLayer: CAShapeLayer?
     var selectedLayer: CAShapeLayer?
     var pinViewTapped: UIView?
+    var pinViewAdded: UIView?
     var handImageView = UIImageView()
     var cornersImageView: [UIImageView] = []
     
@@ -109,11 +112,16 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     }()
     
     @objc func deleteButtonTapped() {
-        selectedLayer?.removeFromSuperlayer()
-        removeAuxiliaryOverlays()
-        addedObject = nil 
+        resetUI()
     }
     
+    func resetUI() {
+        pinViewAdded?.removeFromSuperview()
+        selectedLayer?.removeFromSuperlayer()
+        removeAuxiliaryOverlays()
+        addedObject = nil
+        pinViewAdded = nil
+    }
     override func viewDidLoad() {
         super.viewDidLoad()
         updateMinZoomScaleForSize(view.bounds.size)
@@ -172,12 +180,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         let frame = CGRect(origin: touch, size: size)
  
         switch mode {
-        case .dropPin:
-            if currentLayer == nil && drawingMode == .dropPin && pinViewTapped == nil  {
-                addTag(withLocation: touch, toPhoto: imageView)
-            }
-            return UIBezierPath()
-        case .drawRect:
+         case .drawRect:
             return UIBezierPath(rect: frame)
         case .drawEllipse:
             return UIBezierPath(roundedRect: frame, cornerRadius: shapeSize)
@@ -362,28 +365,32 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     // MARK: - Adding Tag
 
     func addTag(withLocation location: CGPoint, toPhoto photo: UIImageView) {
+        
+        deleteButton.frame.origin = CGPoint(x: location.x-15, y: location.y-50)
+        imageView.addSubview(deleteButton)
+        
         let frame = CGRect(x: location.x-20, y: location.y-20, width: 40, height: 40)
-        let tempImageView = UIView(frame: frame)
-        tempImageView.isUserInteractionEnabled = true
+        let pinViewTapped = UIView(frame: frame)
+        pinViewTapped.isUserInteractionEnabled = true
         let pinImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: 40, height: 40))
         let tintableImage = #imageLiteral(resourceName: "pin.circle.fill")
         pinImageView.image = tintableImage
         pinImageView.tintColor = .red //will be options
         pinImageView.tag = 4
-        tempImageView.addSubview(pinImageView)
+        pinViewTapped.addSubview(pinImageView)
         
         let label = UILabel(frame: CGRect(x:40, y: 0, width: 250, height: 30))
         label.textColor = UIColor.red
         label.text = "(\(Double(round(1000*location.x)/1000)), \(Double(round(1000*location.y)/1000)))"
         label.tag = 5
-        tempImageView.addSubview(label)
+        pinViewTapped.addSubview(label)
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
             label.isHidden = true
         }
-        tempImageView.tag = 2
-        pinViewTapped = tempImageView
-        photo.addSubview(tempImageView)
+        pinViewTapped.tag = 2
+        photo.addSubview(pinViewTapped)
+        pinViewAdded = pinViewTapped
     }
     
     // MARK: - Image Picker
@@ -454,8 +461,13 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     }
                 }
       
+       // add new pin if there isnt
+            if currentLayer == nil && drawingMode == .dropPin && pinViewAdded == nil  {
+                addTag(withLocation: touchPoint, toPhoto: imageView)
+             }
+           
         // No shape selected or added so add new one
-        if currentLayer == nil && drawingMode != .noDrawing && addedObject == nil {
+        if currentLayer == nil && drawingMode != .noDrawing && addedObject == nil && drawingMode != .dropPin {
             //add shape
             // draw rectangle, ellipse etc according to selection
             imageView.layer.addSublayer(selectedShapeLayer)
@@ -488,10 +500,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             addedObject = shapeInfo(shape: rectLayer, cornersArray: corners)
             addAuxiliaryOverlays(addedObject)
              
-        }
-        
-        if !choosingIcon {
-            pinViewTapped = nil
         }
         
         currentLayer = nil
@@ -598,8 +606,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             let color = UIColor(red: 1, green: 0, blue: 0.3, alpha: 0.4).cgColor
             currentLayer?.fillColor? = color
            
-            pinViewTapped?.frame.origin = CGPoint(x: currentPoint.x-20, y: currentPoint.y-20)
-                
+            if pinViewTapped != nil {
+                pinViewTapped?.frame.origin = CGPoint(x: currentPoint.x-20, y: currentPoint.y-20)
+                deleteButton.frame.origin = CGPoint(x: currentPoint.x-15, y: currentPoint.y-50)
+            }
+            
             touchedPoint = currentPoint
             
         }
@@ -667,11 +678,10 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         if cornersImageView.count != 0 {
             for i in 0...3 {
                 cornersImageView[i].removeFromSuperview()
-                
             }
-            deleteButton.removeFromSuperview()
             cornersImageView = [] // reset
         }
+        deleteButton.removeFromSuperview()
     }
     
   

@@ -28,7 +28,7 @@
                                         </constraints>
                                     </imageView>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yVy-UI-V41">
-                                        <rect key="frame" x="594" y="30" width="44" height="128"/>
+                                        <rect key="frame" x="330" y="30" width="44" height="128"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iLy-mV-PBE">
                                                 <rect key="frame" x="6" y="88" width="32" height="32"/>
@@ -104,13 +104,7 @@
                             <constraint firstItem="Y00-Kb-PAN" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="V8m-J6-4lv"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Image Map" id="90G-tu-d3f">
-                        <barButtonItem key="rightBarButtonItem" title="Item" image="trash.fill" catalog="system" id="iKS-ma-C9t">
-                            <connections>
-                                <action selector="clearPressed:" destination="BYZ-38-t0r" id="kMZ-CL-VEF"/>
-                            </connections>
-                        </barButtonItem>
-                    </navigationItem>
+                    <navigationItem key="navigationItem" title="Image Map" id="90G-tu-d3f"/>
                     <connections>
                         <outlet property="controlView" destination="yVy-UI-V41" id="UMp-QD-MVE"/>
                         <outlet property="ellipseButton" destination="iLy-mV-PBE" id="3tr-9C-h5q"/>
@@ -338,7 +332,6 @@
         <image name="ellipseShape" width="44" height="44"/>
         <image name="pin" width="44" height="44"/>
         <image name="rectangleShape" width="44" height="44"/>
-        <image name="trash.fill" catalog="system" width="121" height="128"/>
         <namedColor name="AccentColor">
             <color red="0.0" green="0.46000000000000002" blue="0.89000000000000001" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </namedColor>
