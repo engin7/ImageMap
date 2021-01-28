@@ -76,7 +76,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var selectedLayer: CAShapeLayer?
     var pinViewTapped: UIView?
     var handImageView = UIImageView()
-    var cornersImageView: [UIImageView] = [] // FIXME:
+    var cornersImageView: [UIImageView] = []
+    
     var drawingMode = drawMode.noDrawing
     
     enum drawMode {
@@ -96,6 +97,12 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
           return shapeLayer
     }()
    
+    lazy var trashCanImageView: UIImageView = {
+         let imgView = UIImageView(image: #imageLiteral(resourceName: "bin"))
+        imgView.frame.size = CGSize(width: 30, height: 30)
+        return imgView
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         updateMinZoomScaleForSize(view.bounds.size)
@@ -367,7 +374,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     
     // MARK: - Image Picker
     
-    
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         guard let image = info[.editedImage] as? UIImage else { return }
 
@@ -392,9 +398,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         circleImage.clipsToBounds = true
         circleImage.tag = 4
         pin.addSubview(circleImage)
-        
-      
-        
         imageView.bringSubviewToFront(pin)
         pinViewTapped = nil
     }
@@ -414,6 +417,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {    [self] in
                      // show hide corner and rotate control
                     cornersImageView.forEach{$0.isHidden = !$0.isHidden}
+                    trashCanImageView.isHidden = !trashCanImageView.isHidden
                 }
                  if (selectedLayer == nil) {
                     selectedLayer = layer
@@ -428,7 +432,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                   
             }
         }
-  
+        
         //  Detect PIN to drag it !!
         if let pin = touchPoint.getSubViewTouched(imageView: imageView)  {
                      // detect PIN
@@ -441,7 +445,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                             picker.allowsEditing = true
                             picker.delegate = self
                             present(picker, animated: true)
-                        
                     }
                 }
       
@@ -477,7 +480,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             
             let layer = shapeInfo(shape: rectLayer, cornersArray: corners)
            
-            addCornersOverlay(layer)
+            addAuxiliaryOverlays(layer)
             
             allShapes.append(layer)
              
@@ -531,7 +534,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             panStartPoint = rotationPanRecognizer.location(in: imageView)
             // define in which corner we are: (default is no corners)
             let positions = [cornerPoint.leftTop,cornerPoint.leftBottom,cornerPoint.rightBottom,cornerPoint.rightTop]
-            if !cornersImageView.isEmpty {
+            if !cornersImageView.isEmpty && cornersImageView.allSatisfy({ $0.isHidden == false }) {
               for i in 0...3 {
                 let x = cornersImageView[i].frame.origin.x + 15
                 let y = cornersImageView[i].frame.origin.y + 15
@@ -629,7 +632,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
   
     }
     
-    func addCornersOverlay(_ shape: shapeInfo?) {
+    func addAuxiliaryOverlays(_ shape: shapeInfo?) {
         // reset
         guard let shape = shape else { return }
         let corners = getCorners(shape: shape)
@@ -643,29 +646,36 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             self.imageView.addSubview(imageView)
             cornersImageView.append(imageView)
         }
-          
+        if let centerX = corners.centroid()?.x, let minY = corners.map({ $0.y }).min() {
+             trashCanImageView.frame.origin = CGPoint(x: centerX-20, y: minY-40)
+             self.imageView.addSubview(trashCanImageView)
+
+          }
+      
       }
     
     func moveCornerOverlay(corners:[CGPoint]) {
 //        let corners = [leftTopOrigin,leftBottomOrigin,rightBottomOrigin,rightTopOrigin]
 
-        if cornersImageView.count != 0 {
-            for i in 0...3 {
-                cornersImageView[i].frame.origin = CGPoint(x: corners[i].x-15, y: corners[i].y-15)
-                
+            if cornersImageView.count != 0 {
+                for i in 0...3 {
+                    cornersImageView[i].frame.origin = CGPoint(x: corners[i].x-15, y: corners[i].y-15)
+                    
+                }
+            if let centerX = corners.centroid()?.x, let minY = corners.map({ $0.y }).min() {
+                trashCanImageView.frame.origin = CGPoint(x: centerX-20, y: minY-40)
             }
-             
         }
         
     }
     
     func removeCornerOverlays() {
-        
         if cornersImageView.count != 0 {
             for i in 0...3 {
                 cornersImageView[i].removeFromSuperview()
                 
             }
+            trashCanImageView.removeFromSuperview()
             cornersImageView = [] // reset
         }
     }
