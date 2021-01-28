@@ -28,7 +28,7 @@
                                         </constraints>
                                     </imageView>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yVy-UI-V41">
-                                        <rect key="frame" x="356" y="217" width="44" height="128"/>
+                                        <rect key="frame" x="1372" y="217" width="44" height="128"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iLy-mV-PBE">
                                                 <rect key="frame" x="6" y="88" width="32" height="32"/>
@@ -80,7 +80,7 @@
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wrI-4p-bFt">
-                                        <rect key="frame" x="356" y="551" width="44" height="312"/>
+                                        <rect key="frame" x="1372" y="551" width="44" height="312"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jeP-Et-OnW">
                                                 <rect key="frame" x="6" y="100" width="32" height="32"/>
@@ -90,7 +90,7 @@
                                                 </constraints>
                                                 <state key="normal" title="Button" image="cyan"/>
                                                 <connections>
-                                                    <action selector="ellipseButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="PKi-hI-q0q"/>
+                                                    <action selector="cyanTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="hb9-bH-OYj"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wIQ-bJ-NrY">
@@ -103,7 +103,7 @@
                                                     <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
                                                 </state>
                                                 <connections>
-                                                    <action selector="rectButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="GEZ-X7-3zi"/>
+                                                    <action selector="yellowTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="mUR-SE-rgL"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JJg-9y-gqh">
@@ -114,7 +114,7 @@
                                                 </constraints>
                                                 <state key="normal" title="Button" image="red"/>
                                                 <connections>
-                                                    <action selector="ellipseButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Zn2-yc-FeE"/>
+                                                    <action selector="redTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="7rt-D7-Jh8"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QCT-Ve-NiD">
@@ -127,7 +127,7 @@
                                                     <preferredSymbolConfiguration key="preferredSymbolConfiguration" scale="large"/>
                                                 </state>
                                                 <connections>
-                                                    <action selector="rectButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Lcx-qm-cfN"/>
+                                                    <action selector="orangeTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="wP0-hd-FVt"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="g97-1k-OJb">
@@ -138,7 +138,7 @@
                                                 </constraints>
                                                 <state key="normal" title="Button" image="green"/>
                                                 <connections>
-                                                    <action selector="pinButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="vUk-qq-8uM"/>
+                                                    <action selector="greenTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ulT-FV-81B"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Iac-hP-gZW">
@@ -149,7 +149,7 @@
                                                 </constraints>
                                                 <state key="normal" title="Button" image="blue"/>
                                                 <connections>
-                                                    <action selector="ellipseButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="3a5-pu-qeG"/>
+                                                    <action selector="blueTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="DkR-QW-hKn"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kTD-Mr-lDr">
@@ -160,7 +160,7 @@
                                                 </constraints>
                                                 <state key="normal" title="Button" image="magenta"/>
                                                 <connections>
-                                                    <action selector="pinButtonPressed:" destination="BYZ-38-t0r" eventType="touchUpInside" id="Vdo-WU-tKO"/>
+                                                    <action selector="magentaTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="MLV-UQ-u49"/>
                                                 </connections>
                                             </button>
                                         </subviews>

@@ -81,6 +81,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var selectedLayer: CAShapeLayer?
     var pinViewTapped: UIView?
     var pinViewAdded: UIView?
+    var pinImage: UIView?
     var handImageView = UIImageView()
     var cornersImageView: [UIImageView] = []
     
@@ -122,6 +123,75 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         addedObject = nil
         pinViewAdded = nil
     }
+    
+    
+    @IBAction func magentaTapped(_ sender: Any) {
+        drawingColor = drawColor.magenta
+        pinImage?.tintColor = drawingColor.associatedColor
+        selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
+    }
+    
+    @IBAction func yellowTapped(_ sender: Any) {
+        drawingColor = drawColor.yellow
+        pinImage?.tintColor = drawingColor.associatedColor
+        selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
+    }
+    
+    @IBAction func cyanTapped(_ sender: Any) {
+        drawingColor = drawColor.cyan
+        pinImage?.tintColor = drawingColor.associatedColor
+        selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
+    }
+    
+    @IBAction func greenTapped(_ sender: Any) {
+        drawingColor = drawColor.green
+        pinImage?.tintColor = drawingColor.associatedColor
+        selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
+    }
+    
+    @IBAction func orangeTapped(_ sender: Any) {
+        drawingColor = drawColor.orange
+        pinImage?.tintColor = drawingColor.associatedColor
+        selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
+    }
+    
+    @IBAction func redTapped(_ sender: Any) {
+        drawingColor = drawColor.red
+        pinImage?.tintColor = drawingColor.associatedColor
+        selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
+    }
+    
+    @IBAction func blueTapped(_ sender: Any) {
+        drawingColor = drawColor.blue
+        pinImage?.tintColor = drawingColor.associatedColor
+        selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
+    }
+    
+    var drawingColor = drawColor.blue
+    enum drawColor {
+        case magenta
+        case yellow
+        case cyan
+        case green
+        case orange
+        case red
+        case blue
+        
+            var associatedColor: UIColor {
+                  switch self {
+                    case .magenta: return .magenta
+                    case .yellow: return .yellow
+                    case .cyan: return .cyan
+                    case .green: return .green
+                    case .orange: return .orange
+                    case .red: return .red
+                    case .blue: return .blue
+                  }
+              }
+    }
+    
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         updateMinZoomScaleForSize(view.bounds.size)
@@ -373,11 +443,13 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         let pinViewTapped = UIView(frame: frame)
         pinViewTapped.isUserInteractionEnabled = true
         let pinImageView = UIImageView(frame: CGRect(x: 0, y: 0, width: 40, height: 40))
-        let tintableImage = #imageLiteral(resourceName: "pin.circle.fill")
-        pinImageView.image = tintableImage
-        pinImageView.tintColor = .red //will be options
+        let originalImage = #imageLiteral(resourceName: "pin.circle.fill")
+        let templateImage = originalImage.withRenderingMode(.alwaysTemplate)
+        pinImageView.image = templateImage
+        pinImageView.tintColor = drawingColor.associatedColor
         pinImageView.tag = 4
         pinViewTapped.addSubview(pinImageView)
+        pinImage = pinImageView
         
         let label = UILabel(frame: CGRect(x:40, y: 0, width: 250, height: 30))
         label.textColor = UIColor.red
@@ -476,12 +548,13 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             
             let rectLayer = CAShapeLayer()
             rectLayer.strokeColor = UIColor.black.cgColor
-            rectLayer.fillColor = UIColor.clear.cgColor
             rectLayer.lineWidth = 4
             rectLayer.path = selectedShapeLayer.path
+            rectLayer.fillColor? = drawingColor.associatedColor.cgColor
+
             imageView.layer.addSublayer(rectLayer)
             selectedLayer = rectLayer
-             
+
             let minX = rectLayer.path!.boundingBox.minX
             let minY = rectLayer.path!.boundingBox.minY
             let maxX = rectLayer.path!.boundingBox.maxX
@@ -563,19 +636,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                  // TODO: - Refactor this point detection
             imageView.layer.sublayers?.forEach { layer in
                 let layer = layer as? CAShapeLayer
-                if let path = layer?.path, corner != .noCornersSelected ||  path.contains(panStartPoint) ||  addedObject != nil {
+                if let path = layer?.path, corner != .noCornersSelected ||  path.contains(panStartPoint)  {
                         if (currentLayer == nil) {
                             currentLayer = layer!
                             selectedShapesInitial = addedObject
-                            if let center = getCorners(shape: addedObject!).centroid()    {
-                             if let pin = center.getSubViewTouched(imageView: imageView)  {
-                                         // detect PIN
-                                        if pin.tag == 2 {
-                                              pinViewTapped = pin
-                                        }
-                                    }
-                                }
-                            }
+                          }
                          }
                     }
             
@@ -590,7 +655,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
        }
                     touchedPoint = panStartPoint // to offset reference
 
-        if gesture.state == UIGestureRecognizer.State.changed && addedObject != nil || pinViewTapped != nil{
+        if gesture.state == UIGestureRecognizer.State.changed && selectedShapesInitial != nil || pinViewTapped != nil{
             // we're inside selection
             print("&&&&&&&  TOUCHING")
             print(corner)
@@ -601,11 +666,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             let offset = (x: (currentPoint.x - touchedPoint.x), y: (currentPoint.y - touchedPoint.y))
   
             currentLayer?.path = modifyShape(corner,offset).cgPath
-            
-            // highlight moving/resizing rect
-            let color = UIColor(red: 1, green: 0, blue: 0.3, alpha: 0.4).cgColor
-            currentLayer?.fillColor? = color
-           
+             
             if pinViewTapped != nil {
                 pinViewTapped?.frame.origin = CGPoint(x: currentPoint.x-20, y: currentPoint.y-20)
                 deleteButton.frame.origin = CGPoint(x: currentPoint.x-15, y: currentPoint.y-50)
@@ -624,7 +685,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             selectedShapesInitial = addedObject
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [self] in
-                currentLayer?.fillColor? = UIColor.clear.cgColor
                 selectedLayer = currentLayer
                 currentLayer = nil
             }
@@ -652,7 +712,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             cornersImageView.append(imageView)
         }
         if let centerX = corners.centroid()?.x, let minY = corners.map({ $0.y }).min() {
-             deleteButton.frame.origin = CGPoint(x: centerX-20, y: minY-40)
+             deleteButton.frame.origin = CGPoint(x: centerX-20, y: minY-50)
              self.imageView.addSubview(deleteButton)
 
           }
@@ -668,7 +728,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     
                 }
             if let centerX = corners.centroid()?.x, let minY = corners.map({ $0.y }).min() {
-                deleteButton.frame.origin = CGPoint(x: centerX-20, y: minY-40)
+                deleteButton.frame.origin = CGPoint(x: centerX-20, y: minY-50)
             }
         }
         
