@@ -254,7 +254,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             newCorners.append((.rightTop, shiftedRightTop))
         }
          
-        thePath.close()
+            thePath.close()
         
         var ellipsePath = UIBezierPath()
          
@@ -328,8 +328,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         var cornerArray: [CGPoint] = []
         newCorners.forEach{cornerArray.append($0.point)}
         moveCornerOverlay(corners:cornerArray)
-        guard let point = cornerArray.centroid() else { return thePath}
-        pinViewTapped?.frame.origin = CGPoint(x:  point.x-20, y: point.y-20)
+
         let shapeEdited = shapeInfo(shape: selectedLayer!, cornersArray: newCorners)
         selectedShape = shapeEdited
         
@@ -533,22 +532,19 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             // define in which corner we are: (default is no corners)
             let positions = [cornerPoint.leftTop,cornerPoint.leftBottom,cornerPoint.rightBottom,cornerPoint.rightTop]
             if !cornersImageView.isEmpty {
-            for i in 0...3 {
-                if cornersImageView[i].frame.origin.distance(to: panStartPoint) < 44 {
+              for i in 0...3 {
+                let x = cornersImageView[i].frame.origin.x + 15
+                let y = cornersImageView[i].frame.origin.y + 15
+                if  CGPoint(x:x, y:y).distance(to: panStartPoint) < 44 {
                     corner = positions[i]
                 }
+              }
             }
-            }
-            var cornersCenter = CGPoint(x: -100, y: -100) // outside the screen
-            if corner != .noCornersSelected {
-                var cornersArray: [CGPoint] = []
-                cornersImageView.forEach{cornersArray.append($0.frame.origin)}
-                cornersCenter = cornersArray.centroid() ?? CGPoint(x: -100, y: -100)
-            }
+ 
                  // TODO: - Refactor this point detection
             imageView.layer.sublayers?.forEach { layer in
                 let layer = layer as? CAShapeLayer
-                if let path = layer?.path, path.contains(cornersCenter) ||  path.contains(panStartPoint) {
+                if let path = layer?.path, corner != .noCornersSelected ||  path.contains(panStartPoint) {
                         if (selectedLayer == nil) {
                             selectedLayer = layer!
                             selectedShape =  allShapes.filter {
