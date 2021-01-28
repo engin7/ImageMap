@@ -7,7 +7,6 @@
 
 import UIKit
 
- 
 class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
  
     
@@ -78,13 +77,14 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var pinViewTapped: UIView?
     var handImageView = UIImageView()
     var cornersImageView: [UIImageView] = [] // FIXME:
-    var drawingMode = drawMode.dropPin
+    var drawingMode = drawMode.noDrawing
     
     enum drawMode {
         case dropPin
         case drawRect
         case drawEllipse
         case dropPoly
+        case noDrawing
     }
     
     let selectedShapeLayer: CAShapeLayer = {
@@ -98,6 +98,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
    
     override func viewDidLoad() {
         super.viewDidLoad()
+        updateMinZoomScaleForSize(view.bounds.size)
+
         // Do any additional setup after loading the view.
         controlView.layer.cornerRadius = 22
         controlView.layer.borderColor = UIColor.lightGray.cgColor
@@ -152,10 +154,12 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         let frame = CGRect(origin: touch, size: size)
  
         switch mode {
-        case .drawRect:
-            return UIBezierPath(rect: frame)
         case .dropPin:
-            // TODO: make polygon possible
+            if selectedLayer == nil && drawingMode == .dropPin && pinViewTapped == nil  {
+                addTag(withLocation: touch, toPhoto: imageView)
+            }
+            return UIBezierPath()
+        case .drawRect:
             return UIBezierPath(rect: frame)
         case .drawEllipse:
             return UIBezierPath(roundedRect: frame, cornerRadius: shapeSize)
@@ -441,14 +445,9 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                         
                     }
                 }
-        
-        // just add pin
-        if selectedLayer == nil && drawingMode == .dropPin && pinViewTapped == nil  {
-            addTag(withLocation: touchPoint, toPhoto: imageView)
-        }
-        
+      
         // No shape selected so add new one
-        if selectedLayer == nil && drawingMode != .dropPin {
+        if selectedLayer == nil && drawingMode != .noDrawing {
             //add shape
             // draw rectangle, ellipse etc according to selection
             imageView.layer.addSublayer(selectedShapeLayer)
@@ -477,10 +476,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             var cornerPoints: [CGPoint] = []
             corners.forEach{cornerPoints.append($0.point)}
             
-            guard let center = cornerPoints.centroid() else { return }
-            
-            addTag(withLocation: center, toPhoto: imageView)
-
             let layer = shapeInfo(shape: rectLayer, cornersArray: corners)
            
             addCornersOverlay(layer)
@@ -699,12 +694,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     
     
     // MARK: - ScrollView zoom, drag etc
-
-    override func viewWillLayoutSubviews() {
-      super.viewWillLayoutSubviews()
-      updateMinZoomScaleForSize(view.bounds.size)
-    }
-
+ 
     func updateMinZoomScaleForSize(_ size: CGSize) {
       let widthScale = size.width / imageView.bounds.width
       let heightScale = size.height / imageView.bounds.height
