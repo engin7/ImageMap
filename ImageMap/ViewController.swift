@@ -40,6 +40,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     @IBAction func clearPressed(_ sender: Any) {
         imageView.subviews.forEach({ $0.removeFromSuperview() })
         imageView.layer.sublayers?.removeAll()
+         
+        addedObject = nil
      }
      
     @IBOutlet weak var pinButton: UIButton!
@@ -73,6 +75,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var rotationPanRecognizer : UIPanGestureRecognizer!
     let notificationCenter = NotificationCenter.default
  
+    var currentLayer: CAShapeLayer?
     var selectedLayer: CAShapeLayer?
     var pinViewTapped: UIView?
     var handImageView = UIImageView()
@@ -97,11 +100,19 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
           return shapeLayer
     }()
    
-    lazy var trashCanImageView: UIImageView = {
-         let imgView = UIImageView(image: #imageLiteral(resourceName: "bin"))
-        imgView.frame.size = CGSize(width: 30, height: 30)
-        return imgView
+    lazy var deleteButton: UIButton = {
+        let button = UIButton()
+        button.frame.size = CGSize(width: 30, height: 30)
+        button.setImage(#imageLiteral(resourceName: "bin"), for: UIControl.State.normal)
+        button.addTarget(self, action: #selector(deleteButtonTapped), for: .touchUpInside)
+        return button
     }()
+    
+    @objc func deleteButtonTapped() {
+        selectedLayer?.removeFromSuperlayer()
+        removeAuxiliaryOverlays()
+        addedObject = nil 
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -133,7 +144,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     override func viewDidLayoutSubviews()
            {
            // don't forget to do this....is critical.
-            selectedLayer?.anchorPoint = CGPoint(x: 0, y: 0)
+            currentLayer?.anchorPoint = CGPoint(x: 0, y: 0)
        }
        
     
@@ -162,7 +173,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
  
         switch mode {
         case .dropPin:
-            if selectedLayer == nil && drawingMode == .dropPin && pinViewTapped == nil  {
+            if currentLayer == nil && drawingMode == .dropPin && pinViewTapped == nil  {
                 addTag(withLocation: touch, toPhoto: imageView)
             }
             return UIBezierPath()
@@ -334,10 +345,13 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         
         var cornerArray: [CGPoint] = []
         newCorners.forEach{cornerArray.append($0.point)}
-        moveCornerOverlay(corners:cornerArray)
-
-        let shapeEdited = shapeInfo(shape: selectedLayer!, cornersArray: newCorners)
-        selectedShape = shapeEdited
+        moveAuxiliaryOverlays(corners:cornerArray)
+        
+        if let layer = currentLayer {
+            let shapeEdited = shapeInfo(shape: layer, cornersArray: newCorners)
+            addedObject = shapeEdited
+        }
+        
         
         if drawingMode == .drawEllipse {
             return ellipsePath
@@ -413,21 +427,13 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         imageView.layer.sublayers?.forEach { layer in
             let layer = layer as? CAShapeLayer
             if let path = layer?.path, path.contains(touchPoint) {
-               
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {    [self] in
-                     // show hide corner and rotate control
-                    cornersImageView.forEach{$0.isHidden = !$0.isHidden}
-                    trashCanImageView.isHidden = !trashCanImageView.isHidden
-                }
-                 if (selectedLayer == nil) {
-                    selectedLayer = layer
-                    selectedShape =  allShapes.filter {
-                        $0.shape == selectedLayer!
-                    }.first!
-                    selectedShapesInitial = selectedShape
+                
+                 if (currentLayer == nil) {
+                    currentLayer = layer
+                    selectedShapesInitial = addedObject
                     var corners: [CGPoint] = []
                     selectedShapesInitial?.cornersArray.forEach{corners.append($0.point)}
-                    moveCornerOverlay(corners:corners)
+                    moveAuxiliaryOverlays(corners:corners)
                 }
                   
             }
@@ -448,8 +454,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     }
                 }
       
-        // No shape selected so add new one
-        if selectedLayer == nil && drawingMode != .noDrawing {
+        // No shape selected or added so add new one
+        if currentLayer == nil && drawingMode != .noDrawing && addedObject == nil {
             //add shape
             // draw rectangle, ellipse etc according to selection
             imageView.layer.addSublayer(selectedShapeLayer)
@@ -462,7 +468,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             rectLayer.lineWidth = 4
             rectLayer.path = selectedShapeLayer.path
             imageView.layer.addSublayer(rectLayer)
-              
+            selectedLayer = rectLayer
+             
             let minX = rectLayer.path!.boundingBox.minX
             let minY = rectLayer.path!.boundingBox.minY
             let maxX = rectLayer.path!.boundingBox.maxX
@@ -478,11 +485,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             var cornerPoints: [CGPoint] = []
             corners.forEach{cornerPoints.append($0.point)}
             
-            let layer = shapeInfo(shape: rectLayer, cornersArray: corners)
-           
-            addAuxiliaryOverlays(layer)
-            
-            allShapes.append(layer)
+            addedObject = shapeInfo(shape: rectLayer, cornersArray: corners)
+            addAuxiliaryOverlays(addedObject)
              
         }
         
@@ -490,7 +494,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             pinViewTapped = nil
         }
         
-        selectedLayer = nil
+        currentLayer = nil
         selectedShapeLayer.path = nil
 
     }
@@ -510,7 +514,12 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     }
  
     // save shapes info in this struct
-    struct shapeInfo {
+    struct shapeInfo: Equatable {
+        
+        static func == (lhs: ViewController.shapeInfo, rhs: ViewController.shapeInfo) -> Bool {
+            true
+        }
+        
         var shape: CAShapeLayer
         var cornersArray : [(corner: cornerPoint,point: CGPoint)]
  
@@ -520,9 +529,8 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
            }
     }
     
-    var selectedShape: shapeInfo?
+    var addedObject: shapeInfo?
     var selectedShapesInitial: shapeInfo?
-    var allShapes: [shapeInfo] = []
     var corner = cornerPoint()
     var panStartPoint = CGPoint.zero
     var touchedPoint = CGPoint.zero
@@ -547,14 +555,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                  // TODO: - Refactor this point detection
             imageView.layer.sublayers?.forEach { layer in
                 let layer = layer as? CAShapeLayer
-                if let path = layer?.path, corner != .noCornersSelected ||  path.contains(panStartPoint) {
-                        if (selectedLayer == nil) {
-                            selectedLayer = layer!
-                            selectedShape =  allShapes.filter {
-                                $0.shape == selectedLayer
-                            }.first!
-                            selectedShapesInitial = selectedShape
-                            if let center = getCorners(shape: selectedShape!).centroid()    {
+                if let path = layer?.path, corner != .noCornersSelected ||  path.contains(panStartPoint) ||  addedObject != nil {
+                        if (currentLayer == nil) {
+                            currentLayer = layer!
+                            selectedShapesInitial = addedObject
+                            if let center = getCorners(shape: addedObject!).centroid()    {
                              if let pin = center.getSubViewTouched(imageView: imageView)  {
                                          // detect PIN
                                         if pin.tag == 2 {
@@ -565,7 +570,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                             }
                          }
                     }
-            if selectedShape == nil  {
+            
             // detect PIN to drag it (no shape condition)
             if let pin = panStartPoint.getSubViewTouched(imageView: imageView)  {
                          // detect PIN
@@ -573,11 +578,11 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                               pinViewTapped = pin
                         }
                     }
-               }
+            
        }
                     touchedPoint = panStartPoint // to offset reference
 
-        if gesture.state == UIGestureRecognizer.State.changed && selectedShape != nil || pinViewTapped != nil{
+        if gesture.state == UIGestureRecognizer.State.changed && addedObject != nil || pinViewTapped != nil{
             // we're inside selection
             print("&&&&&&&  TOUCHING")
             print(corner)
@@ -587,17 +592,14 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             
             let offset = (x: (currentPoint.x - touchedPoint.x), y: (currentPoint.y - touchedPoint.y))
   
-             selectedLayer?.path = modifyShape(corner,offset).cgPath
- 
+            currentLayer?.path = modifyShape(corner,offset).cgPath
+            
             // highlight moving/resizing rect
             let color = UIColor(red: 1, green: 0, blue: 0.3, alpha: 0.4).cgColor
-            selectedLayer?.fillColor? = color
-            
-            if selectedShape == nil {
-                pinViewTapped?.frame.origin = CGPoint(x: currentPoint.x-20, y: currentPoint.y-20)
+            currentLayer?.fillColor? = color
+           
+            pinViewTapped?.frame.origin = CGPoint(x: currentPoint.x-20, y: currentPoint.y-20)
                 
-            }
-            
             touchedPoint = currentPoint
             
         }
@@ -608,22 +610,14 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             print("***** Touch Ended")
             scrollView.isScrollEnabled = true // enabled scroll
             // update the intial shape with edited edition
-            selectedShapesInitial = selectedShape
-            if selectedShape != nil {
-               
-                // updating operation
-                var newAllShapes = allShapes.filter {  $0.shape != selectedLayer }
-                newAllShapes.append(selectedShape!)
-                allShapes = newAllShapes
-                
-            }
-         
+            selectedShapesInitial = addedObject
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [self] in
-                 selectedLayer?.fillColor? = UIColor.clear.cgColor
-                 selectedLayer = nil
+                currentLayer?.fillColor? = UIColor.clear.cgColor
+                selectedLayer = currentLayer
+                currentLayer = nil
             }
             
-            selectedShape = nil
             corner = .noCornersSelected
             touchedPoint = CGPoint.zero
             panStartPoint = CGPoint.zero
@@ -637,7 +631,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         guard let shape = shape else { return }
         let corners = getCorners(shape: shape)
        
-        removeCornerOverlays()
+        removeAuxiliaryOverlays()
           
         for i in 0...3 {
             let imageView = UIImageView(image: #imageLiteral(resourceName: "largecircle.fill.circle"))
@@ -647,14 +641,14 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
             cornersImageView.append(imageView)
         }
         if let centerX = corners.centroid()?.x, let minY = corners.map({ $0.y }).min() {
-             trashCanImageView.frame.origin = CGPoint(x: centerX-20, y: minY-40)
-             self.imageView.addSubview(trashCanImageView)
+             deleteButton.frame.origin = CGPoint(x: centerX-20, y: minY-40)
+             self.imageView.addSubview(deleteButton)
 
           }
       
       }
     
-    func moveCornerOverlay(corners:[CGPoint]) {
+    func moveAuxiliaryOverlays(corners:[CGPoint]) {
 //        let corners = [leftTopOrigin,leftBottomOrigin,rightBottomOrigin,rightTopOrigin]
 
             if cornersImageView.count != 0 {
@@ -663,19 +657,19 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     
                 }
             if let centerX = corners.centroid()?.x, let minY = corners.map({ $0.y }).min() {
-                trashCanImageView.frame.origin = CGPoint(x: centerX-20, y: minY-40)
+                deleteButton.frame.origin = CGPoint(x: centerX-20, y: minY-40)
             }
         }
         
     }
     
-    func removeCornerOverlays() {
+    func removeAuxiliaryOverlays() {
         if cornersImageView.count != 0 {
             for i in 0...3 {
                 cornersImageView[i].removeFromSuperview()
                 
             }
-            trashCanImageView.removeFromSuperview()
+            deleteButton.removeFromSuperview()
             cornersImageView = [] // reset
         }
     }
