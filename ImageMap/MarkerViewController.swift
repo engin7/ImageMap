@@ -14,18 +14,18 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
     
 // TODO: - integrate models.
 
-    var inputBundle: InputBundle
+    var inputBundle: InputBundle?
     
-    public init(url: String, mode: EnumLayoutMapActivity, data: [LayoutMapData]) {
-            self.inputBundle = InputBundle(layoutUrl: url, mode: mode, layoutData: nil)
-            super.init(nibName: nil, bundle: nil)
-        }
-
-    required init?(coder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-    
-    
+    // non-storyboard option:
+//    public init(url: String, mode: EnumLayoutMapActivity, data: LayoutMapData?) {
+//            self.inputBundle = InputBundle(layoutUrl: url, mode: mode, layoutData: data)
+//            super.init(nibName: nil, bundle: nil)
+//        }
+//
+//    required init?(coder: NSCoder) {
+//        fatalError("init(coder:) has not been implemented")
+//    }
+ 
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
                               shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
            return true
@@ -230,7 +230,7 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
         updateMinZoomScaleForSize(view.bounds.size)
         
         // Download image from URL
-        imageView.loadImageUsingCache(urlString: inputBundle.layoutUrl)
+        imageView.loadImageUsingCache(urlString: inputBundle?.layoutUrl ?? "")
         
         // Do any additional setup after loading the view.
         controlView.layer.cornerRadius = 22

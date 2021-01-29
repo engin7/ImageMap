@@ -39,3 +39,4 @@ struct InputBundle {
     let layoutData: LayoutMapData? // empty array if no shape/pin exists in the map
 }
 
+ 
