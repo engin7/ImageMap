@@ -10,6 +10,7 @@
 		101D823325BD31D0004BC081 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 101D823225BD31D0004BC081 /* Extensions.swift */; };
 		288EEFEC25C0106A009F66E9 /* MainTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 288EEFEB25C0106A009F66E9 /* MainTableViewController.swift */; };
 		2899858C25C4122200560C4D /* UIImageViewExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2899858B25C4122200560C4D /* UIImageViewExtension.swift */; };
+		2899858F25C449E000560C4D /* PlanListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2899858E25C449E000560C4D /* PlanListViewController.swift */; };
 		28A0BE4725C145FC00DEB06F /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A0BE4625C145FC00DEB06F /* Models.swift */; };
 		28A0BE4A25C154C800DEB06F /* AddEquipmentVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A0BE4925C154C800DEB06F /* AddEquipmentVC.swift */; };
 		28A5402B25AC3B1300619B48 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 28A5402A25AC3B1300619B48 /* AppDelegate.swift */; };
@@ -24,6 +25,7 @@
 		101D823225BD31D0004BC081 /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		288EEFEB25C0106A009F66E9 /* MainTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTableViewController.swift; sourceTree = "<group>"; };
 		2899858B25C4122200560C4D /* UIImageViewExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageViewExtension.swift; sourceTree = "<group>"; };
+		2899858E25C449E000560C4D /* PlanListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlanListViewController.swift; sourceTree = "<group>"; };
 		28A0BE4625C145FC00DEB06F /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		28A0BE4925C154C800DEB06F /* AddEquipmentVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddEquipmentVC.swift; sourceTree = "<group>"; };
 		28A5402725AC3B1300619B48 /* ImageMap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ImageMap.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -70,6 +72,7 @@
 				28A5402C25AC3B1300619B48 /* SceneDelegate.swift */,
 				28A5402E25AC3B1300619B48 /* MarkerViewController.swift */,
 				288EEFEB25C0106A009F66E9 /* MainTableViewController.swift */,
+				2899858E25C449E000560C4D /* PlanListViewController.swift */,
 				28A0BE4925C154C800DEB06F /* AddEquipmentVC.swift */,
 				28A0BE4625C145FC00DEB06F /* Models.swift */,
 				101D823225BD31D0004BC081 /* Extensions.swift */,
@@ -159,6 +162,7 @@
 				28A0BE4725C145FC00DEB06F /* Models.swift in Sources */,
 				288EEFEC25C0106A009F66E9 /* MainTableViewController.swift in Sources */,
 				2899858C25C4122200560C4D /* UIImageViewExtension.swift in Sources */,
+				2899858F25C449E000560C4D /* PlanListViewController.swift in Sources */,
 				101D823325BD31D0004BC081 /* Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
