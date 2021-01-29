@@ -15,22 +15,21 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
 // TODO: - integrate models.
 
     var inputBundle: InputBundle?
-    
-    // non-storyboard option:
-//    public init(url: String, mode: EnumLayoutMapActivity, data: LayoutMapData?) {
-//            self.inputBundle = InputBundle(layoutUrl: url, mode: mode, layoutData: data)
-//            super.init(nibName: nil, bundle: nil)
-//        }
-//
-//    required init?(coder: NSCoder) {
-//        fatalError("init(coder:) has not been implemented")
-//    }
- 
-    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
-                              shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
-           return true
-       }
-    
+    var vectorType: LayoutVector?
+    var vectorData: VectorMetaData?
+    var recordId = ""
+    var recordTypeId = ""
+    @IBAction func saveButtonPressed(_ sender: Any) {
+        
+        if vectorType != nil, vectorData != nil {
+            let data = LayoutMapData(vector: vectorType!, metaData: vectorData!)
+            // SAVE DATA LOGIC HERE
+        }
+       
+        print("NOTHING TO SAVE HERE...")
+         
+    }
+     
     @IBOutlet weak var controlView: UIView!
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var imageViewBottomConstraint: NSLayoutConstraint!
@@ -119,6 +118,11 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
     return detail
     }()
       
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                              shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+           return true
+       }
+    
     var drawingMode = drawMode.noDrawing
     
     enum drawMode {
@@ -213,13 +217,13 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
         
             var associatedColor: UIColor {
                   switch self {
-                    case .magenta: return UIColor.magenta.withAlphaComponent(0.5)
-                    case .yellow: return  UIColor.yellow.withAlphaComponent(0.5)
-                    case .cyan: return  UIColor.cyan.withAlphaComponent(0.5)
-                    case .green: return UIColor.green.withAlphaComponent(0.5)
-                    case .orange: return  UIColor.orange.withAlphaComponent(0.5)
-                    case .red: return  UIColor.red.withAlphaComponent(0.5)
-                    case .blue: return  UIColor.blue.withAlphaComponent(0.5)
+                    case .magenta: return UIColor.magenta.withAlphaComponent(0.25)
+                    case .yellow: return  UIColor.yellow.withAlphaComponent(0.25)
+                    case .cyan: return  UIColor.cyan.withAlphaComponent(0.25)
+                    case .green: return UIColor.green.withAlphaComponent(0.25)
+                    case .orange: return  UIColor.orange.withAlphaComponent(0.25)
+                    case .red: return  UIColor.red.withAlphaComponent(0.25)
+                    case .blue: return  UIColor.blue.withAlphaComponent(0.25)
                   }
               }
     }
@@ -462,6 +466,28 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
         }
         
         
+        switch drawingMode {
+        
+        case .drawRect:
+                vectorType = .PATH(points: cornerArray)
+            if let color = selectedLayer?.fillColor  {
+                 let colorInfo = UIColor(cgColor: color).toRGBAString()
+                vectorData = VectorMetaData(color: colorInfo, iconUrl: "PUT Rect URL HERE", recordId: recordId, recordTypeId: recordTypeId)
+            }
+           
+        case .drawEllipse:
+                let shapeSize = min(imageView.bounds.width, imageView.bounds.height)/10
+                vectorType = .ELLIPSE(points: cornerArray, cornerRadius: shapeSize)
+            if let color = selectedLayer?.fillColor  {
+                 let colorInfo = UIColor(cgColor: color).toRGBAString()
+                vectorData = VectorMetaData(color: colorInfo, iconUrl: "PUT Ellipse URL HERE", recordId: recordId, recordTypeId: recordTypeId)
+            }
+
+        default:
+               print("Sth is wrong!")
+        }
+        
+        
         if drawingMode == .drawEllipse {
             return ellipsePath
         }
@@ -499,6 +525,13 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
         pinViewTapped.tag = 2
         photo.addSubview(pinViewTapped)
         pinViewAdded = pinViewTapped
+        // recordId & recordTypeId will come from previous VC textfield.
+        vectorType = .PIN(point: location)
+        if let color = pinViewTapped.tintColor  {
+             let colorInfo = color.toRGBAString()
+            vectorData = VectorMetaData(color: colorInfo, iconUrl: "PUT PIN URL HERE", recordId: recordId, recordTypeId: recordTypeId)
+        }
+ 
     }
     
     // MARK: - Image Picker
@@ -539,10 +572,8 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
                             detailView.center.y = self.view.bounds.height - 150
                             self.view.layoutIfNeeded()
         }, completion: nil)
-        
-        let shape =  selectedShapesInitial?.shape.description
-        let corners = selectedShapesInitial?.cornersArray.description
-        labelDetail.text = (shape ?? pinViewTapped?.description ?? "No info") + "\n\n\n" + (corners ?? "Corners information not available.")
+      
+        labelDetail.text = (vectorType.debugDescription ?? "No Type info") + "\n\n\n" + (vectorData.debugDescription ?? "information not available.")
          
     }
 
@@ -631,12 +662,31 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
             
             addedObject = shapeInfo(shape: rectLayer, cornersArray: corners)
             addAuxiliaryOverlays(addedObject)
+            
+            switch drawingMode {
+            
+            case .drawRect:
+                    vectorType = .PATH(points: cornerPoints)
+                if let color = selectedLayer?.fillColor  {
+                     let colorInfo = UIColor(cgColor: color).toRGBAString()
+                    vectorData = VectorMetaData(color: colorInfo, iconUrl: "PUT Rect URL HERE", recordId: recordId, recordTypeId: recordTypeId)
+                }
+            case .drawEllipse:
+                    let shapeSize = min(imageView.bounds.width, imageView.bounds.height)/10
+                    vectorType = .ELLIPSE(points: cornerPoints, cornerRadius: shapeSize)
+                if let color = selectedLayer?.fillColor  {
+                     let colorInfo = UIColor(cgColor: color).toRGBAString()
+                    vectorData = VectorMetaData(color: colorInfo, iconUrl: "PUT Ellipse URL HERE", recordId: recordId, recordTypeId: recordTypeId)
+                }
+            default:
+                   print("Sth is wrong!")
+            }
              
         }
         
         currentLayer = nil
         selectedShapeLayer.path = nil
-
+       
     }
     
     // MARK: - Rotation logic

@@ -213,7 +213,13 @@
                             <constraint firstItem="Y00-Kb-PAN" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="V8m-J6-4lv"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="Image Map" id="90G-tu-d3f"/>
+                    <navigationItem key="navigationItem" title="Image Map" id="90G-tu-d3f">
+                        <barButtonItem key="rightBarButtonItem" title="💾" id="4v7-nP-ahh">
+                            <connections>
+                                <action selector="saveButtonPressed:" destination="BYZ-38-t0r" id="rpk-hI-cMe"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <connections>
                         <outlet property="controlView" destination="yVy-UI-V41" id="UMp-QD-MVE"/>
                         <outlet property="ellipseButton" destination="iLy-mV-PBE" id="3tr-9C-h5q"/>
