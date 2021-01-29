@@ -1,7 +1,7 @@
 
 
 //
-//  ViewController.swift
+//  MarkerViewController.swift
 //  ImageMap
 //
 //  Created by Engin KUK on 11.01.2021.
@@ -9,21 +9,22 @@
 
 import UIKit
 
-class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
  
     
-    // TODO: - integrate models Arman asked.
+// TODO: - integrate models.
+
+    var inputBundle: InputBundle
     
-//    var inputBundle: InputBundle
-//
-//    public init(url: String, mode: EnumLayoutMapActivity, data: [LayoutMapData]) {
-//            self.inputBundle = InputBundle(layoutUrl: url, mode: mode, layoutData: data)
-//            super.init(nibName: nil, bundle: nil)
-//        }
-//
-//    required init?(coder: NSCoder) {
-//        fatalError("init(coder:) has not been implemented")
-//    }
+    public init(url: String, mode: EnumLayoutMapActivity, data: [LayoutMapData]) {
+            self.inputBundle = InputBundle(layoutUrl: url, mode: mode, layoutData: nil)
+            super.init(nibName: nil, bundle: nil)
+        }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
                               shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
@@ -86,17 +87,38 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var pinImage: UIView?
     var handImageView = UIImageView()
     var cornersImageView: [UIImageView] = []
+    var labelDetail = UILabel()
     
     lazy var detailView : UIView = {
-        let detail = UIView(frame: CGRect(x: 0, y: UIScreen.main.bounds.height, width: UIScreen.main.bounds.width, height: 300))
-        detail.backgroundColor = .systemPink
+        let width = UIScreen.main.bounds.width
+        let height = UIScreen.main.bounds.height
+        let detail = UIView(frame: CGRect(x: 0, y: height, width: width, height: 300))
+        detail.backgroundColor = .white
+        detail.layer.cornerRadius = 8
+        detail.layer.borderColor = UIColor.lightGray.cgColor
+        detail.layer.borderWidth = 0.5
+        
+        let label = UILabel(frame: CGRect(x: 20, y: 20, width: width-40, height: 40))
+        label.text = "Record Details"
+        label.textAlignment = .center
+        detail.addSubview(label)
+        
+        labelDetail = UILabel(frame: CGRect(x: 20, y: 40, width: width-40, height: 240))
+        labelDetail.font = UIFont(name: "Helvetica Neue", size: 14)
+        labelDetail.textAlignment = .center
+        labelDetail.lineBreakMode = NSLineBreakMode.byWordWrapping
+        labelDetail.numberOfLines = 12
+        detail.addSubview(labelDetail)
+        
+        let swipeDown = UISwipeGestureRecognizer(target: self, action: #selector(handleGesture))
+        swipeDown.direction = .down
+        detail.addGestureRecognizer(swipeDown)
         self.view.addSubview(detail)
+        
     // add scroll down gesture
     return detail
     }()
-     
-
-    
+      
     var drawingMode = drawMode.noDrawing
     
     enum drawMode {
@@ -203,11 +225,13 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     }
     
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         updateMinZoomScaleForSize(view.bounds.size)
-
+        
+        // Download image from URL
+        imageView.loadImageUsingCache(urlString: inputBundle.layoutUrl)
+        
         // Do any additional setup after loading the view.
         controlView.layer.cornerRadius = 22
         controlView.layer.borderColor = UIColor.lightGray.cgColor
@@ -515,9 +539,21 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                             detailView.center.y = self.view.bounds.height - 150
                             self.view.layoutIfNeeded()
         }, completion: nil)
+        
+        let shape =  selectedShapesInitial?.shape.description
+        let corners = selectedShapesInitial?.cornersArray.description
+        labelDetail.text = (shape ?? pinViewTapped?.description ?? "No info") + "\n\n\n" + (corners ?? "Corners information not available.")
          
     }
 
+    @objc func handleGesture() {
+        UIView.animate(withDuration: 0.5, delay: 0, options: [.curveEaseOut],
+                       animations: { [self] in
+                          detailView.center.y = self.view.bounds.height + 150
+                          self.view.layoutIfNeeded()
+      }, completion: nil)
+    }
+    
     
     // MARK: - Tapping Tag
  
@@ -620,7 +656,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     // save shapes info in this struct
     struct shapeInfo: Equatable {
         
-        static func == (lhs: ViewController.shapeInfo, rhs: ViewController.shapeInfo) -> Bool {
+        static func == (lhs: MarkerViewController.shapeInfo, rhs: MarkerViewController.shapeInfo) -> Bool {
             true
         }
         
@@ -813,7 +849,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
   
 }
 
-extension ViewController: UIScrollViewDelegate {
+extension MarkerViewController: UIScrollViewDelegate {
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         return imageView
     }

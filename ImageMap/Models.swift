@@ -22,7 +22,7 @@ struct VectorMetaData {
 
 enum LayoutVector {
     case PIN(point: CGPoint)
-    case PATH(points: [CGPoint]) // Rect or Polygon (future version suppport)
+    case PATH(points: [CGPoint])
     case ELLIPSE(points: [CGPoint], cornerRadius: CGFloat)
 }
 // let ellipse = UIBezierPath(roundedRect: frame, cornerRadius: shapeSize)
@@ -36,6 +36,6 @@ struct LayoutMapData {
 struct InputBundle {
     let layoutUrl: String
     let mode: EnumLayoutMapActivity
-    let layoutData: [LayoutMapData] // empty array if no shape/pin exists in the map
+    let layoutData: LayoutMapData? // empty array if no shape/pin exists in the map
 }
 

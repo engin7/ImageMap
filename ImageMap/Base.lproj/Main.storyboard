@@ -13,7 +13,7 @@
         <!--Image Map-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="ImageMap" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController id="BYZ-38-t0r" customClass="MarkerViewController" customModule="ImageMap" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -28,7 +28,7 @@
                                         </constraints>
                                     </imageView>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yVy-UI-V41">
-                                        <rect key="frame" x="1372" y="217" width="44" height="128"/>
+                                        <rect key="frame" x="330" y="30" width="44" height="128"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="iLy-mV-PBE">
                                                 <rect key="frame" x="6" y="88" width="32" height="32"/>
@@ -80,7 +80,7 @@
                                         </constraints>
                                     </view>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="wrI-4p-bFt">
-                                        <rect key="frame" x="1372" y="551" width="44" height="312"/>
+                                        <rect key="frame" x="330" y="364" width="44" height="312"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jeP-Et-OnW">
                                                 <rect key="frame" x="6" y="100" width="32" height="32"/>
@@ -431,6 +431,21 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="UI5-oa-W4k" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="3082.608695652174" y="115.7608695652174"/>
+        </scene>
+        <!--View Controller-->
+        <scene sceneID="NNg-Nd-D00">
+            <objects>
+                <viewController id="LUr-Nm-Vzc" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="Na8-T8-bOk">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <viewLayoutGuide key="safeArea" id="pGp-b5-nmK"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                    </view>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="UR7-tb-BJz" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="5881" y="934"/>
         </scene>
     </scenes>
     <resources>
