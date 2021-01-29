@@ -1,3 +1,5 @@
+
+
 //
 //  ViewController.swift
 //  ImageMap
@@ -10,7 +12,7 @@ import UIKit
 class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizerDelegate, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
  
     
-    // TODO: integrate models Arman asked.
+    // TODO: - integrate models Arman asked.
     
 //    var inputBundle: InputBundle
 //
@@ -84,6 +86,16 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     var pinImage: UIView?
     var handImageView = UIImageView()
     var cornersImageView: [UIImageView] = []
+    
+    lazy var detailView : UIView = {
+        let detail = UIView(frame: CGRect(x: 0, y: UIScreen.main.bounds.height, width: UIScreen.main.bounds.width, height: 300))
+        detail.backgroundColor = .systemPink
+        self.view.addSubview(detail)
+    // add scroll down gesture
+    return detail
+    }()
+     
+
     
     var drawingMode = drawMode.noDrawing
     
@@ -179,13 +191,13 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         
             var associatedColor: UIColor {
                   switch self {
-                    case .magenta: return .magenta
-                    case .yellow: return .yellow
-                    case .cyan: return .cyan
-                    case .green: return .green
-                    case .orange: return .orange
-                    case .red: return .red
-                    case .blue: return .blue
+                    case .magenta: return UIColor.magenta.withAlphaComponent(0.5)
+                    case .yellow: return  UIColor.yellow.withAlphaComponent(0.5)
+                    case .cyan: return  UIColor.cyan.withAlphaComponent(0.5)
+                    case .green: return UIColor.green.withAlphaComponent(0.5)
+                    case .orange: return  UIColor.orange.withAlphaComponent(0.5)
+                    case .red: return  UIColor.red.withAlphaComponent(0.5)
+                    case .blue: return  UIColor.blue.withAlphaComponent(0.5)
                   }
               }
     }
@@ -495,13 +507,24 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
         pinViewTapped = nil
     }
     
+    
+    // MARK: - animate detail view
+    func showDetailView() {
+          UIView.animate(withDuration: 1, delay: 0, options: [.curveEaseOut],
+                         animations: { [self] in
+                            detailView.center.y = self.view.bounds.height - 150
+                            self.view.layoutIfNeeded()
+        }, completion: nil)
+         
+    }
+
+    
     // MARK: - Tapping Tag
  
     @objc func singleTap(gesture: UIRotationGestureRecognizer) {
         let touchPoint = singleTapRecognizer.location(in: imageView)
-        var choosingIcon = false
-        // add Rect with single tap
-         
+       
+        
         // Highlighting rect
         imageView.layer.sublayers?.forEach { layer in
             let layer = layer as? CAShapeLayer
@@ -513,6 +536,7 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                     var corners: [CGPoint] = []
                     selectedShapesInitial?.cornersArray.forEach{corners.append($0.point)}
                     moveAuxiliaryOverlays(corners:corners)
+                    showDetailView()
                 }
                   
             }
@@ -525,7 +549,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
                         pinViewTapped = pin
                         pin.subviews.forEach({ if $0.tag == 5 {$0.isHidden = !$0.isHidden }})
                         // add menu to select image
-                            choosingIcon = true
                         let picker = UIImagePickerController()
                             picker.allowsEditing = true
                             picker.delegate = self
@@ -789,7 +812,6 @@ class ViewController: UIViewController, UITextFieldDelegate, UIGestureRecognizer
     }
   
 }
-
 
 extension ViewController: UIScrollViewDelegate {
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
