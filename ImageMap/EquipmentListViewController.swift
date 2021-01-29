@@ -1,27 +1,20 @@
 //
-//  MainTableViewController.swift
+//  EquipmentListViewController.swift
 //  ImageMap
 //
-//  Created by Engin KUK on 26.01.2021.
+//  Created by Engin KUK on 29.01.2021.
 //
-
+  
 import UIKit
 
-class MainTableViewController: UIViewController, UITabBarControllerDelegate, UITableViewDataSource, UITableViewDelegate {
- 
-    static var listVC = "PlanListViewController"
-    static var equipmentVC = "EquipmentListViewController"
- 
-    @IBOutlet weak var newEquipmentButton: UIButton!
-    
+class EquipmentListViewController: UIViewController, UITabBarControllerDelegate, UITableViewDataSource, UITableViewDelegate {
+  
     override func viewDidLoad() {
         super.viewDidLoad()
-        newEquipmentButton.layer.cornerRadius = 20
     }
 
     // MARK: - Table view data source
- 
-
+  
     func numberOfSections(in tableView: UITableView) -> Int {
             return 4
         }
@@ -48,13 +41,13 @@ class MainTableViewController: UIViewController, UITabBarControllerDelegate, UIT
         switch indexPath.section {
         
         case 0:
-            cell.textLabel?.text = "  Inspections"
+            cell.textLabel?.text = "  Computer"
         case 1:
-            cell.textLabel?.text = "  Incidents"
+            cell.textLabel?.text = "  Table"
         case 2:
-            cell.textLabel?.text = "  Equipments"
+            cell.textLabel?.text = "  Lab Equipment"
         case 3:
-            cell.textLabel?.text = "  Buildings & Floor Plans"
+            cell.textLabel?.text = "  Fire Extinguisher"
          
         default:
             print("sth wrong")
@@ -72,28 +65,28 @@ class MainTableViewController: UIViewController, UITabBarControllerDelegate, UIT
     }
  
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-           
-        switch indexPath.section {
-        
-        case 0:
-            print("Inspections")
-        case 1:
-            print("Incidents")
-        case 2:
-            let vc = self.storyboard?.instantiateViewController(withIdentifier: MainTableViewController.equipmentVC) as! EquipmentListViewController
-            self.navigationController?.pushViewController(vc, animated: true)
-        case 3:
-            let vc = self.storyboard?.instantiateViewController(withIdentifier: MainTableViewController.listVC) as! PlanListViewController
-            self.navigationController?.pushViewController(vc, animated: true)
-        default:
-            print("sth wrong")
-        }
-        
-        
-       }
-    
-    
-    
 
+        let vc = self.storyboard?.instantiateViewController(withIdentifier: AddEquipmentViewController.markerVC) as! MarkerViewController
+
+        switch indexPath.section {
+            case 0:
+                let link = "https://ci.mit.edu/sites/default/files/images/Map-smaller2.png"
+                let input = InputBundle(layoutUrl: link, mode: EnumLayoutMapActivity.VIEW, layoutData: nil)
+                vc.inputBundle = input
+                self.navigationController?.pushViewController(vc, animated: true)
+            case 1:
+                let link = "https://www.georgeglazer.com/wpmain/wp-content/uploads/2017/02/garfield-harvard-det1.jpg"
+                let input = InputBundle(layoutUrl: link, mode: EnumLayoutMapActivity.ADD, layoutData: nil)
+                vc.inputBundle = input
+                self.navigationController?.pushViewController(vc, animated: true)
+            default:
+              print("THIS PART WILL BE DYNAMIC LATER")
+            }
+       }
 }
+
+
+
+ 
+
  
