@@ -852,7 +852,7 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
        }
                     touchedPoint = panStartPoint // to offset reference
 
-        if gesture.state == UIGestureRecognizer.State.changed && selectedShapesInitial != nil || pinViewTapped != nil{
+        if gesture.state == UIGestureRecognizer.State.changed && (currentLayer != nil || pinViewTapped != nil ) {
             // we're inside selection
             print("&&&&&&&  TOUCHING")
             print(corner)
@@ -877,13 +877,13 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
             
              // if clicked on rotation image cancel scrollView pangesture
             print("***** Touch Ended")
-            scrollView.isScrollEnabled = true // enabled scroll
             // update the intial shape with edited edition
             selectedShapesInitial = addedObject
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [self] in
                 selectedLayer = currentLayer
                 currentLayer = nil
+                scrollView.isScrollEnabled = true // enabled scroll
             }
             
             corner = .noCornersSelected
