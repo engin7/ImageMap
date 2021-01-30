@@ -29,7 +29,10 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
         print("NOTHING TO SAVE HERE...")
          
     }
-     
+    
+    @IBOutlet weak var containerStackView: UIStackView!
+    @IBOutlet weak var colorPickerStackView: UIStackView!
+    
     @IBOutlet weak var controlView: UIView!
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var imageViewBottomConstraint: NSLayoutConstraint!
@@ -162,47 +165,86 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
         pinViewAdded = nil
     }
     
+    // MARK: - Color Picker Controls
     
     @IBAction func magentaTapped(_ sender: Any) {
         drawingColor = drawColor.magenta
         pinImage?.tintColor = drawingColor.associatedColor
         selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
+        animateColorPicker()
     }
     
     @IBAction func yellowTapped(_ sender: Any) {
         drawingColor = drawColor.yellow
         pinImage?.tintColor = drawingColor.associatedColor
         selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
+        animateColorPicker()
     }
     
     @IBAction func cyanTapped(_ sender: Any) {
         drawingColor = drawColor.cyan
         pinImage?.tintColor = drawingColor.associatedColor
         selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
+        animateColorPicker()
     }
     
     @IBAction func greenTapped(_ sender: Any) {
         drawingColor = drawColor.green
         pinImage?.tintColor = drawingColor.associatedColor
         selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
+        animateColorPicker()
     }
     
     @IBAction func orangeTapped(_ sender: Any) {
         drawingColor = drawColor.orange
         pinImage?.tintColor = drawingColor.associatedColor
         selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
+        animateColorPicker()
     }
     
     @IBAction func redTapped(_ sender: Any) {
         drawingColor = drawColor.red
         pinImage?.tintColor = drawingColor.associatedColor
         selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
+        animateColorPicker()
     }
-    
+    // Bottom button
     @IBAction func blueTapped(_ sender: Any) {
-        drawingColor = drawColor.blue
+        if !colorPickerStackView.isHidden {
+            drawingColor = drawColor.blue
+        }
         pinImage?.tintColor = drawingColor.associatedColor
         selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
+        animateColorPicker()
+    }
+        
+    @IBOutlet weak var buttomColorButtom: UIButton!
+   
+    func animateColorPicker() {
+        // to change bottom image color
+        let origImage = buttomColorButtom.imageView?.image
+        let tintedImage = origImage?.withRenderingMode(.alwaysTemplate)
+      
+        UIView.animate(
+            withDuration: 0.4, delay: 0, options: .curveEaseOut,
+            animations: { [self] in
+                colorPickerStackView.subviews.forEach { $0.isHidden = !$0.isHidden }
+                colorPickerStackView.isHidden = !colorPickerStackView.isHidden
+                if colorPickerStackView.isHidden == true {
+                    colorPickerStackView.isUserInteractionEnabled = false
+                    buttomColorButtom.setImage(tintedImage, for: .normal)
+                    buttomColorButtom.tintColor = drawingColor.associatedColor
+                    buttomColorButtom.layer.borderWidth = 3
+                    buttomColorButtom.layer.cornerRadius = 16
+                    buttomColorButtom.layer.borderColor = UIColor.gray.cgColor
+                    
+                } else {
+                    colorPickerStackView.isUserInteractionEnabled = true
+                    buttomColorButtom.setImage(tintedImage, for: .normal)
+                    buttomColorButtom.tintColor = .blue
+                    buttomColorButtom.layer.borderWidth = 0
+                }
+           })
     }
     
     var drawingColor = drawColor.blue
@@ -232,7 +274,8 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
     override func viewDidLoad() {
         super.viewDidLoad()
         updateMinZoomScaleForSize(view.bounds.size)
-        
+        // color picker 
+        configureStackViews()
         // Download image from URL
         imageView.loadImageUsingCache(urlString: inputBundle?.layoutUrl ?? "")
         
@@ -265,6 +308,15 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
             currentLayer?.anchorPoint = CGPoint(x: 0, y: 0)
        }
        
+    func configureStackViews() {
+        colorPickerStackView.isHidden = false
+        
+//        colorBackgroundView.layer.cornerRadius = 16
+//        colorBackgroundView.layer.shadowColor = UIColor.gray.cgColor
+//        colorBackgroundView.layer.shadowOpacity = 0.8
+//        colorBackgroundView.layer.shadowOffset = .zero
+    }
+    
     
     @objc func adjustForKeyboard(notification: Notification) {
         guard let keyboardValue = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue else { return }
