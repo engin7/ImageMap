@@ -30,8 +30,8 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
          
     }
     
-    @IBOutlet weak var containerStackView: UIStackView!
     @IBOutlet weak var colorPickerStackView: UIStackView!
+    @IBOutlet weak var colorPickerBackgroundView: UIView!
     
     @IBOutlet weak var controlView: UIView!
     @IBOutlet weak var scrollView: UIScrollView!
@@ -218,33 +218,70 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
         animateColorPicker()
     }
         
-    @IBOutlet weak var buttomColorButtom: UIButton!
-   
+    @IBOutlet weak var bottomColorButton: UIButton!
+    @IBOutlet weak var colorPickerHeight: NSLayoutConstraint!
     func animateColorPicker() {
         // to change bottom image color
-        let origImage = buttomColorButtom.imageView?.image
+        let origImage = bottomColorButton.imageView?.image
         let tintedImage = origImage?.withRenderingMode(.alwaysTemplate)
       
-        UIView.animate(
-            withDuration: 0.4, delay: 0, options: .curveEaseOut,
-            animations: { [self] in
-                colorPickerStackView.subviews.forEach { $0.isHidden = !$0.isHidden }
-                colorPickerStackView.isHidden = !colorPickerStackView.isHidden
-                if colorPickerStackView.isHidden == true {
-                    colorPickerStackView.isUserInteractionEnabled = false
-                    buttomColorButtom.setImage(tintedImage, for: .normal)
-                    buttomColorButtom.tintColor = drawingColor.associatedColor
-                    buttomColorButtom.layer.borderWidth = 3
-                    buttomColorButtom.layer.cornerRadius = 16
-                    buttomColorButtom.layer.borderColor = UIColor.gray.cgColor
-                    
-                } else {
-                    colorPickerStackView.isUserInteractionEnabled = true
-                    buttomColorButtom.setImage(tintedImage, for: .normal)
-                    buttomColorButtom.tintColor = .blue
-                    buttomColorButtom.layer.borderWidth = 0
-                }
-           })
+      
+        
+        if colorPickerHeight.constant == 288 {
+            colorPickerHeight.constant = 48
+            UIView.animate(
+                withDuration: 0.4, delay: 0.2, options: .curveEaseOut,
+                animations: {
+                     self.view.layoutIfNeeded()
+         })
+               UIView.animate(
+                withDuration: 0.2, delay: 0.1, options: .curveEaseOut,
+                                animations: { [self] in
+                                        colorPickerStackView.subviews.forEach { $0.isHidden = !$0.isHidden }
+                                        colorPickerStackView.isHidden = !colorPickerStackView.isHidden
+
+                                     if colorPickerStackView.isHidden == true {
+                                         bottomColorButton.setImage(tintedImage, for: .normal)
+                                        bottomColorButton.tintColor = drawingColor.associatedColor.withAlphaComponent(1.0)
+                                        bottomColorButton.layer.borderWidth = 2
+                                        bottomColorButton.layer.cornerRadius = 16
+                                        bottomColorButton.layer.borderColor = UIColor.gray.cgColor
+
+                                    } else {
+                                         bottomColorButton.setImage(tintedImage, for: .normal)
+                                        bottomColorButton.tintColor = drawColor.blue.associatedColor.withAlphaComponent(1.0)
+                                        bottomColorButton.layer.borderWidth = 0
+                                    }
+                               })
+        } else {
+            colorPickerHeight.constant = 288
+            UIView.animate(
+                withDuration: 0.2, delay: 0.1, options: .curveEaseOut,
+                animations: {
+                    self.view.layoutIfNeeded()
+               })
+            UIView.animate(
+                withDuration: 0.4, delay: 0.2, options: .curveEaseOut,
+                        animations: { [self] in
+                                colorPickerStackView.subviews.forEach { $0.isHidden = !$0.isHidden }
+                                colorPickerStackView.isHidden = !colorPickerStackView.isHidden
+
+                             if colorPickerStackView.isHidden == true {
+                                 bottomColorButton.setImage(tintedImage, for: .normal)
+                                bottomColorButton.tintColor = drawingColor.associatedColor.withAlphaComponent(1.0)
+                                bottomColorButton.layer.borderWidth = 2
+                                bottomColorButton.layer.cornerRadius = 16
+                                bottomColorButton.layer.borderColor = UIColor.gray.cgColor
+
+                            } else {
+                                 bottomColorButton.setImage(tintedImage, for: .normal)
+                                bottomColorButton.tintColor = drawColor.blue.associatedColor.withAlphaComponent(1.0)
+                                bottomColorButton.layer.borderWidth = 0
+                            }
+                       })
+        }
+        
+     
     }
     
     var drawingColor = drawColor.blue
@@ -259,18 +296,17 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
         
             var associatedColor: UIColor {
                   switch self {
-                    case .magenta: return UIColor.magenta.withAlphaComponent(0.25)
-                    case .yellow: return  UIColor.yellow.withAlphaComponent(0.25)
-                    case .cyan: return  UIColor.cyan.withAlphaComponent(0.25)
-                    case .green: return UIColor.green.withAlphaComponent(0.25)
-                    case .orange: return  UIColor.orange.withAlphaComponent(0.25)
-                    case .red: return  UIColor.red.withAlphaComponent(0.25)
-                    case .blue: return  UIColor.blue.withAlphaComponent(0.25)
+                  case .magenta: return UIColor(red: 157/255, green: 31/255, blue: 129/255, alpha: 0.250)
+                    case .yellow: return UIColor(red: 249/255, green: 253/255, blue: 65/255, alpha: 0.250)
+                    case .cyan: return  UIColor(red: 65/255, green: 255/255, blue: 253/255, alpha: 0.250)
+                    case .green: return UIColor(red: 54/255, green: 199/255, blue: 73/255, alpha: 0.250)
+                    case .orange: return  UIColor(red: 248/255, green: 152/255, blue: 45/255, alpha: 0.250)
+                    case .red: return  UIColor(red: 252/255, green: 96/255, blue: 90/255, alpha: 0.250)
+                    case .blue: return  UIColor(red: 58/255, green: 155/255, blue: 251/255, alpha: 0.250)
                   }
               }
     }
-    
-    
+     
     override func viewDidLoad() {
         super.viewDidLoad()
         updateMinZoomScaleForSize(view.bounds.size)
@@ -309,12 +345,12 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
        }
        
     func configureStackViews() {
-        colorPickerStackView.isHidden = false
+ 
+        colorPickerBackgroundView.layer.cornerRadius = 22
+        colorPickerBackgroundView.layer.shadowColor = UIColor.gray.cgColor
+        colorPickerBackgroundView.layer.shadowOpacity = 0.8
+        colorPickerBackgroundView.layer.shadowOffset = .zero
         
-//        colorBackgroundView.layer.cornerRadius = 16
-//        colorBackgroundView.layer.shadowColor = UIColor.gray.cgColor
-//        colorBackgroundView.layer.shadowOpacity = 0.8
-//        colorBackgroundView.layer.shadowOffset = .zero
     }
     
     
