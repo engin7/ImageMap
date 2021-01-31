@@ -42,7 +42,7 @@
                                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="xDo-Uo-UHw">
                                                 <rect key="frame" x="0.0" y="0.0" width="32" height="232"/>
                                                 <subviews>
-                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kTD-Mr-lDr">
+                                                    <button opaque="NO" tag="6" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="kTD-Mr-lDr">
                                                         <rect key="frame" x="0.0" y="0.0" width="32" height="32"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="32" id="d0z-iw-Rs7"/>
@@ -52,7 +52,7 @@
                                                             <action selector="magentaTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="MLV-UQ-u49"/>
                                                         </connections>
                                                     </button>
-                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wIQ-bJ-NrY">
+                                                    <button opaque="NO" tag="5" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="wIQ-bJ-NrY">
                                                         <rect key="frame" x="0.0" y="40" width="32" height="32"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="32" id="McB-d4-Hws"/>
@@ -64,7 +64,7 @@
                                                             <action selector="yellowTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="mUR-SE-rgL"/>
                                                         </connections>
                                                     </button>
-                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jeP-Et-OnW">
+                                                    <button opaque="NO" tag="4" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="jeP-Et-OnW">
                                                         <rect key="frame" x="0.0" y="80" width="32" height="32"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="32" id="Aid-z7-D2O"/>
@@ -74,7 +74,7 @@
                                                             <action selector="cyanTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="hb9-bH-OYj"/>
                                                         </connections>
                                                     </button>
-                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="g97-1k-OJb">
+                                                    <button opaque="NO" tag="3" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="g97-1k-OJb">
                                                         <rect key="frame" x="0.0" y="120" width="32" height="32"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="32" id="Oa7-Eq-E4n"/>
@@ -84,7 +84,7 @@
                                                             <action selector="greenTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ulT-FV-81B"/>
                                                         </connections>
                                                     </button>
-                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QCT-Ve-NiD">
+                                                    <button opaque="NO" tag="2" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QCT-Ve-NiD">
                                                         <rect key="frame" x="0.0" y="160" width="32" height="32"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="32" id="EeE-kQ-oAq"/>
@@ -96,7 +96,7 @@
                                                             <action selector="orangeTapped:" destination="BYZ-38-t0r" eventType="touchUpInside" id="wP0-hd-FVt"/>
                                                         </connections>
                                                     </button>
-                                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JJg-9y-gqh">
+                                                    <button opaque="NO" tag="1" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="JJg-9y-gqh">
                                                         <rect key="frame" x="0.0" y="200" width="32" height="32"/>
                                                         <constraints>
                                                             <constraint firstAttribute="height" constant="32" id="Ot8-L8-7rf"/>
@@ -139,9 +139,8 @@
                                         <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
                                             <constraint firstAttribute="bottom" secondItem="Iac-hP-gZW" secondAttribute="bottom" id="DMc-3t-PdS"/>
-                                            <constraint firstItem="Iac-hP-gZW" firstAttribute="top" secondItem="xDo-Uo-UHw" secondAttribute="bottom" constant="8" symbolic="YES" id="EF3-Pp-ydK"/>
-                                            <constraint firstItem="xDo-Uo-UHw" firstAttribute="top" secondItem="Fye-xo-RIk" secondAttribute="top" id="Mh2-CE-1qO"/>
                                             <constraint firstAttribute="bottom" secondItem="Iac-hP-gZW" secondAttribute="bottom" id="eGO-6Z-aQS"/>
+                                            <constraint firstItem="Iac-hP-gZW" firstAttribute="top" secondItem="xDo-Uo-UHw" secondAttribute="bottom" constant="8" symbolic="YES" id="fey-TA-mlV"/>
                                         </constraints>
                                     </stackView>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="yVy-UI-V41">

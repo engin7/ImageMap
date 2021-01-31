@@ -254,16 +254,68 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
         } else {
             colorPickerHeight.constant = 288
             colorPickerStackView.subviews.forEach { $0.alpha = 0.01 }
+        
             UIView.animate(
                 withDuration: 0.15, delay: 0.1, options: .curveEaseOut,
                 animations: {
                     self.view.layoutIfNeeded()
                })
             UIView.animate(
-                withDuration: 0.4, delay: 0.2, options: .curveEaseOut,
+                withDuration: 0.3, delay: 0.2, options: .curveEaseOut,
                         animations: { [self] in
                                 colorPickerStackView.subviews.forEach { $0.isHidden = !$0.isHidden }
                             colorPickerStackView.subviews.forEach { $0.alpha = 1.0 }
+                            colorPickerStackView.subviews.forEach {
+                                switch drawingColor {
+                                  case .magenta:
+                                    if $0.tag == 6 {
+                                        $0.layer.borderWidth = 3
+                                        $0.layer.borderColor = UIColor.gray.cgColor
+                                    } else {
+                                        $0.layer.borderWidth = 0
+                                    }
+                                  case .yellow:
+                                    if $0.tag == 5 {
+                                        $0.layer.borderWidth = 3
+                                        $0.layer.borderColor = UIColor.gray.cgColor
+                                    }  else {
+                                        $0.layer.borderWidth = 0
+                                    }
+                                  case .cyan:
+                                    if $0.tag == 4 {
+                                        $0.layer.borderWidth = 3
+                                        $0.layer.borderColor = UIColor.gray.cgColor
+                                    }  else {
+                                        $0.layer.borderWidth = 0
+                                    }
+                                  case .green:
+                                    if $0.tag == 3 {
+                                        $0.layer.borderWidth = 3
+                                        $0.layer.borderColor = UIColor.gray.cgColor
+                                    }  else {
+                                        $0.layer.borderWidth = 0
+                                    }
+                                  case .orange:
+                                    if $0.tag == 2 {
+                                        $0.layer.borderWidth = 3
+                                        $0.layer.borderColor = UIColor.gray.cgColor
+                                    }  else {
+                                        $0.layer.borderWidth = 0
+                                    }
+                                  case .red:
+                                    if $0.tag == 1 {
+                                        $0.layer.borderWidth = 3
+                                        $0.layer.borderColor = UIColor.gray.cgColor
+                                    }  else {
+                                        $0.layer.borderWidth = 0
+                                    }
+                                  case .blue:
+                                      print("not inside this stackView")
+                                }
+                                 
+                                }
+                                
+                             
                                 self.view.layoutIfNeeded()
                                 colorPickerStackView.isHidden = !colorPickerStackView.isHidden
 
@@ -351,7 +403,7 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
         colorPickerBackgroundView.layer.shadowColor = UIColor.gray.cgColor
         colorPickerBackgroundView.layer.shadowOpacity = 0.8
         colorPickerBackgroundView.layer.shadowOffset = .zero
-        
+        colorPickerStackView.subviews.forEach { $0.layer.cornerRadius = 16 }
     }
     
     
