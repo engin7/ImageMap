@@ -174,7 +174,7 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
         animateColorPicker()
     }
     
-    @IBAction func yellowTapped(_ sender: Any) {
+    @IBAction func yellowTapped(_ sender: UIButton) {
         drawingColor = drawColor.yellow
         pinImage?.tintColor = drawingColor.associatedColor
         selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
@@ -220,17 +220,16 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
         
     @IBOutlet weak var bottomColorButton: UIButton!
     @IBOutlet weak var colorPickerHeight: NSLayoutConstraint!
+    
     func animateColorPicker() {
         // to change bottom image color
         let origImage = bottomColorButton.imageView?.image
         let tintedImage = origImage?.withRenderingMode(.alwaysTemplate)
       
-      
-        
         if colorPickerHeight.constant == 288 {
             colorPickerHeight.constant = 48
             UIView.animate(
-                withDuration: 0.4, delay: 0.2, options: .curveEaseOut,
+                withDuration: 0.3, delay: 0.1, options: .curveEaseOut,
                 animations: {
                      self.view.layoutIfNeeded()
          })
@@ -239,14 +238,13 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
                                 animations: { [self] in
                                         colorPickerStackView.subviews.forEach { $0.isHidden = !$0.isHidden }
                                         colorPickerStackView.isHidden = !colorPickerStackView.isHidden
-
+                                    
                                      if colorPickerStackView.isHidden == true {
                                          bottomColorButton.setImage(tintedImage, for: .normal)
                                         bottomColorButton.tintColor = drawingColor.associatedColor.withAlphaComponent(1.0)
-                                        bottomColorButton.layer.borderWidth = 2
-                                        bottomColorButton.layer.cornerRadius = 16
+                                        bottomColorButton.layer.borderWidth = 3
                                         bottomColorButton.layer.borderColor = UIColor.gray.cgColor
-
+                                        
                                     } else {
                                          bottomColorButton.setImage(tintedImage, for: .normal)
                                         bottomColorButton.tintColor = drawColor.blue.associatedColor.withAlphaComponent(1.0)
@@ -255,8 +253,9 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
                                })
         } else {
             colorPickerHeight.constant = 288
+            colorPickerStackView.subviews.forEach { $0.alpha = 0.01 }
             UIView.animate(
-                withDuration: 0.2, delay: 0.1, options: .curveEaseOut,
+                withDuration: 0.15, delay: 0.1, options: .curveEaseOut,
                 animations: {
                     self.view.layoutIfNeeded()
                })
@@ -264,12 +263,14 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
                 withDuration: 0.4, delay: 0.2, options: .curveEaseOut,
                         animations: { [self] in
                                 colorPickerStackView.subviews.forEach { $0.isHidden = !$0.isHidden }
+                            colorPickerStackView.subviews.forEach { $0.alpha = 1.0 }
+                                self.view.layoutIfNeeded()
                                 colorPickerStackView.isHidden = !colorPickerStackView.isHidden
 
                              if colorPickerStackView.isHidden == true {
                                  bottomColorButton.setImage(tintedImage, for: .normal)
                                 bottomColorButton.tintColor = drawingColor.associatedColor.withAlphaComponent(1.0)
-                                bottomColorButton.layer.borderWidth = 2
+                                bottomColorButton.layer.borderWidth = 3
                                 bottomColorButton.layer.cornerRadius = 16
                                 bottomColorButton.layer.borderColor = UIColor.gray.cgColor
 
@@ -345,7 +346,7 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
        }
        
     func configureStackViews() {
- 
+        bottomColorButton.layer.cornerRadius = 16
         colorPickerBackgroundView.layer.cornerRadius = 22
         colorPickerBackgroundView.layer.shadowColor = UIColor.gray.cgColor
         colorPickerBackgroundView.layer.shadowOpacity = 0.8
