@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="xUm-qV-HvE">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="3it-Iw-J2N">
     <device id="retina5_5" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17505"/>
         <capability name="Named colors" minToolsVersion="9.0"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
@@ -255,7 +255,7 @@
         <!--Layout Map-->
         <scene sceneID="1ts-lJ-Hza">
             <objects>
-                <viewController id="TTC-wR-Py8" customClass="LayoutViewController" customModule="ImageMap" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="LayoutViewController" id="TTC-wR-Py8" customClass="LayoutViewController" customModule="ImageMap" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="e9m-7M-x0K">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -281,7 +281,7 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="  Where am I?  " textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yAm-ei-pj1">
-                                        <rect key="frame" x="268.33333333333331" y="606" width="115.66666666666669" height="36"/>
+                                        <rect key="frame" x="268.33333333333331" y="626" width="115.66666666666669" height="36"/>
                                         <color key="backgroundColor" white="0.6446382705" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="36" id="qsR-Wk-c8E"/>
@@ -300,7 +300,7 @@
                                     </label>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstItem="q02-rl-WrP" firstAttribute="bottom" secondItem="yAm-ei-pj1" secondAttribute="bottom" constant="50" id="4nT-X2-tj0"/>
+                                    <constraint firstItem="q02-rl-WrP" firstAttribute="bottom" secondItem="yAm-ei-pj1" secondAttribute="bottom" constant="30" id="4nT-X2-tj0"/>
                                     <constraint firstItem="jwJ-la-DDB" firstAttribute="leading" secondItem="q02-rl-WrP" secondAttribute="leading" id="6rM-eB-Ch3"/>
                                     <constraint firstItem="yAm-ei-pj1" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="q02-rl-WrP" secondAttribute="leading" symbolic="YES" id="ALw-8n-CM2"/>
                                     <constraint firstItem="q02-rl-WrP" firstAttribute="trailing" secondItem="gh6-XM-XBN" secondAttribute="trailing" constant="8" id="BoB-Th-4G0"/>

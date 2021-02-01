@@ -9,7 +9,8 @@ import UIKit
 
 class PlanListViewController: UIViewController, UITabBarControllerDelegate, UITableViewDataSource, UITableViewDelegate {
  
-    
+     static var layoutVC = "LayoutViewController"
+ 
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -69,7 +70,7 @@ class PlanListViewController: UIViewController, UITabBarControllerDelegate, UITa
  
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 
-        let vc = self.storyboard?.instantiateViewController(withIdentifier: AddEquipmentViewController.markerVC) as! MarkerViewController
+        let vc = self.storyboard?.instantiateViewController(withIdentifier: PlanListViewController.layoutVC) as! LayoutViewController
 
         switch indexPath.section {
             case 0:
@@ -79,7 +80,7 @@ class PlanListViewController: UIViewController, UITabBarControllerDelegate, UITa
                 self.navigationController?.pushViewController(vc, animated: true)
             case 1:
                 let link = "https://www.georgeglazer.com/wpmain/wp-content/uploads/2017/02/garfield-harvard-det1.jpg"
-                let input = InputBundle(layoutUrl: link, mode: EnumLayoutMapActivity.ADD, layoutData: nil)
+                let input = InputBundle(layoutUrl: link, mode: EnumLayoutMapActivity.VIEW, layoutData: nil)
                 vc.inputBundle = input
                 self.navigationController?.pushViewController(vc, animated: true)
             default:
@@ -89,7 +90,3 @@ class PlanListViewController: UIViewController, UITabBarControllerDelegate, UITa
 }
 
 
-
- 
-
- 

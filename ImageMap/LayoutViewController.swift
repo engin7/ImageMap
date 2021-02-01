@@ -9,7 +9,8 @@ import UIKit
 
 class LayoutViewController: UIViewController, UIGestureRecognizerDelegate {
     
-    
+    var inputBundle: InputBundle?
+ 
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var imageViewBottomConstraint: NSLayoutConstraint!
@@ -17,15 +18,17 @@ class LayoutViewController: UIViewController, UIGestureRecognizerDelegate {
     @IBOutlet weak var imageViewTopConstraint: NSLayoutConstraint!
     @IBOutlet weak var imageViewTrailingConstraint: NSLayoutConstraint!
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        // Download image from URL
+        imageView.loadImageUsingCache(urlString: inputBundle?.layoutUrl ?? "")
+        
         updateMinZoomScaleForSize(view.bounds.size)
-    let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(scrollViewDoubleTapped))
-    doubleTapRecognizer.numberOfTapsRequired = 2
-    scrollView.addGestureRecognizer(doubleTapRecognizer)
+        let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(scrollViewDoubleTapped))
+        doubleTapRecognizer.numberOfTapsRequired = 2
+        scrollView.addGestureRecognizer(doubleTapRecognizer)
     }
-    
     
 }
  
