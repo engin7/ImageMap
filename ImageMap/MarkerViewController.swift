@@ -660,7 +660,7 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
         // recordId & recordTypeId will come from previous VC textfield.
         vectorType = .PIN(point: location)
         if let color = pinViewTapped.tintColor  {
-             let colorInfo = color.toRGBAString()
+             let colorInfo = color.htmlRGBaColor
             vectorData = VectorMetaData(color: colorInfo, iconUrl: "PUT PIN URL HERE", recordId: recordId, recordTypeId: recordTypeId)
         }
  
@@ -801,14 +801,14 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
             case .drawRect:
                     vectorType = .PATH(points: cornerPoints)
                 if let color = selectedLayer?.fillColor  {
-                     let colorInfo = UIColor(cgColor: color).toRGBAString()
+                     let colorInfo = UIColor(cgColor: color).htmlRGBaColor
                     vectorData = VectorMetaData(color: colorInfo, iconUrl: "PUT Rect URL HERE", recordId: recordId, recordTypeId: recordTypeId)
                 }
             case .drawEllipse:
                     let shapeSize = min(imageView.bounds.width, imageView.bounds.height)/10
                     vectorType = .ELLIPSE(points: cornerPoints, cornerRadius: shapeSize)
                 if let color = selectedLayer?.fillColor  {
-                     let colorInfo = UIColor(cgColor: color).toRGBAString()
+                     let colorInfo = UIColor(cgColor: color).htmlRGBaColor
                     vectorData = VectorMetaData(color: colorInfo, iconUrl: "PUT Ellipse URL HERE", recordId: recordId, recordTypeId: recordTypeId)
                 }
             default:
@@ -932,14 +932,14 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
             case .dropPin:
                     vectorType = .PIN(point: touchedPoint)
                 if let color = pinViewTapped?.tintColor  {
-                     let colorInfo = color.toRGBAString()
+                     let colorInfo = color.htmlRGBaColor
                     vectorData = VectorMetaData(color: colorInfo, iconUrl: "PUT PIN URL HERE", recordId: recordId, recordTypeId: recordTypeId)
                 }
             
             case .drawRect:
                     vectorType = .PATH(points: cornerArray)
                 if let color = selectedLayer?.fillColor  {
-                     let colorInfo = UIColor(cgColor: color).toRGBAString()
+                     let colorInfo = UIColor(cgColor: color).htmlRGBaColor
                     vectorData = VectorMetaData(color: colorInfo, iconUrl: "PUT Rect URL HERE", recordId: recordId, recordTypeId: recordTypeId)
                 }
                
@@ -947,7 +947,7 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
                     let shapeSize = min(imageView.bounds.width, imageView.bounds.height)/10
                     vectorType = .ELLIPSE(points: cornerArray, cornerRadius: shapeSize)
                 if let color = selectedLayer?.fillColor  {
-                     let colorInfo = UIColor(cgColor: color).toRGBAString()
+                     let colorInfo = UIColor(cgColor: color).htmlRGBaColor
                     vectorData = VectorMetaData(color: colorInfo, iconUrl: "PUT Ellipse URL HERE", recordId: recordId, recordTypeId: recordTypeId)
                 }
 

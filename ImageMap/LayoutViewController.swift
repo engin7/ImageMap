@@ -49,8 +49,8 @@ class LayoutViewController: UIViewController, UIGestureRecognizerDelegate {
         let thePath = UIBezierPath()
         itemLayer.strokeColor = UIColor.black.cgColor
         itemLayer.lineWidth = 4
-//        itemLayer.fillColor? =
-        
+        itemLayer.fillColor? = UIColor(hex: metaData.color)!.cgColor
+ 
         switch vector {
          case .PATH(let points):
             
@@ -58,7 +58,7 @@ class LayoutViewController: UIViewController, UIGestureRecognizerDelegate {
             thePath.addLine(to: points[1])
             thePath.addLine(to: points[2])
             thePath.addLine(to: points[3])
-              
+            thePath.close()
         case .ELLIPSE(let points, let cornerRadius):
                // will do
             print("..")
