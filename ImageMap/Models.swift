@@ -44,7 +44,7 @@ struct InputBundle {
 struct OutputBundle {
     let layoutName: String // to show in table
     let layoutUrl: String
-    var layoutData: [LayoutMapData] = [] // empty array if no shape/pin exists in the map
+    var layoutData = [LayoutMapData]() // empty array if no shape/pin exists in the map
 }
 
 class DataBase {

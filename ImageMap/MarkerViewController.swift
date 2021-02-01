@@ -19,20 +19,32 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
     var vectorData: VectorMetaData?
     var recordId = ""
     var recordTypeId = ""
-    var dataBase = DataBase.shared
+   
     
     @IBAction func saveButtonPressed(_ sender: Any) {
         if vectorType != nil, vectorData != nil {
             let data = LayoutMapData(vector: vectorType!, metaData: vectorData!)
             // SAVE NEW ITEM LOGIC
-            for var layout in dataBase.layouts {
-                if layout.layoutUrl == inputBundle?.layoutUrl  {
-                    layout.layoutData.append(data)
-                }
-            }
+            modifyDataBase ( db: dataBase, object: data)
         }
-        print("NOTHING TO SAVE HERE...")
     }
+    
+   
+    func modifyDataBase ( db: [OutputBundle], object: LayoutMapData)  {
+        var index: Int?
+         for (i, layout) in db.enumerated() {
+            if layout.layoutUrl == inputBundle?.layoutUrl {
+                index = i
+               }
+         }
+        if let index = index {
+            dataBase[index].layoutData.append(object)
+            print("*** ITEM SAVED TO DATABASE ******")
+        } else {
+            print("NOTHING TO SAVE HERE...")
+        }
+    }
+    
     
     @IBOutlet weak var colorPickerStackView: UIStackView!
     @IBOutlet weak var colorPickerBackgroundView: UIView!

@@ -17,10 +17,10 @@ class LayoutViewController: UIViewController, UIGestureRecognizerDelegate {
     @IBOutlet weak var imageViewLeadingConstraint: NSLayoutConstraint!
     @IBOutlet weak var imageViewTopConstraint: NSLayoutConstraint!
     @IBOutlet weak var imageViewTrailingConstraint: NSLayoutConstraint!
-    
+   
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        drawAllSavedItems()
         // Download image from URL
         imageView.loadImageUsingCache(urlString: layout?.layoutUrl ?? "")
         
@@ -28,6 +28,45 @@ class LayoutViewController: UIViewController, UIGestureRecognizerDelegate {
         let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(scrollViewDoubleTapped))
         doubleTapRecognizer.numberOfTapsRequired = 2
         scrollView.addGestureRecognizer(doubleTapRecognizer)
+    }
+    
+    // MARK: - Helper method for drawing Shapes
+    
+    private func drawAllSavedItems() {
+        if let layout = layout {
+            for item in layout.layoutData {
+                  drawShape(item)
+            }
+        }
+    }
+    
+    private func drawShape(_ item: LayoutMapData)   {
+    
+        let metaData = item.metaData
+        let vector = item.vector
+        
+        let itemLayer = CAShapeLayer()
+        let thePath = UIBezierPath()
+        itemLayer.strokeColor = UIColor.black.cgColor
+        itemLayer.lineWidth = 4
+//        itemLayer.fillColor? =
+        
+        switch vector {
+         case .PATH(let points):
+            
+            thePath.move(to: points[0])
+            thePath.addLine(to: points[1])
+            thePath.addLine(to: points[2])
+            thePath.addLine(to: points[3])
+              
+        case .ELLIPSE(let points, let cornerRadius):
+               // will do
+            print("..")
+        default:
+            print("..")
+        }
+        itemLayer.path = thePath.cgPath
+        imageView.layer.addSublayer(itemLayer)
     }
     
 }

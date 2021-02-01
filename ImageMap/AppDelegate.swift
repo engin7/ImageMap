@@ -7,6 +7,8 @@
 
 import UIKit
 
+var dataBase = DataBase.shared.layouts
+
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 

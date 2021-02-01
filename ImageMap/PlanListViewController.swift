@@ -10,8 +10,7 @@ import UIKit
 class PlanListViewController: UIViewController, UITabBarControllerDelegate, UITableViewDataSource, UITableViewDelegate {
  
      static var layoutVC = "LayoutViewController"
-     var dataBase = DataBase.shared
-
+       
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -21,7 +20,7 @@ class PlanListViewController: UIViewController, UITabBarControllerDelegate, UITa
  
 
     func numberOfSections(in tableView: UITableView) -> Int {
-        return dataBase.layouts.count
+        return dataBase.count
         }
     
       func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -44,7 +43,7 @@ class PlanListViewController: UIViewController, UITabBarControllerDelegate, UITa
                 }()
         
       
-        cell.textLabel?.text = "  " + dataBase.layouts[indexPath.section].layoutName + "  Campus"
+        cell.textLabel?.text = "  " + dataBase[indexPath.section].layoutName + "  Campus"
       
         cell.textLabel?.font = UIFont.systemFont(ofSize: 28)
         cell.textLabel?.textAlignment = .left
@@ -61,7 +60,7 @@ class PlanListViewController: UIViewController, UITabBarControllerDelegate, UITa
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 
         let vc = self.storyboard?.instantiateViewController(withIdentifier: PlanListViewController.layoutVC) as! LayoutViewController
-        let outPut = dataBase.layouts[indexPath.section]
+        let outPut = dataBase[indexPath.section]
         vc.layout = outPut
         self.navigationController?.pushViewController(vc, animated: true)
        }
