@@ -9,8 +9,8 @@ import UIKit
 
 class LayoutViewController: UIViewController, UIGestureRecognizerDelegate {
     
-    var inputBundle: InputBundle?
- 
+   var layout: OutputBundle?
+    
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var imageViewBottomConstraint: NSLayoutConstraint!
@@ -22,7 +22,7 @@ class LayoutViewController: UIViewController, UIGestureRecognizerDelegate {
         super.viewDidLoad()
         
         // Download image from URL
-        imageView.loadImageUsingCache(urlString: inputBundle?.layoutUrl ?? "")
+        imageView.loadImageUsingCache(urlString: layout?.layoutUrl ?? "")
         
         updateMinZoomScaleForSize(view.bounds.size)
         let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(scrollViewDoubleTapped))

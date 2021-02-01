@@ -39,4 +39,36 @@ struct InputBundle {
     let layoutData: LayoutMapData? // empty array if no shape/pin exists in the map
 }
 
+// MOCK DATABASE
+
+struct OutputBundle {
+    let layoutName: String // to show in table
+    let layoutUrl: String
+    var layoutData: [LayoutMapData] = [] // empty array if no shape/pin exists in the map
+}
+
+class DataBase {
+    static let shared = DataBase()
+    var layouts = [OutputBundle]()
+    init() {
+        add()
+    }
+    
+    func add() {
+        
+        let record0 = OutputBundle(layoutName: "MIT", layoutUrl: "https://ci.mit.edu/sites/default/files/images/Map-smaller2.png")
+        let record1 = OutputBundle(layoutName: "Harvard", layoutUrl: "https://www.georgeglazer.com/wpmain/wp-content/uploads/2017/02/garfield-harvard-det1.jpg")
+        let record2 = OutputBundle(layoutName: "Stanford", layoutUrl: "")
+        let record3 = OutputBundle(layoutName: "Princeton", layoutUrl: "")
+        
+        layouts.append(record0)
+        layouts.append(record1)
+        layouts.append(record2)
+        layouts.append(record3)
+        
+    }
+    
+}
+
+ 
  

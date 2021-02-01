@@ -10,7 +10,8 @@ import UIKit
 class PlanListViewController: UIViewController, UITabBarControllerDelegate, UITableViewDataSource, UITableViewDelegate {
  
      static var layoutVC = "LayoutViewController"
- 
+     var dataBase = DataBase.shared
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -20,7 +21,7 @@ class PlanListViewController: UIViewController, UITabBarControllerDelegate, UITa
  
 
     func numberOfSections(in tableView: UITableView) -> Int {
-            return 4
+        return dataBase.layouts.count
         }
     
       func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -42,20 +43,9 @@ class PlanListViewController: UIViewController, UITabBarControllerDelegate, UITa
 
                 }()
         
-        switch indexPath.section {
-        
-        case 0:
-            cell.textLabel?.text = "  MIT Campus"
-        case 1:
-            cell.textLabel?.text = "  Harvard Campus"
-        case 2:
-            cell.textLabel?.text = "  Stanford Campus"
-        case 3:
-            cell.textLabel?.text = "  Princeton Campus"
-         
-        default:
-            print("sth wrong")
-        }
+      
+        cell.textLabel?.text = "  " + dataBase.layouts[indexPath.section].layoutName + "  Campus"
+      
         cell.textLabel?.font = UIFont.systemFont(ofSize: 28)
         cell.textLabel?.textAlignment = .left
         
@@ -71,21 +61,9 @@ class PlanListViewController: UIViewController, UITabBarControllerDelegate, UITa
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 
         let vc = self.storyboard?.instantiateViewController(withIdentifier: PlanListViewController.layoutVC) as! LayoutViewController
-
-        switch indexPath.section {
-            case 0:
-                let link = "https://ci.mit.edu/sites/default/files/images/Map-smaller2.png"
-                let input = InputBundle(layoutUrl: link, mode: EnumLayoutMapActivity.VIEW, layoutData: nil)
-                vc.inputBundle = input
-                self.navigationController?.pushViewController(vc, animated: true)
-            case 1:
-                let link = "https://www.georgeglazer.com/wpmain/wp-content/uploads/2017/02/garfield-harvard-det1.jpg"
-                let input = InputBundle(layoutUrl: link, mode: EnumLayoutMapActivity.VIEW, layoutData: nil)
-                vc.inputBundle = input
-                self.navigationController?.pushViewController(vc, animated: true)
-            default:
-              print("THIS PART WILL BE DYNAMIC LATER")
-            }
+        let outPut = dataBase.layouts[indexPath.section]
+        vc.layout = outPut
+        self.navigationController?.pushViewController(vc, animated: true)
        }
 }
 

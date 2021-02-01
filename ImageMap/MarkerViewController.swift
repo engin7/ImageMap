@@ -19,16 +19,19 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
     var vectorData: VectorMetaData?
     var recordId = ""
     var recordTypeId = ""
+    var dataBase = DataBase.shared
     
     @IBAction func saveButtonPressed(_ sender: Any) {
-        
         if vectorType != nil, vectorData != nil {
             let data = LayoutMapData(vector: vectorType!, metaData: vectorData!)
-            // SAVE DATA LOGIC HERE
+            // SAVE NEW ITEM LOGIC
+            for var layout in dataBase.layouts {
+                if layout.layoutUrl == inputBundle?.layoutUrl  {
+                    layout.layoutData.append(data)
+                }
+            }
         }
-       
         print("NOTHING TO SAVE HERE...")
-         
     }
     
     @IBOutlet weak var colorPickerStackView: UIStackView!
@@ -913,6 +916,13 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
             
             // Save to Model
             switch drawingMode {
+            
+            case .dropPin:
+                    vectorType = .PIN(point: touchedPoint)
+                if let color = pinViewTapped?.tintColor  {
+                     let colorInfo = color.toRGBAString()
+                    vectorData = VectorMetaData(color: colorInfo, iconUrl: "PUT PIN URL HERE", recordId: recordId, recordTypeId: recordTypeId)
+                }
             
             case .drawRect:
                     vectorType = .PATH(points: cornerArray)
