@@ -806,7 +806,7 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
                 }
             case .drawEllipse:
                     let shapeSize = min(imageView.bounds.width, imageView.bounds.height)/10
-                    vectorType = .ELLIPSE(points: cornerPoints, cornerRadius: shapeSize)
+                    vectorType = .ELLIPSE(points: cornerPoints)
                 if let color = selectedLayer?.fillColor  {
                      let colorInfo = UIColor(cgColor: color).htmlRGBaColor
                     vectorData = VectorMetaData(color: colorInfo, iconUrl: "PUT Ellipse URL HERE", recordId: recordId, recordTypeId: recordTypeId)
@@ -945,7 +945,7 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
                
             case .drawEllipse:
                     let shapeSize = min(imageView.bounds.width, imageView.bounds.height)/10
-                    vectorType = .ELLIPSE(points: cornerArray, cornerRadius: shapeSize)
+                    vectorType = .ELLIPSE(points: cornerArray)
                 if let color = selectedLayer?.fillColor  {
                      let colorInfo = UIColor(cgColor: color).htmlRGBaColor
                     vectorData = VectorMetaData(color: colorInfo, iconUrl: "PUT Ellipse URL HERE", recordId: recordId, recordTypeId: recordTypeId)

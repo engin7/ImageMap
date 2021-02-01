@@ -23,7 +23,7 @@ struct VectorMetaData {
 enum LayoutVector {
     case PIN(point: CGPoint)
     case PATH(points: [CGPoint])
-    case ELLIPSE(points: [CGPoint], cornerRadius: CGFloat)
+    case ELLIPSE(points: [CGPoint]) // operation is different here even data model is same!
 }
 // let ellipse = UIBezierPath(roundedRect: frame, cornerRadius: shapeSize)
 // We'll save points and draw rectframe with corner radii so we can get the ellipse shape
