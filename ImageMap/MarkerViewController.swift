@@ -19,6 +19,7 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
     var vectorData: VectorMetaData?
     var recordId = ""
     var recordTypeId = ""
+    
     @IBAction func saveButtonPressed(_ sender: Any) {
         
         if vectorType != nil, vectorData != nil {
@@ -598,35 +599,12 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
         var cornerArray: [CGPoint] = []
         newCorners.forEach{cornerArray.append($0.point)}
         moveAuxiliaryOverlays(corners:cornerArray)
-        
+
         if let layer = currentLayer {
             let shapeEdited = shapeInfo(shape: layer, cornersArray: newCorners)
             addedObject = shapeEdited
         }
-        
-        
-        switch drawingMode {
-        
-        case .drawRect:
-                vectorType = .PATH(points: cornerArray)
-            if let color = selectedLayer?.fillColor  {
-                 let colorInfo = UIColor(cgColor: color).toRGBAString()
-                vectorData = VectorMetaData(color: colorInfo, iconUrl: "PUT Rect URL HERE", recordId: recordId, recordTypeId: recordTypeId)
-            }
-           
-        case .drawEllipse:
-                let shapeSize = min(imageView.bounds.width, imageView.bounds.height)/10
-                vectorType = .ELLIPSE(points: cornerArray, cornerRadius: shapeSize)
-            if let color = selectedLayer?.fillColor  {
-                 let colorInfo = UIColor(cgColor: color).toRGBAString()
-                vectorData = VectorMetaData(color: colorInfo, iconUrl: "PUT Ellipse URL HERE", recordId: recordId, recordTypeId: recordTypeId)
-            }
-
-        default:
-               print("Sth is wrong!")
-        }
-        
-        
+         
         if drawingMode == .drawEllipse {
             return ellipsePath
         }
@@ -712,7 +690,7 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
                             self.view.layoutIfNeeded()
         }, completion: nil)
       
-        labelDetail.text = (vectorType.debugDescription ?? "No Type info") + "\n\n\n" + (vectorData.debugDescription ?? "information not available.")
+        labelDetail.text = (vectorType.debugDescription) + "\n\n\n" + (vectorData.debugDescription)
          
     }
 
@@ -929,6 +907,31 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
         }
           
         if gesture.state == UIGestureRecognizer.State.ended {
+            
+            var cornerArray: [CGPoint] = []
+            addedObject?.cornersArray.forEach{cornerArray.append($0.point)}
+            
+            // Save to Model
+            switch drawingMode {
+            
+            case .drawRect:
+                    vectorType = .PATH(points: cornerArray)
+                if let color = selectedLayer?.fillColor  {
+                     let colorInfo = UIColor(cgColor: color).toRGBAString()
+                    vectorData = VectorMetaData(color: colorInfo, iconUrl: "PUT Rect URL HERE", recordId: recordId, recordTypeId: recordTypeId)
+                }
+               
+            case .drawEllipse:
+                    let shapeSize = min(imageView.bounds.width, imageView.bounds.height)/10
+                    vectorType = .ELLIPSE(points: cornerArray, cornerRadius: shapeSize)
+                if let color = selectedLayer?.fillColor  {
+                     let colorInfo = UIColor(cgColor: color).toRGBAString()
+                    vectorData = VectorMetaData(color: colorInfo, iconUrl: "PUT Ellipse URL HERE", recordId: recordId, recordTypeId: recordTypeId)
+                }
+
+            default:
+                   print("Sth is wrong!")
+            }
             
              // if clicked on rotation image cancel scrollView pangesture
             print("***** Touch Ended")
