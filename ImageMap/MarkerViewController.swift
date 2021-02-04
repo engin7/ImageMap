@@ -185,42 +185,42 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
     
     @IBAction func magentaTapped(_ sender: Any) {
         drawingColor = drawColor.magenta
-        pinImage?.tintColor = drawingColor.associatedColor
+        pinImage?.tintColor = drawingColor.associatedColor.withAlphaComponent(1.0)
         selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
         animateColorPicker()
     }
     
     @IBAction func yellowTapped(_ sender: UIButton) {
         drawingColor = drawColor.yellow
-        pinImage?.tintColor = drawingColor.associatedColor
+        pinImage?.tintColor = drawingColor.associatedColor.withAlphaComponent(1.0)
         selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
         animateColorPicker()
     }
     
     @IBAction func cyanTapped(_ sender: Any) {
         drawingColor = drawColor.cyan
-        pinImage?.tintColor = drawingColor.associatedColor
+        pinImage?.tintColor = drawingColor.associatedColor.withAlphaComponent(1.0)
         selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
         animateColorPicker()
     }
     
     @IBAction func greenTapped(_ sender: Any) {
         drawingColor = drawColor.green
-        pinImage?.tintColor = drawingColor.associatedColor
+        pinImage?.tintColor = drawingColor.associatedColor.withAlphaComponent(1.0)
         selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
         animateColorPicker()
     }
     
     @IBAction func orangeTapped(_ sender: Any) {
         drawingColor = drawColor.orange
-        pinImage?.tintColor = drawingColor.associatedColor
+        pinImage?.tintColor = drawingColor.associatedColor.withAlphaComponent(1.0)
         selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
         animateColorPicker()
     }
     
     @IBAction func redTapped(_ sender: Any) {
         drawingColor = drawColor.red
-        pinImage?.tintColor = drawingColor.associatedColor
+        pinImage?.tintColor = drawingColor.associatedColor.withAlphaComponent(1.0)
         selectedLayer?.fillColor? = drawingColor.associatedColor.cgColor
         animateColorPicker()
     }
@@ -640,7 +640,7 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
         let originalImage = #imageLiteral(resourceName: "pin.circle.fill")
         let templateImage = originalImage.withRenderingMode(.alwaysTemplate)
         pinImageView.image = templateImage
-        pinImageView.tintColor = drawingColor.associatedColor
+        pinImageView.tintColor = drawingColor.associatedColor.withAlphaComponent(1.0)
         pinImageView.tag = 4
         pinViewTapped.addSubview(pinImageView)
         pinImage = pinImageView

@@ -36,10 +36,34 @@ class LayoutViewController: UIViewController, UIGestureRecognizerDelegate {
         if let layout = layout {
             for item in layout.layoutData {
                   drawShape(item)
+                 
             }
         }
     }
     
+    func dropPin(_ point: CGPoint) -> UIImage? {
+                var image = UIImage()
+                let color = UIColor(ciColor: .red)
+                UIGraphicsBeginImageContext(scrollView.frame.size)
+                
+                guard let context = UIGraphicsGetCurrentContext() else { return nil}
+                context.saveGState()
+                context.setStrokeColor(color.cgColor)
+                context.setLineWidth(5)
+                context.move(to: point)
+                let lineEnd: CGPoint = .init(x: point.x + 5.0, y: point.y - 48.0)
+                context.addLine(to: lineEnd)
+                context.addEllipse(in: .init(x: lineEnd.x - 24.0, y: lineEnd.y - 48.0, width: 48.0, height: 48.0))
+                context.drawPath(using: .fillStroke)
+                context.restoreGState()
+                if let img = UIGraphicsGetImageFromCurrentImageContext() {
+                   image = img
+                    UIGraphicsEndImageContext()
+                }
+                
+                return image
+    }
+     
     private func drawShape(_ item: LayoutMapData)   {
     
         let metaData = item.metaData
@@ -52,6 +76,11 @@ class LayoutViewController: UIViewController, UIGestureRecognizerDelegate {
         let thePath = UIBezierPath()
 
         switch vector {
+        case .PIN(let point):
+            let image = dropPin(point)
+            let iv = UIImageView(image: image)
+            scrollView.addSubview(iv)
+            
          case .PATH(let points):
             thePath.move(to: points[0])
             thePath.addLine(to: points[1])
