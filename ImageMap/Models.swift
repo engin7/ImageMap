@@ -57,7 +57,7 @@ class DataBase {
     func add() {
         
         let record0 = OutputBundle(layoutName: "MIT", layoutUrl: "https://ci.mit.edu/sites/default/files/images/Map-smaller2.png")
-        let record1 = OutputBundle(layoutName: "Harvard", layoutUrl: "https://www.georgeglazer.com/wpmain/wp-content/uploads/2017/02/garfield-harvard-det1.jpg")
+        let record1 = OutputBundle(layoutName: "Hill", layoutUrl: "https://www.wallpapertip.com/wmimgs/172-1729863_wallpapers-hd-4k-ultra-hd-4k-wallpaper-pc.jpg")
         let record2 = OutputBundle(layoutName: "Stanford", layoutUrl: "")
         let record3 = OutputBundle(layoutName: "Princeton", layoutUrl: "")
         

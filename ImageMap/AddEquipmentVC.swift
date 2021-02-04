@@ -32,8 +32,8 @@ class AddEquipmentViewController: UIViewController {
             self.navigationController?.pushViewController(vc, animated: true)
         }
         
-        let addMarkAction1 = UIAlertAction(title: "Harvard Campus", style: .destructive) {  (action: UIAlertAction) in
-            let link = "https://www.georgeglazer.com/wpmain/wp-content/uploads/2017/02/garfield-harvard-det1.jpg"
+        let addMarkAction1 = UIAlertAction(title: "Hill", style: .destructive) {  (action: UIAlertAction) in
+            let link = "https://www.wallpapertip.com/wmimgs/172-1729863_wallpapers-hd-4k-ultra-hd-4k-wallpaper-pc.jpg"
             let input = InputBundle(layoutUrl: link, mode: EnumLayoutMapActivity.ADD, layoutData: nil)
             vc.inputBundle = input
             self.navigationController?.pushViewController(vc, animated: true)
@@ -44,8 +44,7 @@ class AddEquipmentViewController: UIViewController {
         addLocationAlert.addAction(cancelAction)
         self.present(addLocationAlert, animated: true, completion: nil)
     }
-    
-    
+ 
     @IBAction func addPhotoButtonTapped(_ sender: Any) {
         // open lib
     }
