@@ -36,29 +36,6 @@ class LayoutViewController: UIViewController, UIGestureRecognizerDelegate {
             }
         }
     }
-    
-    func dropPin(_ point: CGPoint) -> UIImage? {
-                var image = UIImage()
-                let color = UIColor(ciColor: .red)
-                UIGraphicsBeginImageContext(scrollView.frame.size)
-                
-                guard let context = UIGraphicsGetCurrentContext() else { return nil}
-                context.saveGState()
-                context.setStrokeColor(color.cgColor)
-                context.setLineWidth(5)
-                context.move(to: point)
-                let lineEnd: CGPoint = .init(x: point.x + 5.0, y: point.y - 48.0)
-                context.addLine(to: lineEnd)
-                context.addEllipse(in: .init(x: lineEnd.x - 24.0, y: lineEnd.y - 48.0, width: 48.0, height: 48.0))
-                context.drawPath(using: .fillStroke)
-                context.restoreGState()
-                if let img = UIGraphicsGetImageFromCurrentImageContext() {
-                   image = img
-                    UIGraphicsEndImageContext()
-                }
-                
-                return image
-    }
      
     private func drawShape(_ item: LayoutMapData)   {
     
@@ -76,7 +53,7 @@ class LayoutViewController: UIViewController, UIGestureRecognizerDelegate {
            
             let p = imageView.contentClippingPos(point: point)
             let iv = UIImageView(frame: imageView.frame)
-            iv.image = dropPin(p)
+            iv.dropPin(p)
             
             scrollView.addSubview(iv)
  
@@ -182,5 +159,27 @@ extension UIImageView {
 
         return CGPoint(x: x, y: y)
     }
+    
+    func dropPin(_ point: CGPoint)  {
+               
+                let color = UIColor(ciColor: .red)
+                UIGraphicsBeginImageContext(self.frame.size)
+                guard let context = UIGraphicsGetCurrentContext() else { return }
+                context.saveGState()
+                context.setStrokeColor(color.cgColor)
+                context.setLineWidth(2)
+                context.move(to: point)
+                let lineEnd: CGPoint = .init(x: point.x + 2.0, y: point.y - 25.0)
+                context.addLine(to: lineEnd)
+                context.addEllipse(in: .init(x: lineEnd.x-8, y: lineEnd.y - 15.0, width: 15.0, height: 15.0))
+                context.drawPath(using: .fillStroke)
+                context.restoreGState()
+                if let img = UIGraphicsGetImageFromCurrentImageContext() {
+                   image = img
+                    UIGraphicsEndImageContext()
+                }
+                 
+    }
+    
 }
 
