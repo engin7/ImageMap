@@ -53,7 +53,7 @@ class LayoutViewController: UIViewController, UIGestureRecognizerDelegate {
            
             let p = imageView.contentClippingPos(point: point)
             let iv = UIImageView(frame: imageView.frame)
-            iv.dropPin(p)
+            iv.dropPin(CGPoint(x: p.x, y: p.y-20))
             
             scrollView.addSubview(iv)
  
@@ -153,9 +153,8 @@ extension UIImageView {
             scale = bounds.height / image.size.height
         }
 
-        let size = CGSize(width: image.size.width * scale, height: image.size.height * scale)
-        let x = ((bounds.width - size.width) / 2.0) + (point.x * scale)
-        let y = ((bounds.height - size.height) / 2.0) + (point.y * scale)
+        let x =  (point.x * scale)
+        let y =  (point.y * scale)
 
         return CGPoint(x: x, y: y)
     }
@@ -167,11 +166,12 @@ extension UIImageView {
                 guard let context = UIGraphicsGetCurrentContext() else { return }
                 context.saveGState()
                 context.setStrokeColor(color.cgColor)
+                context.setFillColor(color.cgColor)
                 context.setLineWidth(2)
                 context.move(to: point)
-                let lineEnd: CGPoint = .init(x: point.x + 2.0, y: point.y - 25.0)
+                let lineEnd: CGPoint = .init(x: point.x, y: point.y - 25.0)
                 context.addLine(to: lineEnd)
-                context.addEllipse(in: .init(x: lineEnd.x-8, y: lineEnd.y - 15.0, width: 15.0, height: 15.0))
+                context.addEllipse(in: .init(x: lineEnd.x-5, y: lineEnd.y - 5.0, width: 10.0, height: 10.0))
                 context.drawPath(using: .fillStroke)
                 context.restoreGState()
                 if let img = UIGraphicsGetImageFromCurrentImageContext() {
