@@ -13,18 +13,14 @@ class LayoutViewController: UIViewController, UIGestureRecognizerDelegate {
     
     @IBOutlet weak var imageView: UIImageView!
     @IBOutlet weak var scrollView: UIScrollView!
-    @IBOutlet weak var imageViewBottomConstraint: NSLayoutConstraint!
-    @IBOutlet weak var imageViewLeadingConstraint: NSLayoutConstraint!
-    @IBOutlet weak var imageViewTopConstraint: NSLayoutConstraint!
-    @IBOutlet weak var imageViewTrailingConstraint: NSLayoutConstraint!
+   
    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        imageView.loadImageUsingCache(urlString: layout?.layoutUrl ?? "")
         drawAllSavedItems()
         // Download image from URL
-        imageView.loadImageUsingCache(urlString: layout?.layoutUrl ?? "")
-        
-        updateMinZoomScaleForSize(view.bounds.size)
         let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(scrollViewDoubleTapped))
         doubleTapRecognizer.numberOfTapsRequired = 2
         scrollView.addGestureRecognizer(doubleTapRecognizer)
@@ -77,10 +73,16 @@ class LayoutViewController: UIViewController, UIGestureRecognizerDelegate {
 
         switch vector {
         case .PIN(let point):
-            let image = dropPin(point)
-            let iv = UIImageView(image: image)
+           
+            let p = imageView.contentClippingPos(point: point)
+            let iv = UIImageView(frame: imageView.frame)
+            iv.image = dropPin(p)
+            
             scrollView.addSubview(iv)
-            print(imageView.contentClippingRect )
+ 
+            print(point)
+            print(p)
+            
          case .PATH(let points):
             thePath.move(to: points[0])
             thePath.addLine(to: points[1])
@@ -110,7 +112,7 @@ class LayoutViewController: UIViewController, UIGestureRecognizerDelegate {
             itemLayer.path = ellipsePath.cgPath
             imageView.layer.addSublayer(itemLayer)
             return
-         default:
+            default:
             print("..")
         }
         
@@ -126,9 +128,7 @@ extension LayoutViewController: UIScrollViewDelegate {
         return imageView
     }
     
-    func scrollViewDidZoom(_ scrollView: UIScrollView) {
-        updateConstraintsForSize(view.bounds.size)
-    }
+   
   
     @objc func scrollViewDoubleTapped(recognizer: UITapGestureRecognizer) {
       
@@ -159,26 +159,15 @@ extension LayoutViewController: UIScrollViewDelegate {
       scrollView.zoomScale = minScale
         
     }
-    func updateConstraintsForSize(_ size: CGSize) {
-        
-        let yOffset = max(0, (size.height - imageView.frame.height) / 2)
-        imageViewTopConstraint.constant = yOffset
-        imageViewBottomConstraint.constant = yOffset
-        
-        let xOffset = max(0, (size.width - imageView.frame.width) / 2)
-        imageViewLeadingConstraint.constant = xOffset
-        imageViewTrailingConstraint.constant = xOffset
-        
-        view.layoutIfNeeded()
-    }
+   
 }
 
 
 extension UIImageView {
-    var contentClippingRect: CGRect {
-        guard let image = image else { return bounds }
-        guard contentMode == .scaleAspectFit else { return bounds }
-        guard image.size.width > 0 && image.size.height > 0 else { return bounds }
+    func contentClippingPos(point: CGPoint) -> CGPoint {
+        guard let image = image else { return .zero }
+        guard contentMode == .scaleAspectFit else { return .zero }
+        guard image.size.width > 0 && image.size.height > 0 else { return .zero }
 
         let scale: CGFloat
         if image.size.width > image.size.height {
@@ -188,9 +177,10 @@ extension UIImageView {
         }
 
         let size = CGSize(width: image.size.width * scale, height: image.size.height * scale)
-        let x = (bounds.width - size.width) / 2.0
-        let y = (bounds.height - size.height) / 2.0
+        let x = ((bounds.width - size.width) / 2.0) + (point.x * scale)
+        let y = ((bounds.height - size.height) / 2.0) + (point.y * scale)
 
-        return CGRect(x: x, y: y, width: size.width, height: size.height)
+        return CGPoint(x: x, y: y)
     }
 }
+

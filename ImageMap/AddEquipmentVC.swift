@@ -25,8 +25,8 @@ class AddEquipmentViewController: UIViewController {
         vc.recordId = equipmentCodeTextField?.text ?? ""
         vc.recordTypeId = equipmentTypeTextField?.text ?? ""
         
-        let addMarkAction0 = UIAlertAction(title: "MIT Campus", style: .destructive) { [self] (action: UIAlertAction) in
-            let link = "https://ci.mit.edu/sites/default/files/images/Map-smaller2.png"
+        let addMarkAction0 = UIAlertAction(title: "Elements", style: .destructive) { [self] (action: UIAlertAction) in
+            let link = "https://www.pixelstalk.net/wp-content/uploads/2016/10/Blueprint-Wallpaper-Full-HD.png"
             let input = InputBundle(layoutUrl: link, mode: EnumLayoutMapActivity.ADD, layoutData: nil)
             vc.inputBundle = input
             self.navigationController?.pushViewController(vc, animated: true)
