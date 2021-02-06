@@ -58,12 +58,13 @@ class PlanListViewController: UIViewController, UITabBarControllerDelegate, UITa
     }
  
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-
-        let vc = self.storyboard?.instantiateViewController(withIdentifier: PlanListViewController.layoutVC) as! LayoutViewController
         let outPut = dataBase[indexPath.section]
-        vc.layout = outPut
-        self.navigationController?.pushViewController(vc, animated: true)
-       }
+        let layoutUrl = outPut.layoutUrl
+        let items = outPut.layoutData
+        let markerView = MarkerPreviewLayout(input: layoutUrl, markers: items)
+        view.addSubview(markerView)
+ 
+     }
 }
 
 

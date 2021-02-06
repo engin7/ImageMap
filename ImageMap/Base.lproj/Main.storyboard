@@ -252,62 +252,6 @@
             </objects>
             <point key="canvasLocation" x="5881.1594202898559" y="152.44565217391306"/>
         </scene>
-        <!--Layout Map-->
-        <scene sceneID="1ts-lJ-Hza">
-            <objects>
-                <viewController storyboardIdentifier="LayoutViewController" id="TTC-wR-Py8" customClass="LayoutViewController" customModule="ImageMap" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="e9m-7M-x0K">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="736"/>
-                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="jwJ-la-DDB">
-                                <rect key="frame" x="-19" y="195" width="451" height="346"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                            </imageView>
-                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="RZW-BE-vmS">
-                                <rect key="frame" x="0.0" y="44" width="414" height="692"/>
-                                <subviews>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="bEW-Wn-f8A">
-                                        <rect key="frame" x="0.0" y="0.0" width="414" height="692"/>
-                                        <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                    </view>
-                                </subviews>
-                                <constraints>
-                                    <constraint firstItem="bEW-Wn-f8A" firstAttribute="trailing" secondItem="cdj-Yh-uyY" secondAttribute="trailing" constant="414" id="KQ8-Xu-PHK"/>
-                                    <constraint firstItem="q02-rl-WrP" firstAttribute="bottom" secondItem="bEW-Wn-f8A" secondAttribute="bottom" id="Ny2-e4-fVi"/>
-                                    <constraint firstItem="bEW-Wn-f8A" firstAttribute="top" secondItem="q02-rl-WrP" secondAttribute="top" id="SRu-vs-d8S"/>
-                                    <constraint firstItem="bEW-Wn-f8A" firstAttribute="leading" secondItem="q02-rl-WrP" secondAttribute="leading" id="V9p-go-PUP"/>
-                                    <constraint firstItem="bEW-Wn-f8A" firstAttribute="top" secondItem="cdj-Yh-uyY" secondAttribute="top" id="aj0-se-0J5"/>
-                                    <constraint firstItem="bEW-Wn-f8A" firstAttribute="leading" secondItem="cdj-Yh-uyY" secondAttribute="leading" id="akk-DR-t8E"/>
-                                    <constraint firstItem="q02-rl-WrP" firstAttribute="trailing" secondItem="bEW-Wn-f8A" secondAttribute="trailing" id="plm-5w-M57"/>
-                                    <constraint firstItem="bEW-Wn-f8A" firstAttribute="bottom" secondItem="cdj-Yh-uyY" secondAttribute="bottom" constant="692" id="v9e-cc-lud"/>
-                                </constraints>
-                                <viewLayoutGuide key="contentLayoutGuide" id="cdj-Yh-uyY"/>
-                                <viewLayoutGuide key="frameLayoutGuide" id="q02-rl-WrP"/>
-                                <connections>
-                                    <outlet property="delegate" destination="TTC-wR-Py8" id="ACc-Jv-rOc"/>
-                                </connections>
-                            </scrollView>
-                        </subviews>
-                        <viewLayoutGuide key="safeArea" id="BGk-n8-V2a"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
-                        <constraints>
-                            <constraint firstItem="BGk-n8-V2a" firstAttribute="bottom" secondItem="RZW-BE-vmS" secondAttribute="bottom" id="VzI-dJ-ueI"/>
-                            <constraint firstItem="BGk-n8-V2a" firstAttribute="trailing" secondItem="RZW-BE-vmS" secondAttribute="trailing" id="jde-G6-k0z"/>
-                            <constraint firstItem="RZW-BE-vmS" firstAttribute="leading" secondItem="BGk-n8-V2a" secondAttribute="leading" id="kfF-RV-ORa"/>
-                            <constraint firstItem="RZW-BE-vmS" firstAttribute="top" secondItem="BGk-n8-V2a" secondAttribute="top" id="zYT-rI-4jo"/>
-                        </constraints>
-                    </view>
-                    <navigationItem key="navigationItem" title="Layout Map" id="sFi-cb-TW5"/>
-                    <connections>
-                        <outlet property="imageView" destination="jwJ-la-DDB" id="m07-ke-yNH"/>
-                        <outlet property="scrollView" destination="RZW-BE-vmS" id="gfc-Vf-cRp"/>
-                    </connections>
-                </viewController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="W6I-ro-5he" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="5792.753623188406" y="906.52173913043487"/>
-        </scene>
         <!--Safety Assure-->
         <scene sceneID="dZl-8h-cZx">
             <objects>
@@ -594,29 +538,6 @@
             </objects>
             <point key="canvasLocation" x="3083" y="908"/>
         </scene>
-        <!--Navigation Controller-->
-        <scene sceneID="b9j-1N-9IO">
-            <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="xUm-qV-HvE" sceneMemberID="viewController">
-                    <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="kXF-Ft-LO5">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
-                        <autoresizingMask key="autoresizingMask"/>
-                        <color key="barTintColor" systemColor="systemBlueColor"/>
-                        <textAttributes key="titleTextAttributes">
-                            <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            <offsetWrapper key="textShadowOffset" horizontal="-270" vertical="0.0"/>
-                        </textAttributes>
-                    </navigationBar>
-                    <nil name="viewControllers"/>
-                    <connections>
-                        <segue destination="TTC-wR-Py8" kind="relationship" relationship="rootViewController" id="ZLO-sR-cbS"/>
-                    </connections>
-                </navigationController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="8kF-fV-Uyb" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="4942" y="910"/>
-        </scene>
     </scenes>
     <resources>
         <image name="addLocation" width="161.5" height="56.5"/>
@@ -636,9 +557,6 @@
         </namedColor>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-        </systemColor>
-        <systemColor name="systemBlueColor">
-            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemRedColor">
             <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

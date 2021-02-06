@@ -380,7 +380,7 @@ class MarkerViewController: UIViewController, UITextFieldDelegate, UIGestureReco
         // color picker 
         configureStackViews()
         // Download image from URL
-        imageView.loadImageUsingCache(urlString: inputBundle?.layoutUrl ?? "")
+        imageView.loadImageUsingCache(urlString: inputBundle?.layoutUrl ?? "" , completion: { _ in })
         
         // Do any additional setup after loading the view.
         controlView.layer.cornerRadius = 22
